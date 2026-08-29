@@ -1,0 +1,3238 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JK Garáž — Diagnostika, oprava, bezpečnosť</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- GSAP & ScrollTrigger & ScrollToPlugin CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
+  
+  
+
+  <style>
+    :root {
+      --bg-dark: #090a0c;
+      --bg-canvas: #b5b7b9;
+      --accent: #00e5ff;
+      --accent-glow: rgba(0, 229, 255, 0.45);
+      --accent-warm: #ff6b35;
+      --accent-green: #00e676;
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-muted: rgba(255, 255, 255, 0.45);
+      --glass-bg: rgba(14, 17, 23, 0.82);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+      --card-bg: rgba(25, 29, 38, 0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    html, body {
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* TOP RIGHT NAVIGATION BAR (RESERVATIONS + LANGUAGE SWITCHER) */
+    .top-nav-bar {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Language Switcher Box */
+    .lang-switcher-box {
+      background: rgba(15, 18, 26, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 100px;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 100px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+
+    .lang-btn:hover {
+      color: #fff;
+    }
+
+    .lang-btn.active {
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 119, 255, 0.3));
+      border: 1px solid rgba(0, 229, 255, 0.4);
+      color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    /* Active Bookings Floating Badge */
+    #active-bookings-badge {
+      background: rgba(18, 22, 30, 0.85);
+      border: 1px solid rgba(0, 230, 118, 0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 8px 16px;
+      border-radius: 100px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s;
+    }
+    #active-bookings-badge:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-green);
+      box-shadow: 0 10px 30px rgba(0, 230, 118, 0.25);
+    }
+    .booking-count-pill {
+      background: var(--accent-green);
+      color: #08110b;
+      font-weight: 800;
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 100px;
+    }
+
+    /* PRELOADER SCREEN */
+    #preloader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: radial-gradient(circle at center, #15181e 0%, #08090b 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
+    }
+
+    #preloader.loaded {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loader-content {
+      text-align: center;
+      max-width: 440px;
+      width: 90%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .loader-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .loader-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      animation: pulse 1.5s infinite;
+    }
+
+    .loader-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      background: linear-gradient(180deg, #fff 30%, rgba(255,255,255,0.6) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .loader-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 36px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #0077ff, var(--accent));
+      box-shadow: 0 0 15px var(--accent-glow);
+      border-radius: 999px;
+      transition: width 0.15s ease-out;
+    }
+
+    .progress-stats {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .progress-percent {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .skip-btn {
+      margin-top: 24px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      text-decoration: underline;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .skip-btn:hover {
+      opacity: 1;
+      color: #fff;
+    }
+
+    /* HERO SECTION */
+    .hero-section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+      position: relative;
+      background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.04) 0%, transparent 70%);
+    }
+
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 22px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
+    }
+
+    .hero-title {
+      font-size: clamp(2.3rem, 5.5vw, 4.6rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.15;
+      max-width: 980px;
+      margin-bottom: 24px;
+      background: linear-gradient(180deg, #ffffff 30%, rgba(255, 255, 255, 0.65) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-description {
+      font-size: clamp(1rem, 1.8vw, 1.25rem);
+      color: var(--text-secondary);
+      max-width: 720px;
+      line-height: 1.65;
+      margin-bottom: 40px;
+      font-weight: 400;
+    }
+
+    .hero-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--accent) 0%, #0088ff 100%);
+      color: #06080b;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 14px 34px;
+      border-radius: 100px;
+      text-decoration: none;
+      box-shadow: 0 10px 30px rgba(0, 229, 255, 0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      border: none;
+      margin-bottom: 30px;
+    }
+    .hero-cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(0, 229, 255, 0.5);
+    }
+
+    .scroll-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      position: absolute;
+      bottom: 40px;
+      animation: float 2.5s ease-in-out infinite;
+    }
+
+    .mouse-icon {
+      width: 22px;
+      height: 36px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      position: relative;
+    }
+
+    .mouse-icon::after {
+      content: '';
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 7px;
+      background: var(--accent);
+      border-radius: 2px;
+      animation: mouseScroll 2s infinite;
+    }
+
+    /* SEQUENCE PINNED CONTAINER */
+    #sequence-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #b5b7b9;
+      overflow: hidden;
+    }
+
+    #canvas-wrapper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas#sequence-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* =========================================================
+       DIAGNOSTIC & EXPLODED VIEW INTERACTIVE HOTSPOTS
+       ========================================================= */
+    #diagnostic-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 25;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s;
+    }
+
+    #diagnostic-layer.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    /* Diagnostic Top Prompt Header */
+    .diagnostic-banner {
+      position: absolute;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(14, 18, 25, 0.92);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 229, 255, 0.2);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 12px 28px;
+      border-radius: 100px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 30;
+      color: #fff;
+      animation: bannerGlow 3s infinite alternate;
+    }
+
+    @keyframes bannerGlow {
+      0% { border-color: rgba(0, 229, 255, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 10px rgba(0,229,255,0.1); }
+      100% { border-color: rgba(0, 229, 255, 0.7); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 25px rgba(0,229,255,0.35); }
+    }
+
+    .diagnostic-pulse-icon {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+      animation: pulse 1.5s infinite;
+    }
+
+    .diagnostic-banner-text h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .diagnostic-banner-text p {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    /* Quick Component Category Filter Bar */
+    .part-category-bar {
+      position: absolute;
+      top: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: rgba(10, 12, 16, 0.75);
+      padding: 6px;
+      border-radius: 100px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(16px);
+      z-index: 30;
+    }
+
+    .cat-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cat-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .cat-btn.active {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: rgba(0, 229, 255, 0.4);
+      color: var(--accent);
+    }
+
+    /* Car Part Hotspot Pin */
+    .part-hotspot {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      z-index: 35;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .part-hotspot:hover {
+      transform: translate(-50%, -50%) scale(1.15);
+      z-index: 40;
+    }
+
+    .hotspot-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(14, 18, 26, 0.92);
+      border: 2px solid var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: 0.85rem;
+      box-shadow: 0 0 20px var(--accent-glow), 0 8px 24px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .hotspot-badge::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px solid var(--accent);
+      opacity: 0.6;
+      animation: hotspotRadar 2.2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+
+    @keyframes hotspotRadar {
+      0% { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(2.0); opacity: 0; }
+    }
+
+    /* Hotspot Hover Card Tooltip */
+    .hotspot-tooltip {
+      position: absolute;
+      bottom: calc(100% + 12px);
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: rgba(15, 18, 25, 0.95);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 12px 18px;
+      border-radius: 14px;
+      width: 230px;
+      color: #fff;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      transition: all 0.25s ease;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      text-align: left;
+    }
+
+    .hotspot-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: rgba(15, 18, 25, 0.95) transparent transparent transparent;
+    }
+
+    .part-hotspot:hover .hotspot-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .tooltip-category {
+      font-size: 0.65rem;
+      font-family: 'Space Mono', monospace;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    .tooltip-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      line-height: 1.25;
+    }
+
+    .tooltip-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    /* =========================================================
+       BOOKIO-STYLE MECHANIC DIAGNOSTIC & RESERVATION MODAL
+       ========================================================= */
+    #booking-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(6, 8, 11, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+
+    #booking-modal.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-container {
+      background: #11141c;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow), 0 0 50px rgba(0, 229, 255, 0.15);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 820px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: scale(0.95) translateY(20px);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #booking-modal.open .modal-container {
+      transform: scale(1) translateY(0);
+    }
+
+    /* Modal Header */
+    .modal-header {
+      padding: 24px 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(18, 22, 31, 0.6);
+    }
+
+    .modal-part-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .modal-part-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(0, 229, 255, 0.12);
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      font-family: 'Space Mono', monospace;
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .modal-part-title-group h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 2px;
+    }
+
+    .modal-part-title-group span {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .modal-close-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-close-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.08);
+    }
+
+    /* Modal Body & Scrollable Sections */
+    .modal-body {
+      padding: 28px 32px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .form-section {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 18px;
+      padding: 22px;
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+
+    .section-title svg {
+      color: var(--accent);
+    }
+
+    /* Common Symptom Pills */
+    .symptom-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .symptom-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 100px;
+      padding: 7px 14px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .symptom-chip:hover {
+      background: rgba(255, 255, 255, 0.09);
+      color: #fff;
+    }
+    .symptom-chip.selected {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Textarea */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .form-textarea {
+      width: 100%;
+      height: 90px;
+      background: rgba(8, 10, 15, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* Severity Radio Buttons */
+    .severity-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .severity-option {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .severity-option:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .severity-option.active {
+      border-color: var(--accent);
+      background: rgba(0, 229, 255, 0.1);
+    }
+    .severity-option.active.urgent {
+      border-color: var(--accent-warm);
+      background: rgba(255, 107, 53, 0.12);
+    }
+    .severity-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .severity-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* MEDIA ATTACHMENTS (PHOTO + AUDIO SOUND RECORDER) */
+    .media-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Photo Dropzone */
+    .upload-box {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      padding: 20px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(8, 10, 15, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 130px;
+      position: relative;
+    }
+    .upload-box:hover {
+      border-color: var(--accent);
+      background: rgba(0, 229, 255, 0.03);
+    }
+    .upload-box input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .upload-icon {
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .upload-title {
+      font-size: 0.84rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .upload-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .photo-preview-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .photo-thumb {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+    }
+
+    /* Audio Noise Recorder */
+    .audio-record-box {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 16px;
+      background: rgba(8, 10, 15, 0.5);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 130px;
+    }
+
+    .record-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .record-title {
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .record-timer {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--accent);
+    }
+
+    .waveform-visualizer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      height: 36px;
+      margin: 10px 0;
+    }
+
+    .wave-bar {
+      width: 3px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      transition: height 0.1s ease;
+    }
+
+    .recording .wave-bar {
+      background: var(--accent-warm);
+      animation: waveAnim 0.8s ease-in-out infinite alternate;
+    }
+
+    @keyframes waveAnim {
+      0% { height: 4px; }
+      100% { height: 32px; }
+    }
+
+    .record-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mic-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mic-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .mic-btn.is-recording {
+      background: rgba(255, 107, 53, 0.25);
+      border-color: var(--accent-warm);
+      color: var(--accent-warm);
+    }
+
+    .audio-playback-btn {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    /* DATE & TIME SLOT PICKER (BOOKIO CALENDAR) */
+    .date-scroll-container {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: thin;
+    }
+
+    .date-card {
+      flex: 0 0 76px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .date-card:hover {
+      border-color: rgba(0, 229, 255, 0.4);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .date-card.selected {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--accent);
+    }
+    .date-day-name {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .date-day-num {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 2px 0;
+    }
+    .date-status {
+      font-size: 0.65rem;
+      color: var(--accent-green);
+    }
+
+    /* Time Slots */
+    .time-slot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .time-slot-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .time-slot-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+    .time-slot-btn.selected {
+      background: var(--accent);
+      color: #06080b;
+      font-weight: 700;
+      border-color: var(--accent);
+    }
+
+    /* MECHANIC SPECIALIST SELECTOR */
+    .mechanic-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .mechanic-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mechanic-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .mechanic-card.selected {
+      border-color: var(--accent);
+      background: rgba(0, 229, 255, 0.1);
+    }
+
+    .mechanic-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1e293b, #334155);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 0.85rem;
+    }
+
+    .mechanic-info h5 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .mechanic-info p {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    /* CUSTOMER CONTACT FIELDS */
+    .contact-inputs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .input-field {
+      width: 100%;
+      background: rgba(8, 10, 15, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.85rem;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* Modal Footer */
+    .modal-footer {
+      padding: 20px 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(18, 22, 31, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pricing-est {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pricing-est span {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .pricing-est strong {
+      font-size: 1.15rem;
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .confirm-booking-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--accent) 0%, #0077ff 100%);
+      color: #06080b;
+      font-weight: 700;
+      font-size: 0.92rem;
+      padding: 12px 28px;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0, 229, 255, 0.35);
+      transition: all 0.2s;
+    }
+    .confirm-booking-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(0, 229, 255, 0.5);
+    }
+
+    /* SUCCESS CONFIRMATION MODAL */
+    #success-screen {
+      position: absolute;
+      inset: 0;
+      background: #11141c;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      text-align: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    #success-screen.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .success-icon-wrap {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(0, 230, 118, 0.15);
+      border: 2px solid var(--accent-green);
+      color: var(--accent-green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      box-shadow: 0 0 30px rgba(0, 230, 118, 0.3);
+      animation: pulse 2s infinite;
+    }
+
+    .booking-ref-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px 28px;
+      margin: 20px 0 28px;
+      max-width: 480px;
+      width: 100%;
+      text-align: left;
+    }
+
+    .ref-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+    .ref-row span { color: var(--text-muted); }
+    .ref-row strong { color: #fff; font-family: 'Space Mono', monospace; }
+
+    /* BOOKINGS DRAWER */
+    #bookings-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 380px;
+      max-width: 90vw;
+      height: 100vh;
+      background: #11141c;
+      border-left: 1px solid var(--glass-border);
+      box-shadow: -10px 0 40px rgba(0,0,0,0.7);
+      z-index: 10001;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #bookings-drawer.open {
+      transform: translateX(0);
+    }
+    .drawer-header {
+      padding: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .drawer-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .booked-item-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px;
+      position: relative;
+    }
+
+    /* HUD CONTROLS & STATUS */
+    .hud-controls {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(15, 17, 21, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      padding: 8px 20px;
+      border-radius: 100px;
+      z-index: 20;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .hud-frame-counter {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hud-frame-counter span {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .hud-divider {
+      width: 1px;
+      height: 16px;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .hud-scrubber-track {
+      width: 120px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hud-scrubber-thumb {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width 0.05s linear;
+    }
+
+    .hud-btn {
+      background: transparent;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      opacity: 0.7;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+
+    .hud-btn:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    /* POST SEQUENCE / SPECIFICATION SECTION */
+    .specs-section {
+      background: var(--bg-dark);
+      padding: 120px 24px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .specs-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .specs-header {
+      text-align: center;
+      margin-bottom: 70px;
+    }
+
+    .specs-header h2 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+    }
+
+    .specs-header p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+
+    .spec-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 32px;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .spec-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(0, 229, 255, 0.3);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .spec-val {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #fff 40%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .spec-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .spec-desc {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 40px 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* ANIMATIONS */
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.6; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes mouseScroll {
+      0% { opacity: 1; transform: translate(-50%, 0); }
+      100% { opacity: 0; transform: translate(-50%, 14px); }
+    }
+
+    /* RESPONSIVENESS */
+    @media (max-width: 768px) {
+      .top-nav-bar {
+        top: 12px;
+        right: 12px;
+        gap: 8px;
+      }
+      .lang-btn {
+        padding: 5px 9px;
+        font-size: 0.72rem;
+      }
+      #active-bookings-badge {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+      }
+      .diagnostic-banner {
+        width: 92%;
+        padding: 10px 18px;
+      }
+      .part-category-bar {
+        width: 95%;
+        top: 80px;
+      }
+      .media-grid, .mechanic-grid, .contact-inputs-grid {
+        grid-template-columns: 1fr;
+      }
+      .severity-selector {
+        grid-template-columns: 1fr;
+      }
+      .modal-body {
+        padding: 20px;
+      }
+      .modal-header, .modal-footer {
+        padding: 16px 20px;
+      }
+      .hud-controls {
+        width: 92%;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP NAVIGATION: RESERVATIONS BADGE + LANGUAGE SWITCHER -->
+  <div class="top-nav-bar">
+    <!-- Active Bookings Button -->
+    <div id="active-bookings-badge" title="Zobraziť rezervácie">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+      <span data-i18n="nav_bookings">Rezervácie</span>
+      <span id="bookings-count-pill" class="booking-count-pill">0</span>
+    </div>
+
+    <!-- Language Switcher Box -->
+    <div class="lang-switcher-box" id="lang-switcher">
+      <button class="lang-btn active" data-lang="sk">🇸🇰 SK</button>
+      <button class="lang-btn" data-lang="en">🇬🇧 EN</button>
+    </div>
+  </div>
+
+  <!-- PRELOADER OVERLAY -->
+  <div id="preloader">
+    <div class="loader-content">
+      <div class="loader-badge" data-i18n="loader_badge">Inicializácia systému</div>
+      <h2 class="loader-title" data-i18n="loader_title">Načítavanie sekvencie</h2>
+      <p class="loader-subtitle" data-i18n="loader_sub">Načítavam 240 ultra-ostrých 4K snímok animácie</p>
+      
+      <div class="progress-bar-container">
+        <div id="progress-fill" class="progress-bar-fill"></div>
+      </div>
+      
+      <div class="progress-stats">
+        <span id="load-status">Uložené v pamäti: 0 / 240</span>
+        <span id="load-percent" class="progress-percent">0%</span>
+      </div>
+
+      <button id="skip-load-btn" class="skip-btn" data-i18n="loader_skip">Spustiť ihneď s postupným načítavaním</button>
+    </div>
+  </div>
+
+  <!-- HERO SECTION -->
+  <header class="hero-section">
+    <div class="brand-tag" data-i18n="hero_tag">JK Garáž</div>
+    <h1 class="hero-title" data-i18n-html="hero_title">Diagnostika, oprava, bezpečnosť.<br />Vaše auto je u nás v bezpečí a zbavíme ho bolesti.</h1>
+    <p class="hero-description" data-i18n="hero_desc">
+      Pred rezerváciou kliknite na problémovú časť auta, nahláste závadu, nahrajte foto alebo zvuk a zarezervujte si termín u certifikovaného mechanika.
+    </p>
+    <button class="hero-cta-btn" id="hero-jump-btn">
+      <span data-i18n="hero_cta">Rezervácia online</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+      </svg>
+    </button>
+    <div class="scroll-indicator">
+      <div class="mouse-icon"></div>
+      <span data-i18n="hero_scroll">Rolujte pre rozloženie</span>
+    </div>
+  </header>
+
+  <!-- PINNED CANVAS SCROLL SEQUENCE -->
+  <section id="sequence-container">
+    <div id="canvas-wrapper">
+      <canvas id="sequence-canvas"></canvas>
+    </div>
+
+    <!-- INTERACTIVE DIAGNOSTIC HOTSPOTS LAYER (ACTIVATED ON EXPLODED VIEW) -->
+    <div id="diagnostic-layer">
+      <!-- Top Guidance Banner -->
+      <div class="diagnostic-banner">
+        <div class="diagnostic-pulse-icon"></div>
+        <div class="diagnostic-banner-text">
+          <h4 data-i18n="diag_banner_title">Interaktívny diagnostický režim aktívny</h4>
+          <p data-i18n="diag_banner_desc">Kliknite na komponent [B, E, I, S, X, W] pre nahlásenie závady a rezerváciu termínu</p>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="part-category-bar" id="category-filter-bar">
+        <!-- Injected dynamically by JS -->
+      </div>
+
+      <!-- Dynamic Hotspot Pins injected by JS -->
+      <div id="hotspots-container"></div>
+    </div>
+
+    <!-- HUD BOTTOM BAR -->
+    <div class="hud-controls">
+      <button class="hud-btn" id="play-pause-btn" title="Auto-play / Pauza">
+        <svg id="play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+      </button>
+
+      <div class="hud-divider"></div>
+
+      <div class="hud-frame-counter">
+        <span data-i18n="hud_frame_prefix">SNÍMKA</span> <span id="current-frame-num">001</span> / 240
+      </div>
+
+      <div class="hud-scrubber-track">
+        <div class="hud-scrubber-thumb" id="hud-progress"></div>
+      </div>
+
+      <div class="hud-divider"></div>
+
+      <button class="hud-btn" id="reset-scroll-btn" title="Naspäť na začiatok">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M18 15l-6-6-6 6"/>
+        </svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- POST-SEQUENCE SPECIFICATION / SHOWCASE -->
+  <section class="specs-section">
+    <div class="specs-container">
+      <div class="specs-header">
+        <h2 data-i18n="specs_title">Servisná &amp; Diagnostická sieť</h2>
+        <p data-i18n="specs_subtitle">Objednajte si precízny servis, diagnostiku a opravy s možnosťou audio a foto nahlasovania závad.</p>
+      </div>
+
+      <div class="specs-grid">
+        <div class="spec-card">
+          <div class="spec-val">100%</div>
+          <div class="spec-label" data-i18n="spec1_label">Diagnostika podsystémov</div>
+          <div class="spec-desc" data-i18n="spec1_desc">Priame prepojenie z 3D rozloženého pohľadu na pracovný príkaz certifikovaného technika.</div>
+        </div>
+
+        <div class="spec-card">
+          <div class="spec-val" data-i18n="spec2_val">Audio</div>
+          <div class="spec-label" data-i18n="spec2_label">Akustický záznamník hluku</div>
+          <div class="spec-desc" data-i18n="spec2_desc">Nahrajte klepanie, pískanie a pazvuky priamo v prehliadači pre analýzu pred návštevou servisu.</div>
+        </div>
+
+        <div class="spec-card">
+          <div class="spec-val" data-i18n="spec3_val">Ihneď</div>
+          <div class="spec-label" data-i18n="spec3_label">Okamžité potvrdenie termínu</div>
+          <div class="spec-desc" data-i18n="spec3_desc">Rezervačný kalendár v štýle Bookio s priradením mechanika, SMS notifikáciou a digitálnym protokolom.</div>
+        </div>
+
+        <div class="spec-card">
+          <div class="spec-val">4.98★</div>
+          <div class="spec-label" data-i18n="spec4_label">Hodnotenie špecialistov</div>
+          <div class="spec-desc" data-i18n="spec4_desc">Všetky servisné úkony vykonávajú výhradne certifikovaní majstri na nemecké vozidlá.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span data-i18n="footer_text">&copy; JK Garáž &bull; Diagnostický a rezervačný systém &bull; Poháňané GSAP ScrollTrigger</span>
+  </footer>
+
+  <!-- =========================================================
+       BOOKIO-STYLE RESERVATION MODAL
+       ========================================================= -->
+  <div id="booking-modal">
+    <div class="modal-container">
+      
+      <!-- SUCCESS OVERLAY -->
+      <div id="success-screen">
+        <div class="success-icon-wrap">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h2 style="font-size: 1.8rem; margin-bottom: 8px;" data-i18n="success_title">Rezervácia úspešne potvrdená!</h2>
+        <p style="color: var(--text-secondary); max-width: 420px; font-size: 0.9rem;" data-i18n="success_sub">
+          Váš termín bol zaevidovaný. K vašej zákazke bol priradený certifikovaný servisný technik.
+        </p>
+
+        <div class="booking-ref-card" id="booking-receipt-details">
+          <!-- Filled dynamically -->
+        </div>
+
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+          <button class="confirm-booking-btn" id="add-cal-btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;" data-i18n="success_add_cal">
+            📅 Pridať do kalendára (.ics)
+          </button>
+          <button class="confirm-booking-btn" id="finish-booking-btn" data-i18n="success_done">
+            Hotovo &bull; Návrat k rozloženému pohľadu
+          </button>
+        </div>
+      </div>
+
+      <!-- MODAL HEADER -->
+      <div class="modal-header">
+        <div class="modal-part-info">
+          <div class="modal-part-badge" id="modal-badge">E</div>
+          <div class="modal-part-title-group">
+            <h2 id="modal-part-name">Motor &amp; Prevodovka</h2>
+            <span id="modal-part-category">POHON &bull; 2.0 TFSI</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="modal-close-btn" title="Zatvoriť">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- MODAL BODY -->
+      <div class="modal-body">
+        
+        <!-- 1. ISSUE DIAGNOSTIC & SYMPTOMS -->
+        <div class="form-section">
+          <div class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+            </svg>
+            <span data-i18n="step1_title">Krok 1: Kontrolný zoznam príznakov &amp; Popis</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="step1_symptoms_label">Vyberte časté príznaky (kliknutím označíte):</label>
+            <div class="symptom-grid" id="modal-symptoms-container">
+              <!-- Dynamically populated per part & language -->
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="problem-description" data-i18n="step1_desc_label">Podrobný popis problému:</label>
+            <textarea id="problem-description" class="form-textarea" data-i18n-placeholder="step1_desc_placeholder" placeholder="Popíšte závadu (napr. klepanie pri 2 500 ot/min, občasné rozsvietenie kontrolky, trasenie pri brzdení...)"></textarea>
+          </div>
+
+          <label class="form-label" data-i18n="step1_urgency_label">Závažnosť závady:</label>
+          <div class="severity-selector">
+            <div class="severity-option active" data-severity="minor">
+              <div class="severity-label" data-i18n="urg_minor_title">🟢 Bežná / Kontrola</div>
+              <div class="severity-desc" data-i18n="urg_minor_desc">Bezpečné na jazdu, bežný servis</div>
+            </div>
+            <div class="severity-option" data-severity="moderate">
+              <div class="severity-label" data-i18n="urg_mod_title">🟡 Výrazná porucha</div>
+              <div class="severity-desc" data-i18n="urg_mod_desc">Znížený výkon / komfort</div>
+            </div>
+            <div class="severity-option urgent" data-severity="urgent">
+              <div class="severity-label" data-i18n="urg_urg_title">🔴 Kritická / Nebezpečné</div>
+              <div class="severity-desc" data-i18n="urg_urg_desc">Vyžaduje okamžitú kontrolu</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. PHOTO UPLOAD & AUDIO NOISE RECORDER -->
+        <div class="form-section">
+          <div class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            <span data-i18n="step2_title">Krok 2: Priložte fotografie &amp; Nahrajte zvuk závady</span>
+          </div>
+
+          <div class="media-grid">
+            <!-- Photo Upload Dropzone -->
+            <div>
+              <div class="upload-box" id="photo-dropzone">
+                <input type="file" id="photo-input" accept="image/*" multiple />
+                <svg class="upload-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <div class="upload-title" data-i18n="step2_photo_title">Pretiahnite fotografiu dielu / budíkov</div>
+                <div class="upload-sub" data-i18n="step2_photo_sub">PNG, JPG do 15MB</div>
+              </div>
+              <div class="photo-preview-list" id="photo-previews"></div>
+            </div>
+
+            <!-- Audio / Engine Noise Recorder -->
+            <div class="audio-record-box" id="audio-box">
+              <div class="record-header">
+                <span class="record-title" data-i18n="step2_audio_title">🎙️ Nahrať zvuk závady</span>
+                <span class="record-timer" id="record-timer">00:00</span>
+              </div>
+
+              <!-- Animated Sound Waveform -->
+              <div class="waveform-visualizer" id="waveform-bars">
+                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+              </div>
+
+              <div class="record-controls">
+                <button type="button" class="mic-btn" id="record-btn">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="10"></circle>
+                  </svg>
+                  <span id="record-btn-text" data-i18n="step2_record_start">Nahrať zvukový záznam</span>
+                </button>
+                <button type="button" class="audio-playback-btn" id="audio-play-btn" data-i18n="step2_play">
+                  ▶ Prehrať
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. DATE & TIME SELECTION (BOOKIO CALENDAR) -->
+        <div class="form-section">
+          <div class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span data-i18n="step3_title">Krok 3: Výber dátumu &amp; Času u mechanika</span>
+          </div>
+
+          <label class="form-label" data-i18n="step3_days_label">Dostupné dni:</label>
+          <div class="date-scroll-container" id="date-cards-container">
+            <!-- 14 Days Generated by JS -->
+          </div>
+
+          <label class="form-label" style="margin-top: 14px;" data-i18n="step3_times_label">Dostupné časy termínov:</label>
+          <div class="time-slot-grid" id="time-slots-container">
+            <!-- Slots generated by JS -->
+          </div>
+
+          <label class="form-label" style="margin-top: 18px;" data-i18n="step3_specialist_label">Priradený špecializovaný mechanik:</label>
+          <div class="mechanic-grid" id="mechanic-selector-container">
+            <div class="mechanic-card selected" data-mech="Markus Vance">
+              <div class="mechanic-avatar">MV</div>
+              <div class="mechanic-info">
+                <h5>Markus Vance</h5>
+                <p data-i18n="mech1_role">Hlavný mechanik pre motory &amp; prevodovky &bull; 4.9★</p>
+              </div>
+            </div>
+            <div class="mechanic-card" data-mech="Elena Rostova">
+              <div class="mechanic-avatar">ER</div>
+              <div class="mechanic-info">
+                <h5>Elena Rostova</h5>
+                <p data-i18n="mech2_role">Špecialistka na podvozky &amp; diagnostiku &bull; 5.0★</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. CUSTOMER CONTACT & VEHICLE DETAILS -->
+        <div class="form-section">
+          <div class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span data-i18n="step4_title">Krok 4: Kontaktné údaje &amp; Informácie o vozidle</span>
+          </div>
+
+          <div class="contact-inputs-grid">
+            <div class="form-group">
+              <label class="form-label" for="cust-name" data-i18n="step4_name_label">Meno a priezvisko *</label>
+              <input type="text" id="cust-name" class="input-field" placeholder="Miroslav Horváth" value="Miroslav Horváth" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cust-phone" data-i18n="step4_phone_label">Telefón (pre SMS notifikácie) *</label>
+              <input type="tel" id="cust-phone" class="input-field" placeholder="+421 900 000 000" value="+421 948 123 456" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cust-email" data-i18n="step4_email_label">E-mailová adresa</label>
+              <input type="email" id="cust-email" class="input-field" placeholder="miroslav@automek.sk" value="miroslav@automek.sk" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cust-plate" data-i18n="step4_plate_label">EČV / Model vozidla</label>
+              <input type="text" id="cust-plate" class="input-field" placeholder="BA-892XX (Audi A4)" value="BA-404EK (Audi A4)" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MODAL FOOTER -->
+      <div class="modal-footer">
+        <div class="pricing-est">
+          <span data-i18n="modal_fee_label">Poplatok za vstupnú diagnostiku</span>
+          <strong id="modal-price-est">€45.00 <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;" data-i18n="modal_free_with_repair">(Zadarmo pri realizácii opravy)</span></strong>
+        </div>
+        <button class="confirm-booking-btn" id="submit-booking-btn">
+          <span data-i18n="modal_confirm_btn">Potvrdiť rezerváciu termínu</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BOOKINGS DRAWER (LIST OF CONFIRMED RESERVATIONS) -->
+  <div id="bookings-drawer">
+    <div class="drawer-header">
+      <h3 style="font-size: 1.1rem; font-weight: 700;" data-i18n="drawer_title">Naplánované rezervácie</h3>
+      <button class="modal-close-btn" id="close-drawer-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="drawer-body" id="drawer-items-list">
+      <!-- Injected dynamically -->
+    </div>
+  </div>
+
+  <!-- CORE SCRIPT LOGIC -->
+  <script>
+    // Register GSAP Plugins
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+    (function() {
+      // =========================================================
+      // MULTI-LANGUAGE TRANSLATIONS (SLOVAK BASE + ENGLISH)
+      // =========================================================
+      const TRANSLATIONS = {
+        sk: {
+          nav_bookings: "Rezervácie",
+          loader_badge: "Inicializácia systému",
+          loader_title: "Načítavanie sekvencie",
+          loader_sub: "Načítavam 240 ultra-ostrých 4K snímok animácie",
+          loader_cached: "Uložené v pamäti:",
+          loader_skip: "Spustiť ihneď s postupným načítavaním",
+          hero_tag: "JK Garáž",
+          hero_title: "Diagnostika, oprava, bezpečnosť.<br />Vaše auto je u nás v bezpečí a zbavíme ho bolesti.",
+          hero_desc: "Pred rezerváciou kliknite na problémovú časť auta, nahláste závadu, nahrajte foto alebo zvuk a zarezervujte si termín u certifikovaného mechanika.",
+          hero_cta: "Rezervácia online",
+          hero_scroll: "Rolujte pre rozloženie",
+          diag_banner_title: "Interaktívny diagnostický režim aktívny",
+          diag_banner_desc: "Kliknite na komponent [B, E, I, S, X, W] pre nahlásenie závady a rezerváciu termínu",
+          cat_all: "Všetky podsystémy",
+          cat_e: "⚡ [E] Motor",
+          cat_b: "🚗 [B] Karoséria",
+          cat_i: "💺 [I] Interiér",
+          cat_s: "🔧 [S] Podvozok",
+          cat_x: "💨 [X] Výfuk",
+          cat_w: "🔘 [W] Kolesá",
+          tooltip_report: "Nahlásiť závadu & Rezervovať →",
+          hud_frame_prefix: "SNÍMKA",
+          specs_title: "Servisná & Diagnostická sieť",
+          specs_subtitle: "Objednajte si precízny servis, diagnostiku a opravy s možnosťou audio a foto nahlasovania závad.",
+          spec1_label: "Diagnostika podsystémov",
+          spec1_desc: "Priame prepojenie z 3D rozloženého pohľadu na pracovný príkaz certifikovaného technika.",
+          spec2_val: "Audio",
+          spec2_label: "Akustický záznamník hluku",
+          spec2_desc: "Nahrajte klepanie, pískanie a pazvuky priamo v prehliadači pre analýzu pred návštevou servisu.",
+          spec3_val: "Ihneď",
+          spec3_label: "Okamžité potvrdenie termínu",
+          spec3_desc: "Rezervačný kalendár v štýle Bookio s priradením mechanika, SMS notifikáciou a digitálnym protokolom.",
+          spec4_label: "Hodnotenie špecialistov",
+          spec4_desc: "Všetky servisné úkony vykonávajú výhradne certifikovaní majstri na nemecké vozidlá.",
+          footer_text: "© JK Garáž • Diagnostický a rezervačný systém • Poháňané GSAP ScrollTrigger",
+          step1_title: "Krok 1: Kontrolný zoznam príznakov & Popis",
+          step1_symptoms_label: "Vyberte časté príznaky (kliknutím označíte):",
+          step1_desc_label: "Podrobný popis problému:",
+          step1_desc_placeholder: "Popíšte závadu (napr. klepanie pri 2 500 ot/min, občasné rozsvietenie kontrolky, trasenie pri brzdení...)",
+          step1_urgency_label: "Závažnosť závady:",
+          urg_minor_title: "🟢 Bežná / Kontrola",
+          urg_minor_desc: "Bezpečné na jazdu, bežný servis",
+          urg_mod_title: "🟡 Výrazná porucha",
+          urg_mod_desc: "Znížený výkon / komfort",
+          urg_urg_title: "🔴 Kritická / Nebezpečné",
+          urg_urg_desc: "Vyžaduje okamžitú kontrolu",
+          step2_title: "Krok 2: Priložte fotografie & Nahrajte zvuk závady",
+          step2_photo_title: "Pretiahnite fotografiu dielu / budíkov",
+          step2_photo_sub: "PNG, JPG do 15MB",
+          step2_audio_title: "🎙️ Nahrať zvuk závady",
+          step2_record_start: "Nahrať zvukový záznam",
+          step2_record_stop: "Zastaviť nahrávanie",
+          step2_record_again: "Nahrať znova",
+          step2_play: "▶ Prehrať",
+          step2_playing: "🔊 Prehrávam...",
+          step3_title: "Krok 3: Výber dátumu & Času u mechanika",
+          step3_days_label: "Dostupné dni:",
+          step3_times_label: "Dostupné časy termínov:",
+          step3_specialist_label: "Priradený špecializovaný mechanik:",
+          mech1_role: "Hlavný mechanik pre motory & prevodovky • 4.9★",
+          mech2_role: "Špecialistka na podvozky & diagnostiku • 5.0★",
+          step4_title: "Krok 4: Kontaktné údaje & Informácie o vozidle",
+          step4_name_label: "Meno a priezvisko *",
+          step4_phone_label: "Telefón (pre SMS notifikácie) *",
+          step4_email_label: "E-mailová adresa",
+          step4_plate_label: "EČV / Model vozidla",
+          modal_fee_label: "Poplatok za vstupnú diagnostiku",
+          modal_free_with_repair: "(Zadarmo pri realizácii opravy)",
+          modal_confirm_btn: "Potvrdiť rezerváciu termínu",
+          success_title: "Rezervácia úspešne potvrdená!",
+          success_sub: "Váš termín bol zaevidovaný. K vašej zákazke bol priradený certifikovaný servisný technik.",
+          receipt_ref: "Číslo zákazky:",
+          receipt_comp: "Komponent:",
+          receipt_slot: "Termín servisu:",
+          receipt_mech: "Priradený mechanik:",
+          receipt_plate: "EČV vozidla:",
+          receipt_media: "Priložené médiá:",
+          receipt_media_val: "{photos} fotografií, {audio}",
+          receipt_audio_yes: "1 zvuková nahrávka",
+          receipt_audio_no: "bez audia",
+          success_add_cal: "📅 Pridať do kalendára (.ics)",
+          success_done: "Hotovo • Návrat k rozloženému pohľadu",
+          drawer_title: "Naplánované rezervácie",
+          drawer_empty: "Zatiaľ nemáte žiadne aktívne rezervácie.<br />Kliknite na ktorýkoľvek rozložený diel pre rezerváciu termínu.",
+          status_confirmed: "Potvrdené",
+          cal_sync_msg: "Servisný termín bol synchronizovaný! Pozvánka do kalendára (.ics) a potvrdzujúca SMS bola odoslaná."
+        },
+        en: {
+          nav_bookings: "Reservations",
+          loader_badge: "System Initializing",
+          loader_title: "Preloading Sequence",
+          loader_sub: "Loading 240 ultra-sharp 4K animation frames",
+          loader_cached: "Cached:",
+          loader_skip: "Start anyway with progressive streaming",
+          hero_tag: "JK Garage",
+          hero_title: "Diagnostics, repair, safety.<br />Your car is safe with us and we'll fix all its pain.",
+          hero_desc: "Before booking, click on the problem part of the car, report the issue, upload a photo or sound, and reserve an appointment with a certified mechanic.",
+          hero_cta: "Book Online",
+          hero_scroll: "Scroll To Deconstruct",
+          diag_banner_title: "Interactive Diagnostic Mode Active",
+          diag_banner_desc: "Click any component pin [B, E, I, S, X, W] to report issues & book a mechanic",
+          cat_all: "All Subsystems",
+          cat_e: "⚡ [E] Engine",
+          cat_b: "🚗 [B] Body & Glass",
+          cat_i: "💺 [I] Interior",
+          cat_s: "🔧 [S] Suspension",
+          cat_x: "💨 [X] Exhaust",
+          cat_w: "🔘 [W] Wheels",
+          tooltip_report: "Report Issue & Book →",
+          hud_frame_prefix: "FRAME",
+          specs_title: "Mechanic Reservation Network",
+          specs_subtitle: "Book precision certified maintenance, diagnostics, and repairs with real-time audio and photographic symptom reporting.",
+          spec1_label: "Subsystem Diagnostic",
+          spec1_desc: "Direct component mapping from 3D exploded view to certified Master Technician work orders.",
+          spec2_val: "Audio",
+          spec2_label: "Acoustic Noise Recorder",
+          spec2_desc: "Record knocking, squeaks, and turbo rattles directly in-browser for pre-visit mechanic analysis.",
+          spec3_val: "Instant",
+          spec3_label: "Slot Confirmation",
+          spec3_desc: "Bookio-style calendar with live mechanic assignment, SMS confirmation, and digital work order receipts.",
+          spec4_label: "Specialist Rating",
+          spec4_desc: "All repairs executed exclusively by certified Audi and German-vehicle master mechanics.",
+          footer_text: "© JK Garage • Diagnostic & Reservation System • Powered by GSAP ScrollTrigger",
+          step1_title: "Step 1: Symptom Checklist & Description",
+          step1_symptoms_label: "Select Common Symptoms (Click to toggle):",
+          step1_desc_label: "Detailed Problem Description:",
+          step1_desc_placeholder: "Describe the symptom (e.g. rattling noise at 2,500 RPM, intermittent warning light, vibration while braking...)",
+          step1_urgency_label: "Urgency Level:",
+          urg_minor_title: "🟢 Minor / Checkup",
+          urg_minor_desc: "Safe to drive, routine issue",
+          urg_mod_title: "🟡 Noticeable Fault",
+          urg_mod_desc: "Performance degraded",
+          urg_urg_title: "🔴 Urgent / Unsafe",
+          urg_urg_desc: "Requires immediate inspection",
+          step2_title: "Step 2: Attach Photos & Record Sound / Noise",
+          step2_photo_title: "Drop Photo of Part / Dash",
+          step2_photo_sub: "PNG, JPG up to 15MB",
+          step2_audio_title: "🎙️ Record Problem Noise",
+          step2_record_start: "Record Sound Note",
+          step2_record_stop: "Stop Recording",
+          step2_record_again: "Re-record Sound",
+          step2_play: "▶ Play",
+          step2_playing: "🔊 Playing...",
+          step3_title: "Step 3: Select Date & Mechanic Time Slot",
+          step3_days_label: "Available Days:",
+          step3_times_label: "Available Appointment Times:",
+          step3_specialist_label: "Assigned Specialist Mechanic:",
+          mech1_role: "Master Engine & Drivetrain • 4.9★",
+          mech2_role: "Suspension & Electronics • 5.0★",
+          step4_title: "Step 4: Customer & Vehicle Information",
+          step4_name_label: "Full Name *",
+          step4_phone_label: "Phone (for SMS status updates) *",
+          step4_email_label: "Email Address",
+          step4_plate_label: "License Plate / Model",
+          modal_fee_label: "Inspection & Diagnostic Fee",
+          modal_free_with_repair: "(Free with repair)",
+          modal_confirm_btn: "Confirm Service Reservation",
+          success_title: "Reservation Confirmed!",
+          success_sub: "Your appointment has been booked. A master mechanic has been assigned to your vehicle's diagnostic ticket.",
+          receipt_ref: "Ticket Reference:",
+          receipt_comp: "Component:",
+          receipt_slot: "Scheduled Slot:",
+          receipt_mech: "Assigned Specialist:",
+          receipt_plate: "Vehicle Plate:",
+          receipt_media: "Attached Media:",
+          receipt_media_val: "{photos} Photos, {audio}",
+          receipt_audio_yes: "1 Audio Recording",
+          receipt_audio_no: "None",
+          success_add_cal: "📅 Add to Calendar (.ics)",
+          success_done: "Done • Back to Exploded View",
+          drawer_title: "Scheduled Reservations",
+          drawer_empty: "No active reservations yet.<br />Click any exploded car component to book a slot.",
+          status_confirmed: "Confirmed",
+          cal_sync_msg: "Service appointment synced! A calendar invite (.ics) & confirmation SMS has been dispatched."
+        }
+      };
+
+      // Current active language (Default: Slovak)
+      let currentLang = localStorage.getItem('automek_lang') || 'sk';
+
+      // 1. CAR COMPONENT DEFINITIONS WITH BILINGUAL METADATA
+      const CAR_PARTS_DATA = [
+        {
+          id: 'part-engine',
+          code: 'E',
+          pctX: 0.50,
+          pctY: 0.56,
+          price: '€49.00',
+          sk: {
+            name: '2.0 TFSI Motor & Prevodovka',
+            category: 'Motor & Pohon',
+            subCategory: 'POHON &bull; TURBO 4-VALEC',
+            symptoms: [
+              'Svieti kontrolka motora (Check Engine)',
+              'Vynechávanie valcov / nepravidelný chod',
+              'Klopanie / cukanie motora',
+              'Strata výkonu / oneskorenie turba',
+              'Únik oleja / chladiacej kvapaliny',
+              'Servis rozvodového remeňa / reťaze'
+            ]
+          },
+          en: {
+            name: '2.0 TFSI Engine & Powertrain',
+            category: 'Engine & Transmission',
+            subCategory: 'POWERTRAIN &bull; TURBOCHARGED V4',
+            symptoms: [
+              'Check Engine Light On',
+              'Engine Misfire / Rough Idle',
+              'Metallic Ticking / Knocking',
+              'Loss of Acceleration / Turbo Lag',
+              'Oil / Coolant Fluid Leak',
+              'Timing Belt / Chain Service'
+            ]
+          }
+        },
+        {
+          id: 'part-roof',
+          code: 'B',
+          pctX: 0.50,
+          pctY: 0.10,
+          price: '€35.00',
+          sk: {
+            name: 'Panoramatická strecha & Akustické sklá',
+            category: 'Karoséria & Zasklenie',
+            subCategory: 'KAROSÉRIA &bull; SKLÁ & ŠÍBER',
+            symptoms: [
+              'Zaseknutý motorček strešného okna',
+              'Prasklina / kamienok na čelnom skle',
+              'Zatekanie vody cez stropnicu',
+              'Nadmerný aerodynamický hluk pri jazde',
+              'Opotrebované gumové tesnenia'
+            ]
+          },
+          en: {
+            name: 'Panoramic Roof & Acoustic Glass',
+            category: 'Body & Glazing',
+            subCategory: 'BODYWORK &bull; GLASS & SUNROOF',
+            symptoms: [
+              'Sunroof Motor Stalled',
+              'Windshield Stone Chip / Crack',
+              'Water Leakage into Headliner',
+              'Excessive Highway Wind Noise',
+              'Rubber Seal Degradation'
+            ]
+          }
+        },
+        {
+          id: 'part-cockpit',
+          code: 'I',
+          pctX: 0.50,
+          pctY: 0.28,
+          price: '€39.00',
+          sk: {
+            name: 'Virtuálny kokpit & Infotainment',
+            category: 'Interiér & Elektronika',
+            subCategory: 'ELEKTRONIKA &bull; SYSTÉM MMI',
+            symptoms: [
+              'Čierna obrazovka digitálnych budíkov',
+              'Porucha klimatizácie / ventilácie',
+              'Nefunkčné tlačidlá na volante',
+              'Výpadky Apple CarPlay / Bluetooth',
+              'Svieti kontrolka airbagu (SRS)'
+            ]
+          },
+          en: {
+            name: 'Virtual Cockpit & Infotainment',
+            category: 'Interior & Electronics',
+            subCategory: 'ELECTRONICS &bull; MMI SYSTEM',
+            symptoms: [
+              'Digital Cluster Black Screen',
+              'AC Climate Control Failure',
+              'Steering Wheel Controls Dead',
+              'CarPlay / Bluetooth Audio Disconnect',
+              'Airbag Warning Indicator (SRS)'
+            ]
+          }
+        },
+        {
+          id: 'part-seats',
+          code: 'I',
+          pctX: 0.66,
+          pctY: 0.44,
+          price: '€29.00',
+          sk: {
+            name: 'Interiér kabíny & Kožené sedadlá',
+            category: 'Interiér & Komfort',
+            subCategory: 'INTERIÉR &bull; ERGONÓMIA',
+            symptoms: [
+              'Zaseknuté elektrické nastavovanie sedadla',
+              'Nefunkčné vyhrievanie sedadla',
+              'Chyba predpínača bezpečnostného pásu',
+              'Poškodenie / opotrebenie kože',
+              'Vŕzganie plastov a obloženia v kabíne'
+            ]
+          },
+          en: {
+            name: 'Interior Cabin & Leather Seats',
+            category: 'Interior & Comfort',
+            subCategory: 'INTERIOR &bull; ERGONOMICS',
+            symptoms: [
+              'Power Seat Motor Stuck',
+              'Seat Heater Not Warming',
+              'Seatbelt Tensioner Fault',
+              'Interior Leather Wear / Tear',
+              'Cabin Rattle / Trim Squeak'
+            ]
+          }
+        },
+        {
+          id: 'part-doors-left',
+          code: 'B',
+          pctX: 0.22,
+          pctY: 0.45,
+          price: '€35.00',
+          sk: {
+            name: 'Ľavé dvere & Spätné zrkadlo',
+            category: 'Karoséria & Dvere',
+            subCategory: 'KAROSÉRIA &bull; DVERE & ZRKADLÁ',
+            symptoms: [
+              'Zaseknuté sťahovanie elektrického okna',
+              'Cvaká zámok dverí (aktuátor)',
+              'Nefunkčný asistent mŕtveho uhla v zrkadle',
+              'Padnuté pánty dverí / zlé dosadanie',
+              'Škrabanec / preliačina z parkoviska'
+            ]
+          },
+          en: {
+            name: 'Left Doors & Power Mirrors',
+            category: 'Body & Panels',
+            subCategory: 'BODYWORK &bull; DOORS & PANELS',
+            symptoms: [
+              'Power Window Mechanism Jammed',
+              'Door Lock Actuator Clicking',
+              'Side Mirror Blind Spot Sensor Error',
+              'Door Hinge Sag / Misalignment',
+              'Parking Ding / Paint Scratch'
+            ]
+          }
+        },
+        {
+          id: 'part-doors-right',
+          code: 'B',
+          pctX: 0.78,
+          pctY: 0.45,
+          price: '€35.00',
+          sk: {
+            name: 'Pravé dvere & Bezkľúčový vstup',
+            category: 'Karoséria & Dvere',
+            subCategory: 'KAROSÉRIA &bull; DVERE & ZÁMKY',
+            symptoms: [
+              'Nefunguje dotykový senzor kľučky',
+              'Hluk v mechanizme sťahovania okna',
+              'Prefukovanie tesnenia / zatekanie',
+              'Zaseknutá detská poistka',
+              'Poškodenie laku dverí'
+            ]
+          },
+          en: {
+            name: 'Right Doors & Keyless Entry',
+            category: 'Body & Panels',
+            subCategory: 'BODYWORK &bull; DOORS & LOCKS',
+            symptoms: [
+              'Keyless Touch Sensor Failure',
+              'Window Regulator Noise',
+              'Door Seal Draft / Water Ingress',
+              'Child Lock Mechanism Stuck',
+              'Body Panel Scratch'
+            ]
+          }
+        },
+        {
+          id: 'part-exhaust',
+          code: 'X',
+          pctX: 0.33,
+          pctY: 0.52,
+          price: '€40.00',
+          sk: {
+            name: 'Duálny výfuk & Katalyzátor',
+            category: 'Výfukový systém & Emisie',
+            subCategory: 'EMISIE &bull; NEREZOVÝ VÝFUK',
+            symptoms: [
+              'Hlučný / rezonujúci zvuk výfuku',
+              'Chyba účinnosti katalyzátora (P0420)',
+              'Uvoľnený úchyt / drnčanie pod autom',
+              'Príprava na emisnú kontrolu (EK)',
+              'Zápach spáleniny / síry zozadu'
+            ]
+          },
+          en: {
+            name: 'Dual Exhaust & Catalytic Converter',
+            category: 'Exhaust & Emissions',
+            subCategory: 'EMISSIONS &bull; STAINLESS EXHAUST',
+            symptoms: [
+              'Loud Exhaust Roar / Rumble',
+              'Catalytic Converter Error (P0420)',
+              'Exhaust Bracket / Hanger Rattle',
+              'Emissions Inspection Preparation',
+              'Sulfur / Burning Smell from Rear'
+            ]
+          }
+        },
+        {
+          id: 'part-shield',
+          code: 'X',
+          pctX: 0.69,
+          pctY: 0.61,
+          price: '€30.00',
+          sk: {
+            name: 'Aerodynamické kryty podvozka',
+            category: 'Podvozok & Ochrana',
+            subCategory: 'PODVOZOK &bull; KOMPOZITNÝ KRYT',
+            symptoms: [
+              'Uvoľnený / odtrhnutý plastový kryt motora',
+              'Kontrola podvozka po náraze',
+              'Porucha snímača hladiny v nádrži',
+              'Kontrola antikoróznej ochrany'
+            ]
+          },
+          en: {
+            name: 'Aerodynamic Underbody Shielding',
+            category: 'Chassis & Underbody',
+            subCategory: 'CHASSIS &bull; COMPOSITE SHIELD',
+            symptoms: [
+              'Scraped Underbody Shield Loose',
+              'Undercarriage Impact Inspection',
+              'Fuel Tank Level Sensor Fault',
+              'Corrosion Protection Check'
+            ]
+          }
+        },
+        {
+          id: 'part-bumper',
+          code: 'B',
+          pctX: 0.50,
+          pctY: 0.83,
+          price: '€45.00',
+          sk: {
+            name: 'Predný nárazník & Matrix LED svetlá',
+            category: 'Exteriér & Osvetlenie',
+            subCategory: 'EXTERIÉR &bull; SVETLÁ & RADAR',
+            symptoms: [
+              'Chyba adaptívnych Matrix LED svetlometov',
+              'Porucha predného radaru / parkovacích senzorov',
+              'Prasknutý / posunutý nárazník',
+              'Zahmlená kamera v maske chladiča',
+              'Výmena rozbitého hmlového svetla'
+            ]
+          },
+          en: {
+            name: 'Front Bumper & Matrix LED Lights',
+            category: 'Body & Lighting',
+            subCategory: 'EXTERIOR &bull; FASCIAS & RADAR',
+            symptoms: [
+              'Matrix LED Adaptive Light Fault',
+              'Distance Radar / Parking Sensor Error',
+              'Front Bumper Crack / Dislodged',
+              'Front Grille Camera Glitch',
+              'Fog Light Lens Replacement'
+            ]
+          }
+        },
+        {
+          id: 'part-susp-left',
+          code: 'S',
+          pctX: 0.20,
+          pctY: 0.80,
+          price: '€39.00',
+          sk: {
+            name: 'Predné ľavé 5-prvkové zavesenie & Brzdy',
+            category: 'Podvozok & Brzdy',
+            subCategory: 'PODVOZOK &bull; TLMIČE & BRZDY',
+            symptoms: [
+              'Pískanie / škrípanie bŕzd',
+              'Vibrácie volantu pri brzdení',
+              'Búchanie / klepanie na nerovnostiach',
+              'Vytečený tlmič pruženia',
+              'Vozidlo ťahá doľava'
+            ]
+          },
+          en: {
+            name: 'Front-Left 5-Link Suspension & Brakes',
+            category: 'Suspension & Brakes',
+            subCategory: 'CHASSIS &bull; DAMPING & BRAKES',
+            symptoms: [
+              'High-Pitched Brake Squeal / Grind',
+              'Steering Wheel Shakes on Braking',
+              'Clunking Sound Over Bumps',
+              'Leaking Shock Absorber Strut',
+              'Car Pulling to the Left'
+            ]
+          }
+        },
+        {
+          id: 'part-susp-right',
+          code: 'S',
+          pctX: 0.80,
+          pctY: 0.80,
+          price: '€39.00',
+          sk: {
+            name: 'Predné pravé 5-prvkové zavesenie & Brzdy',
+            category: 'Podvozok & Brzdy',
+            subCategory: 'PODVOZOK &bull; TLMIČE & BRZDY',
+            symptoms: [
+              'Svieti kontrolka opotrebenia brzdových doštičiek',
+              'Hučanie ložiska kolesa',
+              'Vôľa v čape / nepresné riadenie',
+              'Vŕzganie silentblokov ramien',
+              'Mäkký brzdový pedál'
+            ]
+          },
+          en: {
+            name: 'Front-Right 5-Link Suspension & Brakes',
+            category: 'Suspension & Brakes',
+            subCategory: 'CHASSIS &bull; DAMPING & BRAKES',
+            symptoms: [
+              'Brake Pad Wear Sensor Warning',
+              'Wheel Bearing Humming Noise',
+              'Ball Joint Play / Loose Steering',
+              'Squeaking Bushings',
+              'Brake Pedal Feels Spongy'
+            ]
+          }
+        },
+        {
+          id: 'part-wheels',
+          code: 'W',
+          pctX: 0.10,
+          pctY: 0.62,
+          price: '€25.00',
+          sk: {
+            name: 'Hliníkové disky & Snímače tlaku TPMS',
+            category: 'Kolesá & Pneumatiky',
+            subCategory: 'KOLESÁ &bull; DISKY & TPMS',
+            symptoms: [
+              'Výstraha nízkeho tlaku v pneumatikách (TPMS)',
+              'Ohnutý disk / poškodenie od obrubníka',
+              'Nerovnomerné zjazdenie dezénu',
+              'Pomalý defekt / únik vzduchu',
+              'Vyváženie kolies a 3D geometria'
+            ]
+          },
+          en: {
+            name: 'Alloy Wheels & TPMS Pressure System',
+            category: 'Wheels & Tires',
+            subCategory: 'WHEELS &bull; ALLOY & TPMS',
+            symptoms: [
+              'TPMS Tire Pressure Warning Light',
+              'Bent Rim / Curb Rash Damage',
+              'Uneven Tire Tread Wear',
+              'Slow Air Puncture',
+              'Wheel Balancing & 3D Alignment'
+            ]
+          }
+        }
+      ];
+
+      // Configuration
+      const FRAME_COUNT = 240;
+      const FRAME_PAD = 3;
+      const FRAME_PREFIX = 'ezgif-frame-';
+      const FRAME_EXT = '.png';
+
+      // Elements
+      const canvas = document.getElementById('sequence-canvas');
+      const ctx = canvas.getContext('2d', { alpha: false });
+      const preloader = document.getElementById('preloader');
+      const progressFill = document.getElementById('progress-fill');
+      const loadStatus = document.getElementById('load-status');
+      const loadPercent = document.getElementById('load-percent');
+      const skipBtn = document.getElementById('skip-load-btn');
+      const currentFrameDisplay = document.getElementById('current-frame-num');
+      const hudProgress = document.getElementById('hud-progress');
+      const playPauseBtn = document.getElementById('play-pause-btn');
+      const playIcon = document.getElementById('play-icon');
+      const resetScrollBtn = document.getElementById('reset-scroll-btn');
+      const heroJumpBtn = document.getElementById('hero-jump-btn');
+
+      // Top Nav & Language Switcher
+      const langBtns = document.querySelectorAll('.lang-btn');
+      const activeBookingsBadge = document.getElementById('active-bookings-badge');
+      const bookingsCountPill = document.getElementById('bookings-count-pill');
+      const bookingsDrawer = document.getElementById('bookings-drawer');
+      const closeDrawerBtn = document.getElementById('close-drawer-btn');
+      const drawerItemsList = document.getElementById('drawer-items-list');
+
+      // Diagnostic & Reservation Layer Elements
+      const diagnosticLayer = document.getElementById('diagnostic-layer');
+      const hotspotsContainer = document.getElementById('hotspots-container');
+      const categoryFilterBar = document.getElementById('category-filter-bar');
+
+      // Modal Elements
+      const bookingModal = document.getElementById('booking-modal');
+      const modalCloseBtn = document.getElementById('modal-close-btn');
+      const modalBadge = document.getElementById('modal-badge');
+      const modalPartName = document.getElementById('modal-part-name');
+      const modalPartCategory = document.getElementById('modal-part-category');
+      const modalPriceEst = document.getElementById('modal-price-est');
+      const modalSymptomsContainer = document.getElementById('modal-symptoms-container');
+      const problemDescInput = document.getElementById('problem-description');
+      const severityOptions = document.querySelectorAll('.severity-option');
+      const photoDropzone = document.getElementById('photo-dropzone');
+      const photoInput = document.getElementById('photo-input');
+      const photoPreviews = document.getElementById('photo-previews');
+      const recordBtn = document.getElementById('record-btn');
+      const recordBtnText = document.getElementById('record-btn-text');
+      const recordTimer = document.getElementById('record-timer');
+      const waveformBars = document.getElementById('waveform-bars');
+      const audioPlayBtn = document.getElementById('audio-play-btn');
+      const dateCardsContainer = document.getElementById('date-cards-container');
+      const timeSlotsContainer = document.getElementById('time-slots-container');
+      const mechanicCards = document.querySelectorAll('.mechanic-card');
+      const submitBookingBtn = document.getElementById('submit-booking-btn');
+      const successScreen = document.getElementById('success-screen');
+      const bookingReceiptDetails = document.getElementById('booking-receipt-details');
+      const finishBookingBtn = document.getElementById('finish-booking-btn');
+      const addCalBtn = document.getElementById('add-cal-btn');
+
+      // State
+      const playhead = { frame: 0 };
+      const images = [];
+      let loadedImagesCount = 0;
+      let isPreloaded = false;
+      let autoPlayTween = null;
+      let isAutoPlaying = false;
+      let currentSelectedPart = CAR_PARTS_DATA[0];
+      let selectedSeverity = 'minor';
+      let selectedDateStr = '';
+      let selectedTimeSlot = '10:00';
+      let selectedMechanic = 'Markus Vance';
+      let uploadedPhotos = [];
+      let recordedAudioBlob = null;
+      let isRecording = false;
+      let recordInterval = null;
+      let recordSeconds = 0;
+      let activeBookings = [];
+      let currentCategoryFilter = 'all';
+
+      // Calculated Image Rect within Canvas
+      let currentImageRect = { x: 0, y: 0, width: 0, height: 0 };
+
+      // =========================================================
+      // LANGUAGE SWITCHER ENGINE
+      // =========================================================
+      function setLanguage(lang) {
+        currentLang = lang;
+        document.documentElement.lang = lang;
+        localStorage.setItem('automek_lang', lang);
+
+        langBtns.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.lang === lang);
+        });
+
+        const dict = TRANSLATIONS[lang];
+
+        // 1. Update text nodes
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          const key = el.dataset.i18n;
+          if (dict[key]) el.textContent = dict[key];
+        });
+
+        // 2. Update HTML nodes
+        document.querySelectorAll('[data-i18n-html]').forEach(el => {
+          const key = el.dataset.i18nHtml;
+          if (dict[key]) el.innerHTML = dict[key];
+        });
+
+        // 3. Update Placeholders
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+          const key = el.dataset.i18nPlaceholder;
+          if (dict[key]) el.setAttribute('placeholder', dict[key]);
+        });
+
+        // 4. Update Category Filters Bar
+        renderCategoryFilterBar();
+
+        // 5. Rebuild hotspots & tooltips
+        buildHotspots();
+
+        // 6. Rebuild calendar dates with localized day/month names
+        buildCalendarDates();
+
+        // 7. Re-render modal if open
+        if (bookingModal.classList.contains('open') && currentSelectedPart) {
+          updateModalLanguage();
+        }
+
+        // 8. Update bookings drawer
+        updateActiveBookingsUI();
+      }
+
+      langBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          setLanguage(btn.dataset.lang);
+        });
+      });
+
+      function renderCategoryFilterBar() {
+        const dict = TRANSLATIONS[currentLang];
+        categoryFilterBar.innerHTML = `
+          <button class="cat-btn ${currentCategoryFilter === 'all' ? 'active' : ''}" data-filter="all">${dict.cat_all}</button>
+          <button class="cat-btn ${currentCategoryFilter === 'E' ? 'active' : ''}" data-filter="E">${dict.cat_e}</button>
+          <button class="cat-btn ${currentCategoryFilter === 'B' ? 'active' : ''}" data-filter="B">${dict.cat_b}</button>
+          <button class="cat-btn ${currentCategoryFilter === 'I' ? 'active' : ''}" data-filter="I">${dict.cat_i}</button>
+          <button class="cat-btn ${currentCategoryFilter === 'S' ? 'active' : ''}" data-filter="S">${dict.cat_s}</button>
+          <button class="cat-btn ${currentCategoryFilter === 'X' ? 'active' : ''}" data-filter="X">${dict.cat_x}</button>
+          <button class="cat-btn ${currentCategoryFilter === 'W' ? 'active' : ''}" data-filter="W">${dict.cat_w}</button>
+        `;
+
+        categoryFilterBar.querySelectorAll('.cat-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            categoryFilterBar.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCategoryFilter = btn.dataset.filter;
+
+            const hotspots = hotspotsContainer.querySelectorAll('.part-hotspot');
+            hotspots.forEach(hs => {
+              hs.style.display = (currentCategoryFilter === 'all' || hs.dataset.code === currentCategoryFilter) ? 'block' : 'none';
+            });
+          });
+        });
+      }
+
+      function getFrameUrl(index) {
+        const num = String(index + 1).padStart(FRAME_PAD, '0');
+        return `${FRAME_PREFIX}${num}${FRAME_EXT}`;
+      }
+
+      function preloadFrames() {
+        for (let i = 0; i < FRAME_COUNT; i++) {
+          const img = new Image();
+          img.src = getFrameUrl(i);
+
+          img.onload = () => {
+            loadedImagesCount++;
+            images[i] = img;
+            updateProgress();
+
+            if (i === 0 && !isPreloaded) {
+              render();
+            }
+
+            if (loadedImagesCount === FRAME_COUNT) {
+              finishPreloading();
+            }
+          };
+
+          img.onerror = () => {
+            loadedImagesCount++;
+            images[i] = images[0] || null;
+            updateProgress();
+            if (loadedImagesCount === FRAME_COUNT) {
+              finishPreloading();
+            }
+          };
+        }
+      }
+
+      function updateProgress() {
+        const percent = Math.round((loadedImagesCount / FRAME_COUNT) * 100);
+        progressFill.style.width = `${percent}%`;
+        loadPercent.textContent = `${percent}%`;
+        const dict = TRANSLATIONS[currentLang];
+        loadStatus.textContent = `${dict.loader_cached} ${loadedImagesCount} / ${FRAME_COUNT}`;
+      }
+
+      function finishPreloading() {
+        if (isPreloaded) return;
+        isPreloaded = true;
+
+        setTimeout(() => {
+          preloader.classList.add('loaded');
+          resizeCanvas();
+          render();
+          initScrollTrigger();
+          setLanguage(currentLang);
+          buildTimeSlots();
+        }, 300);
+      }
+
+      skipBtn.addEventListener('click', finishPreloading);
+
+      function resizeCanvas() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const rect = canvas.getBoundingClientRect();
+        
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        
+        ctx.scale(dpr, dpr);
+        render();
+        repositionHotspots();
+      }
+
+      function render() {
+        const frameIndex = Math.min(Math.max(Math.round(playhead.frame), 0), FRAME_COUNT - 1);
+        
+        let img = images[frameIndex];
+        if (!img || !img.complete) {
+          for (let offset = 1; offset < FRAME_COUNT; offset++) {
+            if (images[frameIndex - offset] && images[frameIndex - offset].complete) {
+              img = images[frameIndex - offset];
+              break;
+            }
+            if (images[frameIndex + offset] && images[frameIndex + offset].complete) {
+              img = images[frameIndex + offset];
+              break;
+            }
+          }
+        }
+
+        if (!img) return;
+
+        const cw = canvas.getBoundingClientRect().width;
+        const ch = canvas.getBoundingClientRect().height;
+
+        ctx.fillStyle = '#b5b7b9';
+        ctx.fillRect(0, 0, cw, ch);
+
+        const imgAspect = img.width / img.height;
+        const canvasAspect = cw / ch;
+
+        let drawWidth, drawHeight, offsetX, offsetY;
+
+        if (canvasAspect > imgAspect) {
+          drawHeight = ch * 0.95;
+          drawWidth = drawHeight * imgAspect;
+        } else {
+          drawWidth = cw * 0.95;
+          drawHeight = drawWidth / imgAspect;
+        }
+
+        offsetX = (cw - drawWidth) / 2;
+        offsetY = (ch - drawHeight) / 2;
+
+        currentImageRect = { x: offsetX, y: offsetY, width: drawWidth, height: drawHeight };
+
+        ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+
+        // Update HUD
+        const currentNum = String(frameIndex + 1).padStart(3, '0');
+        currentFrameDisplay.textContent = currentNum;
+        const progressPct = (frameIndex / (FRAME_COUNT - 1)) * 100;
+        hudProgress.style.width = `${progressPct}%`;
+      }
+
+      function initScrollTrigger() {
+        const sequenceTimeline = gsap.timeline({
+          scrollTrigger: {
+            id: "sequence-scroll",
+            trigger: "#sequence-container",
+            start: "top top",
+            end: "+=3800",
+            pin: true,
+            scrub: 0.5,
+            anticipatePin: 1,
+            onUpdate: (self) => {
+              updateDiagnosticState(self.progress);
+            }
+          }
+        });
+
+        sequenceTimeline.to(playhead, {
+          frame: FRAME_COUNT - 1,
+          ease: "none",
+          onUpdate: render
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+      }
+
+      function updateDiagnosticState(progress) {
+        if (progress >= 0.85) {
+          diagnosticLayer.classList.add('active');
+          repositionHotspots();
+        } else {
+          diagnosticLayer.classList.remove('active');
+        }
+      }
+
+      // =========================================================
+      // BUILD & POSITION INTERACTIVE HOTSPOTS
+      // =========================================================
+      function buildHotspots() {
+        hotspotsContainer.innerHTML = '';
+        const dict = TRANSLATIONS[currentLang];
+
+        CAR_PARTS_DATA.forEach(part => {
+          const loc = part[currentLang] || part.sk;
+          const el = document.createElement('div');
+          el.className = 'part-hotspot';
+          el.dataset.id = part.id;
+          el.dataset.code = part.code;
+
+          if (currentCategoryFilter !== 'all' && part.code !== currentCategoryFilter) {
+            el.style.display = 'none';
+          }
+
+          el.innerHTML = `
+            <div class="hotspot-badge">${part.code}</div>
+            <div class="hotspot-tooltip">
+              <div class="tooltip-category">${loc.category}</div>
+              <div class="tooltip-title">${loc.name}</div>
+              <div class="tooltip-action">${dict.tooltip_report}</div>
+            </div>
+          `;
+
+          el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openBookingModal(part);
+          });
+
+          hotspotsContainer.appendChild(el);
+        });
+
+        repositionHotspots();
+      }
+
+      function repositionHotspots() {
+        const hotspots = hotspotsContainer.querySelectorAll('.part-hotspot');
+        const rect = currentImageRect;
+
+        hotspots.forEach(el => {
+          const partId = el.dataset.id;
+          const part = CAR_PARTS_DATA.find(p => p.id === partId);
+          if (!part) return;
+
+          const posX = rect.x + (part.pctX * rect.width);
+          const posY = rect.y + (part.pctY * rect.height);
+
+          el.style.left = `${posX}px`;
+          el.style.top = `${posY}px`;
+        });
+      }
+
+      // Jump straight to exploded view from Hero CTA
+      heroJumpBtn.addEventListener('click', () => {
+        const trigger = ScrollTrigger.getById('sequence-scroll');
+        if (trigger) {
+          gsap.to(window, {
+            scrollTo: trigger.end - 50,
+            duration: 1.6,
+            ease: "power2.inOut"
+          });
+        }
+      });
+
+      // =========================================================
+      // BOOKIO-STYLE RESERVATION MODAL LOGIC
+      // =========================================================
+      function openBookingModal(part) {
+        currentSelectedPart = part;
+        updateModalLanguage();
+
+        problemDescInput.value = '';
+        uploadedPhotos = [];
+        photoPreviews.innerHTML = '';
+        resetAudioRecorder();
+        successScreen.classList.remove('active');
+
+        bookingModal.classList.add('open');
+      }
+
+      function updateModalLanguage() {
+        if (!currentSelectedPart) return;
+        const loc = currentSelectedPart[currentLang] || currentSelectedPart.sk;
+        const dict = TRANSLATIONS[currentLang];
+
+        modalBadge.textContent = currentSelectedPart.code;
+        modalPartName.textContent = loc.name;
+        modalPartCategory.innerHTML = loc.subCategory;
+        modalPriceEst.innerHTML = `${currentSelectedPart.price} <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">${dict.modal_free_with_repair}</span>`;
+
+        modalSymptomsContainer.innerHTML = '';
+        loc.symptoms.forEach(sym => {
+          const chip = document.createElement('div');
+          chip.className = 'symptom-chip';
+          chip.textContent = sym;
+          chip.addEventListener('click', () => chip.classList.toggle('selected'));
+          modalSymptomsContainer.appendChild(chip);
+        });
+      }
+
+      function closeModal() {
+        bookingModal.classList.remove('open');
+        stopAudioRecording();
+      }
+
+      modalCloseBtn.addEventListener('click', closeModal);
+      bookingModal.addEventListener('click', (e) => {
+        if (e.target === bookingModal) closeModal();
+      });
+
+      severityOptions.forEach(opt => {
+        opt.addEventListener('click', () => {
+          severityOptions.forEach(o => o.classList.remove('active'));
+          opt.classList.add('active');
+          selectedSeverity = opt.dataset.severity;
+        });
+      });
+
+      photoInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        files.forEach(file => {
+          if (!file.type.startsWith('image/')) return;
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            uploadedPhotos.push(evt.target.result);
+            const img = document.createElement('img');
+            img.src = evt.target.result;
+            img.className = 'photo-thumb';
+            photoPreviews.appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+
+      function resetAudioRecorder() {
+        stopAudioRecording();
+        recordedAudioBlob = null;
+        recordTimer.textContent = '00:00';
+        recordBtn.classList.remove('is-recording');
+        recordBtnText.textContent = TRANSLATIONS[currentLang].step2_record_start;
+        waveformBars.classList.remove('recording');
+        audioPlayBtn.style.display = 'none';
+      }
+
+      function startAudioRecording() {
+        isRecording = true;
+        recordSeconds = 0;
+        recordBtn.classList.add('is-recording');
+        recordBtnText.textContent = TRANSLATIONS[currentLang].step2_record_stop;
+        waveformBars.classList.add('recording');
+        audioPlayBtn.style.display = 'none';
+
+        recordInterval = setInterval(() => {
+          recordSeconds++;
+          const mins = String(Math.floor(recordSeconds / 60)).padStart(2, '0');
+          const secs = String(recordSeconds % 60).padStart(2, '0');
+          recordTimer.textContent = `${mins}:${secs}`;
+          if (recordSeconds >= 30) {
+            stopAudioRecording();
+          }
+        }, 1000);
+      }
+
+      function stopAudioRecording() {
+        if (!isRecording) return;
+        isRecording = false;
+        clearInterval(recordInterval);
+        recordBtn.classList.remove('is-recording');
+        recordBtnText.textContent = TRANSLATIONS[currentLang].step2_record_again;
+        waveformBars.classList.remove('recording');
+
+        recordedAudioBlob = true;
+        audioPlayBtn.style.display = 'inline-flex';
+      }
+
+      recordBtn.addEventListener('click', () => {
+        if (isRecording) {
+          stopAudioRecording();
+        } else {
+          startAudioRecording();
+        }
+      });
+
+      audioPlayBtn.addEventListener('click', () => {
+        try {
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(140, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.8);
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.8);
+        } catch (e) {}
+
+        const dict = TRANSLATIONS[currentLang];
+        audioPlayBtn.textContent = dict.step2_playing;
+        setTimeout(() => { audioPlayBtn.textContent = dict.step2_play; }, 1000);
+      });
+
+      function buildCalendarDates() {
+        dateCardsContainer.innerHTML = '';
+        const today = new Date();
+
+        const daysSK = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pia', 'So'];
+        const monthsSK = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
+        
+        const daysEN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        const days = currentLang === 'sk' ? daysSK : daysEN;
+        const months = currentLang === 'sk' ? monthsSK : monthsEN;
+
+        for (let i = 1; i <= 14; i++) {
+          const d = new Date(today);
+          d.setDate(today.getDate() + i);
+
+          const dayName = days[d.getDay()];
+          const dayNum = d.getDate();
+          const monthName = months[d.getMonth()];
+          const fullStr = `${dayName}, ${dayNum}. ${monthName}`;
+
+          const card = document.createElement('div');
+          card.className = `date-card ${i === 1 ? 'selected' : ''}`;
+          if (i === 1) selectedDateStr = fullStr;
+
+          card.innerHTML = `
+            <div class="date-day-name">${dayName}</div>
+            <div class="date-day-num">${dayNum}</div>
+            <div class="date-status">${monthName}</div>
+          `;
+
+          card.addEventListener('click', () => {
+            dateCardsContainer.querySelectorAll('.date-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedDateStr = fullStr;
+          });
+
+          dateCardsContainer.appendChild(card);
+        }
+      }
+
+      function buildTimeSlots() {
+        const slots = ['08:30', '10:00', '11:30', '13:30', '15:00', '16:30', '17:45'];
+        timeSlotsContainer.innerHTML = '';
+
+        slots.forEach((slot, idx) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `time-slot-btn ${idx === 1 ? 'selected' : ''}`;
+          btn.textContent = slot;
+
+          btn.addEventListener('click', () => {
+            timeSlotsContainer.querySelectorAll('.time-slot-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedTimeSlot = slot;
+          });
+
+          timeSlotsContainer.appendChild(btn);
+        });
+      }
+
+      mechanicCards.forEach(card => {
+        card.addEventListener('click', () => {
+          mechanicCards.forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          selectedMechanic = card.dataset.mech;
+        });
+      });
+
+      submitBookingBtn.addEventListener('click', () => {
+        const custName = document.getElementById('cust-name').value || 'Miroslav Horváth';
+        const custPhone = document.getElementById('cust-phone').value || '+421 948 123 456';
+        const custPlate = document.getElementById('cust-plate').value || 'BA-404EK';
+        const selectedSymptoms = Array.from(modalSymptomsContainer.querySelectorAll('.symptom-chip.selected')).map(c => c.textContent);
+
+        const bookingId = `JK-${Math.floor(100000 + Math.random() * 900000)}`;
+        const loc = currentSelectedPart[currentLang] || currentSelectedPart.sk;
+        const dict = TRANSLATIONS[currentLang];
+
+        const newBooking = {
+          id: bookingId,
+          partName: loc.name,
+          partCode: currentSelectedPart.code,
+          category: loc.category,
+          date: selectedDateStr,
+          time: selectedTimeSlot,
+          mechanic: selectedMechanic,
+          customer: custName,
+          phone: custPhone,
+          plate: custPlate,
+          symptoms: selectedSymptoms,
+          photosCount: uploadedPhotos.length,
+          hasAudio: !!recordedAudioBlob,
+          urgency: selectedSeverity,
+          price: currentSelectedPart.price
+        };
+
+        activeBookings.push(newBooking);
+        updateActiveBookingsUI();
+
+        const audioText = newBooking.hasAudio ? dict.receipt_audio_yes : dict.receipt_audio_no;
+        const mediaText = dict.receipt_media_val.replace('{photos}', newBooking.photosCount).replace('{audio}', audioText);
+
+        bookingReceiptDetails.innerHTML = `
+          <div class="ref-row"><span>${dict.receipt_ref}</span><strong>${bookingId}</strong></div>
+          <div class="ref-row"><span>${dict.receipt_comp}</span><strong>[${newBooking.partCode}] ${newBooking.partName}</strong></div>
+          <div class="ref-row"><span>${dict.receipt_slot}</span><strong>${newBooking.date} &bull; ${newBooking.time}</strong></div>
+          <div class="ref-row"><span>${dict.receipt_mech}</span><strong>${newBooking.mechanic}</strong></div>
+          <div class="ref-row"><span>${dict.receipt_plate}</span><strong>${newBooking.plate}</strong></div>
+          <div class="ref-row"><span>${dict.receipt_media}</span><strong>${mediaText}</strong></div>
+        `;
+
+        successScreen.classList.add('active');
+      });
+
+      finishBookingBtn.addEventListener('click', closeModal);
+
+      addCalBtn.addEventListener('click', () => {
+        alert(TRANSLATIONS[currentLang].cal_sync_msg);
+      });
+
+      function updateActiveBookingsUI() {
+        bookingsCountPill.textContent = activeBookings.length;
+        const dict = TRANSLATIONS[currentLang];
+
+        if (activeBookings.length === 0) {
+          drawerItemsList.innerHTML = `
+            <div style="text-align: center; color: var(--text-muted); margin-top: 40px; font-size: 0.9rem;">
+              ${dict.drawer_empty}
+            </div>
+          `;
+          return;
+        }
+
+        drawerItemsList.innerHTML = '';
+        activeBookings.forEach((b) => {
+          const item = document.createElement('div');
+          item.className = 'booked-item-card';
+          item.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-family:'Space Mono', monospace; font-size:0.75rem; color:var(--accent); font-weight:700;">#${b.id}</span>
+              <span style="font-size:0.72rem; background:rgba(0,230,118,0.15); color:var(--accent-green); padding:2px 8px; border-radius:100px; font-weight:600;">${dict.status_confirmed}</span>
+            </div>
+            <h4 style="font-size:0.92rem; font-weight:700; margin-bottom:4px;">[${b.partCode}] ${b.partName}</h4>
+            <div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:6px;">
+              📅 ${b.date} &bull; ⏰ ${b.time}
+            </div>
+            <div style="font-size:0.74rem; color:var(--text-muted);">
+              ${b.mechanic} | ${b.plate}
+            </div>
+          `;
+          drawerItemsList.appendChild(item);
+        });
+      }
+
+      activeBookingsBadge.addEventListener('click', () => {
+        bookingsDrawer.classList.add('open');
+      });
+
+      closeDrawerBtn.addEventListener('click', () => {
+        bookingsDrawer.classList.remove('open');
+      });
+
+      playPauseBtn.addEventListener('click', () => {
+        const trigger = ScrollTrigger.getById('sequence-scroll');
+        if (!trigger) return;
+
+        if (isAutoPlaying) {
+          if (autoPlayTween) autoPlayTween.pause();
+          isAutoPlaying = false;
+          playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
+        } else {
+          isAutoPlaying = true;
+          playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+          
+          const startScroll = trigger.start;
+          const endScroll = trigger.end;
+          const currentScroll = window.scrollY;
+
+          if (currentScroll >= endScroll - 10) {
+            window.scrollTo({ top: startScroll, behavior: 'instant' });
+          }
+
+          autoPlayTween = gsap.to(window, {
+            scrollTo: endScroll,
+            duration: 8,
+            ease: "power1.inOut",
+            onComplete: () => {
+              isAutoPlaying = false;
+              playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
+            }
+          });
+        }
+      });
+
+      resetScrollBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && !bookingModal.classList.contains('open')) {
+          e.preventDefault();
+          playPauseBtn.click();
+        }
+      });
+
+      preloadFrames();
+      resizeCanvas();
+    })();
+  </script>
+</body>
+</html>

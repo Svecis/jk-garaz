@@ -418,7 +418,7 @@
     .sequence-blend-vignette {
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse at 50% 50%, transparent 48%, rgba(9, 10, 12, 0.45) 75%, rgba(9, 10, 12, 0.98) 100%);
+      background: radial-gradient(ellipse at 50% 50%, transparent 35%, rgba(9, 10, 12, 0.45) 60%, rgba(9, 10, 12, 0.92) 85%, #090a0c 100%);
       pointer-events: none;
       z-index: 10;
     }
@@ -428,8 +428,8 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 160px;
-      background: linear-gradient(180deg, #090a0c 0%, rgba(9, 10, 12, 0.82) 30%, rgba(9, 10, 12, 0) 100%);
+      height: 220px;
+      background: linear-gradient(180deg, #090a0c 0%, rgba(9, 10, 12, 0.9) 45%, transparent 100%);
       pointer-events: none;
       z-index: 11;
     }
@@ -439,8 +439,8 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: 180px;
-      background: linear-gradient(0deg, #090a0c 0%, rgba(9, 10, 12, 0.85) 35%, rgba(9, 10, 12, 0) 100%);
+      height: 220px;
+      background: linear-gradient(0deg, #090a0c 0%, rgba(9, 10, 12, 0.9) 45%, transparent 100%);
       pointer-events: none;
       z-index: 11;
     }
@@ -2847,7 +2847,8 @@
         offCanvas.width = cachedDw;
         offCanvas.height = cachedDh;
 
-        const f = 28;
+        // Široký zmäkčovací prechod na okraje snímky (plynulé vtieranie do tmavého pozadia bez ostrých hrán)
+        const f = Math.round(Math.min(cachedDw, cachedDh) * 0.18);
         cachedGradLeft = offCtx.createLinearGradient(0, 0, f, 0);
         cachedGradLeft.addColorStop(0, 'rgba(0,0,0,1)');
         cachedGradLeft.addColorStop(1, 'rgba(0,0,0,0)');
@@ -2885,26 +2886,26 @@
           }
         }
 
-        if (!img || !cachedBgGradient) return;
+        if (!img) return;
 
-        // 1. Podklad s predpočítaným gradientom (0 ms zdržanie, žiadne layout reflows)
-        ctx.fillStyle = cachedBgGradient;
-        ctx.fillRect(0, 0, cachedCw, cachedCh);
+        // 1. Čisté plátno splývajúce s tmavým pozadím
+        ctx.clearRect(0, 0, cachedCw, cachedCh);
 
         // 2. Vykreslenie snímky do offscreen canvasu
         offCtx.clearRect(0, 0, cachedDw, cachedDh);
         offCtx.drawImage(img, 0, 0, cachedDw, cachedDh);
 
-        // 3. Aplikácia predpočítaných zmäkčovacích prechodov na okraje
+        // 3. Aplikácia zmäkčovacích prechodov na všetky 4 strany
+        const f = Math.round(Math.min(cachedDw, cachedDh) * 0.18);
         offCtx.globalCompositeOperation = 'destination-out';
         offCtx.fillStyle = cachedGradLeft;
-        offCtx.fillRect(0, 0, 28, cachedDh);
+        offCtx.fillRect(0, 0, f, cachedDh);
         offCtx.fillStyle = cachedGradRight;
-        offCtx.fillRect(cachedDw - 28, 0, 28, cachedDh);
+        offCtx.fillRect(cachedDw - f, 0, f, cachedDh);
         offCtx.fillStyle = cachedGradTop;
-        offCtx.fillRect(0, 0, cachedDw, 28);
+        offCtx.fillRect(0, 0, cachedDw, f);
         offCtx.fillStyle = cachedGradBottom;
-        offCtx.fillRect(0, cachedDh - 28, cachedDw, 28);
+        offCtx.fillRect(0, cachedDh - f, cachedDw, f);
         offCtx.globalCompositeOperation = 'source-over';
 
         // 4. Bleskový prenos do hlavného plátna (hardware GPU blit)

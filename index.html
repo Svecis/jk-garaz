@@ -132,6 +132,31 @@
       padding: 2px 8px;
       border-radius: 100px;
     }
+    .admin-portal-link {
+      background: rgba(18, 22, 30, 0.85);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 8px 14px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s;
+    }
+    .admin-portal-link:hover {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--accent);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 229, 255, 0.3);
+    }
 
     /* PRELOADER SCREEN */
     #preloader {
@@ -262,7 +287,8 @@
       text-align: center;
       padding: 40px 20px;
       position: relative;
-      background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.04) 0%, transparent 70%);
+      background: radial-gradient(circle at 50% 35%, rgba(0, 229, 255, 0.08) 0%, transparent 65%),
+                  linear-gradient(180deg, #090a0c 0%, #090a0c 60%, rgba(9, 10, 12, 0.95) 85%, #090a0c 100%);
     }
 
     .brand-tag {
@@ -366,7 +392,7 @@
       position: relative;
       width: 100vw;
       height: 100vh;
-      background: #b5b7b9;
+      background: var(--bg-dark);
       overflow: hidden;
     }
 
@@ -378,6 +404,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      z-index: 1;
     }
 
     canvas#sequence-canvas {
@@ -385,6 +412,37 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
+    }
+
+    /* SEAMLESS BACKGROUND BLENDS (DARK HERO -> CANVAS -> DARK SPECS) */
+    .sequence-blend-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, transparent 48%, rgba(9, 10, 12, 0.45) 75%, rgba(9, 10, 12, 0.98) 100%);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .sequence-blend-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 160px;
+      background: linear-gradient(180deg, #090a0c 0%, rgba(9, 10, 12, 0.82) 30%, rgba(9, 10, 12, 0) 100%);
+      pointer-events: none;
+      z-index: 11;
+    }
+
+    .sequence-blend-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 180px;
+      background: linear-gradient(0deg, #090a0c 0%, rgba(9, 10, 12, 0.85) 35%, rgba(9, 10, 12, 0) 100%);
+      pointer-events: none;
+      z-index: 11;
     }
 
     /* =========================================================
@@ -406,68 +464,86 @@
       pointer-events: auto;
     }
 
-    /* Diagnostic Top Prompt Header */
-    .diagnostic-banner {
+    /* Interactive Hotspot Hint Callout on Pin (Statická, dokonale ostrá a stabilná) */
+    .hotspot-hint-callout {
       position: absolute;
-      top: 24px;
+      top: calc(100% + 14px);
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(14, 18, 25, 0.92);
-      border: 1px solid rgba(0, 229, 255, 0.35);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 229, 255, 0.2);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 12px 28px;
-      border-radius: 100px;
       display: flex;
       align-items: center;
-      gap: 16px;
-      z-index: 30;
-      color: #fff;
-      animation: bannerGlow 3s infinite alternate;
+      gap: 8px;
+      background: rgba(14, 18, 26, 0.95);
+      border: 1px solid var(--accent);
+      box-shadow: 0 0 22px rgba(0, 229, 255, 0.3), 0 8px 24px rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 6px 15px;
+      border-radius: 100px;
+      white-space: nowrap;
+      pointer-events: auto;
+      cursor: pointer;
+      z-index: 50;
+      transition: opacity 0.25s ease, visibility 0.25s ease, box-shadow 0.2s ease;
     }
 
-    @keyframes bannerGlow {
-      0% { border-color: rgba(0, 229, 255, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 10px rgba(0,229,255,0.1); }
-      100% { border-color: rgba(0, 229, 255, 0.7); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 25px rgba(0,229,255,0.35); }
+    /* Keď používateľ nabehne myšou na bod, nápoveda plynulo zmizne a zobrazí sa detailný tooltip */
+    .part-hotspot:hover .hotspot-hint-callout {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
     }
 
-    .diagnostic-pulse-icon {
-      width: 10px;
-      height: 10px;
+    .hotspot-hint-callout:hover {
+      box-shadow: 0 0 32px rgba(0, 229, 255, 0.55), 0 10px 32px rgba(0, 0, 0, 0.85);
+    }
+
+    .hotspot-hint-callout::after {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: transparent transparent var(--accent) transparent;
+    }
+
+    .hint-pulse-dot {
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: var(--accent);
-      box-shadow: 0 0 12px var(--accent);
-      animation: pulse 1.5s infinite;
+      box-shadow: 0 0 8px var(--accent);
+      flex-shrink: 0;
     }
 
-    .diagnostic-banner-text h4 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-
-    .diagnostic-banner-text p {
+    .hint-label {
       font-size: 0.78rem;
-      color: var(--text-secondary);
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.01em;
     }
 
     /* Quick Component Category Filter Bar */
     .part-category-bar {
       position: absolute;
-      top: 90px;
+      top: 20px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 6px;
+      flex-wrap: nowrap;
       justify-content: center;
-      background: rgba(10, 12, 16, 0.75);
-      padding: 6px;
+      background: rgba(10, 12, 16, 0.85);
+      padding: 4px 8px;
       border-radius: 100px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
       z-index: 30;
+      pointer-events: auto;
     }
 
     .cat-btn {
@@ -544,23 +620,24 @@
     /* Hotspot Hover Card Tooltip */
     .hotspot-tooltip {
       position: absolute;
-      bottom: calc(100% + 12px);
+      bottom: calc(100% + 14px);
       left: 50%;
-      transform: translateX(-50%) translateY(10px);
-      background: rgba(15, 18, 25, 0.95);
-      border: 1px solid rgba(0, 229, 255, 0.3);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 12px 18px;
+      transform: translateX(-50%) translateY(8px);
+      background: rgba(13, 16, 23, 0.96);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      padding: 14px 16px;
       border-radius: 14px;
-      width: 230px;
+      width: 250px;
       color: #fff;
       opacity: 0;
       pointer-events: none;
       visibility: hidden;
-      transition: all 0.25s ease;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
-      text-align: left;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(0, 229, 255, 0.15);
+      text-align: center;
+      z-index: 60;
     }
 
     .hotspot-tooltip::after {
@@ -569,9 +646,9 @@
       top: 100%;
       left: 50%;
       transform: translateX(-50%);
-      border-width: 6px;
+      border-width: 7px;
       border-style: solid;
-      border-color: rgba(15, 18, 25, 0.95) transparent transparent transparent;
+      border-color: rgba(13, 16, 23, 0.96) transparent transparent transparent;
     }
 
     .part-hotspot:hover .hotspot-tooltip {
@@ -581,29 +658,64 @@
     }
 
     .tooltip-category {
-      font-size: 0.65rem;
+      font-size: 0.68rem;
       font-family: 'Space Mono', monospace;
       color: var(--accent);
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 4px;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: block;
+      text-align: center;
     }
 
     .tooltip-title {
-      font-size: 0.88rem;
+      font-size: 0.94rem;
       font-weight: 700;
-      margin-bottom: 6px;
-      line-height: 1.25;
+      color: #fff;
+      line-height: 1.35;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+      text-align: center;
     }
 
-    .tooltip-action {
-      display: inline-flex;
+    .tooltip-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin-bottom: 10px;
+    }
+
+    .tooltip-btn {
+      display: flex;
       align-items: center;
-      gap: 4px;
-      font-size: 0.72rem;
-      color: var(--accent);
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 12px;
+      background: rgba(0, 229, 255, 0.08);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      border-radius: 8px;
+      color: #00e5ff;
+      font-size: 0.76rem;
       font-weight: 600;
-      text-decoration: underline;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .part-hotspot:hover .tooltip-btn {
+      background: rgba(0, 229, 255, 0.18);
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.3);
+      color: #fff;
+      border-color: #00e5ff;
+    }
+
+    .tooltip-btn svg {
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .part-hotspot:hover .tooltip-btn svg {
+      transform: translateX(3px);
     }
 
     /* =========================================================
@@ -1299,79 +1411,7 @@
       position: relative;
     }
 
-    /* HUD CONTROLS & STATUS */
-    .hud-controls {
-      position: absolute;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      background: rgba(15, 17, 21, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(20px);
-      padding: 8px 20px;
-      border-radius: 100px;
-      z-index: 20;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    }
 
-    .hud-frame-counter {
-      font-family: 'Space Mono', monospace;
-      font-size: 0.78rem;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .hud-frame-counter span {
-      color: var(--accent);
-      font-weight: 700;
-    }
-
-    .hud-divider {
-      width: 1px;
-      height: 16px;
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    .hud-scrubber-track {
-      width: 120px;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 999px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hud-scrubber-thumb {
-      height: 100%;
-      width: 0%;
-      background: var(--accent);
-      border-radius: 999px;
-      transition: width 0.05s linear;
-    }
-
-    .hud-btn {
-      background: transparent;
-      border: none;
-      color: #fff;
-      cursor: pointer;
-      font-size: 0.8rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 4px;
-      opacity: 0.7;
-      transition: opacity 0.2s, transform 0.15s;
-    }
-
-    .hud-btn:hover {
-      opacity: 1;
-      transform: scale(1.1);
-    }
 
     /* POST SEQUENCE / SPECIFICATION SECTION */
     .specs-section {
@@ -1490,13 +1530,10 @@
         padding: 6px 12px;
         font-size: 0.75rem;
       }
-      .diagnostic-banner {
-        width: 92%;
-        padding: 10px 18px;
-      }
       .part-category-bar {
         width: 95%;
-        top: 80px;
+        top: 14px;
+        gap: 4px;
       }
       .media-grid, .mechanic-grid, .contact-inputs-grid {
         grid-template-columns: 1fr;
@@ -1509,10 +1546,6 @@
       }
       .modal-header, .modal-footer {
         padding: 16px 20px;
-      }
-      .hud-controls {
-        width: 92%;
-        justify-content: space-between;
       }
     }
   </style>
@@ -1532,6 +1565,15 @@
       <span data-i18n="nav_bookings">Rezervácie</span>
       <span id="bookings-count-pill" class="booking-count-pill">0</span>
     </div>
+
+    <!-- Admin Portal Button -->
+    <a href="admin.html" class="admin-portal-link" title="Administrátorský portál" target="_blank">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <span>Admin</span>
+    </a>
 
     <!-- Language Switcher Box -->
     <div class="lang-switcher-box" id="lang-switcher">
@@ -1585,17 +1627,13 @@
       <canvas id="sequence-canvas"></canvas>
     </div>
 
+    <!-- SEAMLESS BACKGROUND BLEND OVERLAYS -->
+    <div class="sequence-blend-top"></div>
+    <div class="sequence-blend-bottom"></div>
+    <div class="sequence-blend-vignette"></div>
+
     <!-- INTERACTIVE DIAGNOSTIC HOTSPOTS LAYER (ACTIVATED ON EXPLODED VIEW) -->
     <div id="diagnostic-layer">
-      <!-- Top Guidance Banner -->
-      <div class="diagnostic-banner">
-        <div class="diagnostic-pulse-icon"></div>
-        <div class="diagnostic-banner-text">
-          <h4 data-i18n="diag_banner_title">Interaktívny diagnostický režim aktívny</h4>
-          <p data-i18n="diag_banner_desc">Kliknite na komponent [B, E, I, S, X, W] pre nahlásenie závady a rezerváciu termínu</p>
-        </div>
-      </div>
-
       <!-- Category Filter Pills -->
       <div class="part-category-bar" id="category-filter-bar">
         <!-- Injected dynamically by JS -->
@@ -1605,32 +1643,6 @@
       <div id="hotspots-container"></div>
     </div>
 
-    <!-- HUD BOTTOM BAR -->
-    <div class="hud-controls">
-      <button class="hud-btn" id="play-pause-btn" title="Auto-play / Pauza">
-        <svg id="play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <polygon points="5 3 19 12 5 21 5 3"></polygon>
-        </svg>
-      </button>
-
-      <div class="hud-divider"></div>
-
-      <div class="hud-frame-counter">
-        <span data-i18n="hud_frame_prefix">SNÍMKA</span> <span id="current-frame-num">001</span> / 240
-      </div>
-
-      <div class="hud-scrubber-track">
-        <div class="hud-scrubber-thumb" id="hud-progress"></div>
-      </div>
-
-      <div class="hud-divider"></div>
-
-      <button class="hud-btn" id="reset-scroll-btn" title="Naspäť na začiatok">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M18 15l-6-6-6 6"/>
-        </svg>
-      </button>
-    </div>
   </section>
 
   <!-- POST-SEQUENCE SPECIFICATION / SHOWCASE -->
@@ -1874,19 +1886,19 @@
           <div class="contact-inputs-grid">
             <div class="form-group">
               <label class="form-label" for="cust-name" data-i18n="step4_name_label">Meno a priezvisko *</label>
-              <input type="text" id="cust-name" class="input-field" placeholder="Miroslav Horváth" value="Miroslav Horváth" required />
+              <input type="text" id="cust-name" class="input-field" placeholder="Meno a priezvisko" required autocomplete="name" />
             </div>
             <div class="form-group">
               <label class="form-label" for="cust-phone" data-i18n="step4_phone_label">Telefón (pre SMS notifikácie) *</label>
-              <input type="tel" id="cust-phone" class="input-field" placeholder="+421 900 000 000" value="+421 948 123 456" required />
+              <input type="tel" id="cust-phone" class="input-field" placeholder="+421 9XX XXX XXX" required autocomplete="tel" />
             </div>
             <div class="form-group">
               <label class="form-label" for="cust-email" data-i18n="step4_email_label">E-mailová adresa</label>
-              <input type="email" id="cust-email" class="input-field" placeholder="miroslav@automek.sk" value="miroslav@automek.sk" />
+              <input type="email" id="cust-email" class="input-field" placeholder="meno@domena.sk" autocomplete="email" />
             </div>
             <div class="form-group">
               <label class="form-label" for="cust-plate" data-i18n="step4_plate_label">EČV / Model vozidla</label>
-              <input type="text" id="cust-plate" class="input-field" placeholder="BA-892XX (Audi A4)" value="BA-404EK (Audi A4)" />
+              <input type="text" id="cust-plate" class="input-field" placeholder="EČV / Model (napr. BA-123AB)" />
             </div>
           </div>
         </div>
@@ -1957,7 +1969,8 @@
           cat_s: "🔧 [S] Podvozok",
           cat_x: "💨 [X] Výfuk",
           cat_w: "🔘 [W] Kolesá",
-          tooltip_report: "Nahlásiť závadu & Rezervovať →",
+          tooltip_report: "Nahlásiť závadu & rezervovať",
+          hotspot_hint: "Kliknite pre nahlásenie závady & rezerváciu",
           hud_frame_prefix: "SNÍMKA",
           specs_title: "Servisná & Diagnostická sieť",
           specs_subtitle: "Objednajte si precízny servis, diagnostiku a opravy s možnosťou audio a foto nahlasovania závad.",
@@ -2045,7 +2058,8 @@
           cat_s: "🔧 [S] Suspension",
           cat_x: "💨 [X] Exhaust",
           cat_w: "🔘 [W] Wheels",
-          tooltip_report: "Report Issue & Book →",
+          tooltip_report: "Report issue & book",
+          hotspot_hint: "Click component to report an issue & book",
           hud_frame_prefix: "FRAME",
           specs_title: "Mechanic Reservation Network",
           specs_subtitle: "Book precision certified maintenance, diagnostics, and repairs with real-time audio and photographic symptom reporting.",
@@ -2156,7 +2170,7 @@
           id: 'part-roof',
           code: 'B',
           pctX: 0.50,
-          pctY: 0.10,
+          pctY: 0.115,
           price: '€35.00',
           sk: {
             name: 'Panoramatická strecha & Akustické sklá',
@@ -2507,11 +2521,6 @@
       const loadStatus = document.getElementById('load-status');
       const loadPercent = document.getElementById('load-percent');
       const skipBtn = document.getElementById('skip-load-btn');
-      const currentFrameDisplay = document.getElementById('current-frame-num');
-      const hudProgress = document.getElementById('hud-progress');
-      const playPauseBtn = document.getElementById('play-pause-btn');
-      const playIcon = document.getElementById('play-icon');
-      const resetScrollBtn = document.getElementById('reset-scroll-btn');
       const heroJumpBtn = document.getElementById('hero-jump-btn');
 
       // Top Nav & Language Switcher
@@ -2559,8 +2568,6 @@
       const images = [];
       let loadedImagesCount = 0;
       let isPreloaded = false;
-      let autoPlayTween = null;
-      let isAutoPlaying = false;
       let currentSelectedPart = CAR_PARTS_DATA[0];
       let selectedSeverity = 'minor';
       let selectedDateStr = '';
@@ -2568,11 +2575,48 @@
       let selectedMechanic = 'Markus Vance';
       let uploadedPhotos = [];
       let recordedAudioBlob = null;
+      let recordedAudioUrl = null;
+      let mediaRecorder = null;
+      let audioStream = null;
+      let audioChunks = [];
+      let currentAudioPlayer = null;
+      let audioVisualizerFrame = null;
       let isRecording = false;
+      let offCanvas = null;
+      let offCtx = null;
       let recordInterval = null;
       let recordSeconds = 0;
       let activeBookings = [];
+      try {
+        const stored = localStorage.getItem('automek_bookings');
+        if (stored) activeBookings = JSON.parse(stored);
+      } catch (e) {
+        activeBookings = [];
+      }
+
+      function persistBookings() {
+        try {
+          localStorage.setItem('automek_bookings', JSON.stringify(activeBookings));
+        } catch (e) {
+          console.warn('LocalStorage save error:', e);
+        }
+      }
+
       let currentCategoryFilter = 'all';
+      let isDiagnosticActive = false;
+
+      // Cachované rozmery a gradienty pre elimináciu layout thrashingu a plynulé scrollovanie
+      let cachedCw = 0;
+      let cachedCh = 0;
+      let cachedDw = 0;
+      let cachedDh = 0;
+      let cachedOffsetX = 0;
+      let cachedOffsetY = 0;
+      let cachedBgGradient = null;
+      let cachedGradLeft = null;
+      let cachedGradRight = null;
+      let cachedGradTop = null;
+      let cachedGradBottom = null;
 
       // Calculated Image Rect within Canvas
       let currentImageRect = { x: 0, y: 0, width: 0, height: 0 };
@@ -2633,6 +2677,30 @@
         });
       });
 
+      function applyCategoryFilter(code) {
+        currentCategoryFilter = code;
+
+        // 1. Zvýraznenie aktívneho tlačidla v lište
+        if (categoryFilterBar) {
+          categoryFilterBar.querySelectorAll('.cat-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.filter === code);
+          });
+        }
+
+        // 2. Filtrovanie bodov na aute a jemné pulzné zvýraznenie
+        const hotspots = hotspotsContainer.querySelectorAll('.part-hotspot');
+        hotspots.forEach(hs => {
+          const isMatch = (code === 'all' || hs.dataset.code === code);
+          hs.style.display = isMatch ? 'block' : 'none';
+          if (isMatch && code !== 'all') {
+            hs.style.transform = 'translate(-50%, -50%) scale(1.18)';
+            setTimeout(() => {
+              hs.style.transform = '';
+            }, 300);
+          }
+        });
+      }
+
       function renderCategoryFilterBar() {
         const dict = TRANSLATIONS[currentLang];
         categoryFilterBar.innerHTML = `
@@ -2647,14 +2715,7 @@
 
         categoryFilterBar.querySelectorAll('.cat-btn').forEach(btn => {
           btn.addEventListener('click', () => {
-            categoryFilterBar.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentCategoryFilter = btn.dataset.filter;
-
-            const hotspots = hotspotsContainer.querySelectorAll('.part-hotspot');
-            hotspots.forEach(hs => {
-              hs.style.display = (currentCategoryFilter === 'all' || hs.dataset.code === currentCategoryFilter) ? 'block' : 'none';
-            });
+            applyCategoryFilter(btn.dataset.filter);
           });
         });
       }
@@ -2665,7 +2726,24 @@
       }
 
       function preloadFrames() {
-        for (let i = 0; i < FRAME_COUNT; i++) {
+        // Okamžité načítanie úvodnej snímky (Frame 0) pre okamžité zobrazenie auta bez čakania
+        const firstImg = new Image();
+        firstImg.src = getFrameUrl(0);
+        firstImg.onload = () => {
+          images[0] = firstImg;
+          loadedImagesCount++;
+          if (!isPreloaded) {
+            render();
+          }
+          updateProgress();
+        };
+        firstImg.onerror = () => {
+          loadedImagesCount++;
+          updateProgress();
+        };
+
+        // Asynchrónne načítanie zvyšných snímok (1 - 239)
+        for (let i = 1; i < FRAME_COUNT; i++) {
           const img = new Image();
           img.src = getFrameUrl(i);
 
@@ -2673,10 +2751,6 @@
             loadedImagesCount++;
             images[i] = img;
             updateProgress();
-
-            if (i === 0 && !isPreloaded) {
-              render();
-            }
 
             if (loadedImagesCount === FRAME_COUNT) {
               finishPreloading();
@@ -2722,10 +2796,70 @@
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
         const rect = canvas.getBoundingClientRect();
         
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
+        cachedCw = rect.width;
+        cachedCh = rect.height;
+
+        canvas.width = cachedCw * dpr;
+        canvas.height = cachedCh * dpr;
         
         ctx.scale(dpr, dpr);
+
+        // Prepočítanie rozmerov modelu len pri zmene veľkosti okna (nie pri každom scrolle!)
+        const imgAspect = 16 / 9;
+        const canvasAspect = cachedCw / cachedCh;
+
+        // Mierne priblíženie (scale: 0.83) pre lepšiu viditeľnosť detailov s bezpečným odstupom
+        const scale = cachedCw >= 768 ? 0.83 : 0.92;
+        let drawWidth, drawHeight;
+
+        if (canvasAspect > imgAspect) {
+          drawHeight = cachedCh * scale;
+          drawWidth = drawHeight * imgAspect;
+        } else {
+          drawWidth = cachedCw * scale;
+          drawHeight = drawWidth / imgAspect;
+        }
+
+        cachedDw = Math.round(drawWidth);
+        cachedDh = Math.round(drawHeight);
+        cachedOffsetX = Math.round((cachedCw - drawWidth) / 2);
+        cachedOffsetY = Math.round((cachedCh - drawHeight) / 2 + (cachedCw >= 768 ? 26 : 10));
+
+        currentImageRect = { x: cachedOffsetX, y: cachedOffsetY, width: cachedDw, height: cachedDh };
+
+        // Predpočítaný vertikálny gradient plátna (nulová réžia pri scrollovaní)
+        cachedBgGradient = ctx.createLinearGradient(0, cachedOffsetY, 0, cachedOffsetY + cachedDh);
+        cachedBgGradient.addColorStop(0, '#7c8082');
+        cachedBgGradient.addColorStop(0.2, '#94989a');
+        cachedBgGradient.addColorStop(0.5, '#a3a7a9');
+        cachedBgGradient.addColorStop(0.8, '#c2c6c8');
+        cachedBgGradient.addColorStop(1, '#babec0');
+
+        // Predpripravený offscreen canvas a gradienty na zjemnenie okrajov (feathering)
+        if (!offCanvas) {
+          offCanvas = document.createElement('canvas');
+          offCtx = offCanvas.getContext('2d');
+        }
+        offCanvas.width = cachedDw;
+        offCanvas.height = cachedDh;
+
+        const f = 28;
+        cachedGradLeft = offCtx.createLinearGradient(0, 0, f, 0);
+        cachedGradLeft.addColorStop(0, 'rgba(0,0,0,1)');
+        cachedGradLeft.addColorStop(1, 'rgba(0,0,0,0)');
+
+        cachedGradRight = offCtx.createLinearGradient(cachedDw, 0, cachedDw - f, 0);
+        cachedGradRight.addColorStop(0, 'rgba(0,0,0,1)');
+        cachedGradRight.addColorStop(1, 'rgba(0,0,0,0)');
+
+        cachedGradTop = offCtx.createLinearGradient(0, 0, 0, f);
+        cachedGradTop.addColorStop(0, 'rgba(0,0,0,1)');
+        cachedGradTop.addColorStop(1, 'rgba(0,0,0,0)');
+
+        cachedGradBottom = offCtx.createLinearGradient(0, cachedDh, 0, cachedDh - f);
+        cachedGradBottom.addColorStop(0, 'rgba(0,0,0,1)');
+        cachedGradBottom.addColorStop(1, 'rgba(0,0,0,0)');
+
         render();
         repositionHotspots();
       }
@@ -2747,39 +2881,30 @@
           }
         }
 
-        if (!img) return;
+        if (!img || !cachedBgGradient) return;
 
-        const cw = canvas.getBoundingClientRect().width;
-        const ch = canvas.getBoundingClientRect().height;
+        // 1. Podklad s predpočítaným gradientom (0 ms zdržanie, žiadne layout reflows)
+        ctx.fillStyle = cachedBgGradient;
+        ctx.fillRect(0, 0, cachedCw, cachedCh);
 
-        ctx.fillStyle = '#b5b7b9';
-        ctx.fillRect(0, 0, cw, ch);
+        // 2. Vykreslenie snímky do offscreen canvasu
+        offCtx.clearRect(0, 0, cachedDw, cachedDh);
+        offCtx.drawImage(img, 0, 0, cachedDw, cachedDh);
 
-        const imgAspect = img.width / img.height;
-        const canvasAspect = cw / ch;
+        // 3. Aplikácia predpočítaných zmäkčovacích prechodov na okraje
+        offCtx.globalCompositeOperation = 'destination-out';
+        offCtx.fillStyle = cachedGradLeft;
+        offCtx.fillRect(0, 0, 28, cachedDh);
+        offCtx.fillStyle = cachedGradRight;
+        offCtx.fillRect(cachedDw - 28, 0, 28, cachedDh);
+        offCtx.fillStyle = cachedGradTop;
+        offCtx.fillRect(0, 0, cachedDw, 28);
+        offCtx.fillStyle = cachedGradBottom;
+        offCtx.fillRect(0, cachedDh - 28, cachedDw, 28);
+        offCtx.globalCompositeOperation = 'source-over';
 
-        let drawWidth, drawHeight, offsetX, offsetY;
-
-        if (canvasAspect > imgAspect) {
-          drawHeight = ch * 0.95;
-          drawWidth = drawHeight * imgAspect;
-        } else {
-          drawWidth = cw * 0.95;
-          drawHeight = drawWidth / imgAspect;
-        }
-
-        offsetX = (cw - drawWidth) / 2;
-        offsetY = (ch - drawHeight) / 2;
-
-        currentImageRect = { x: offsetX, y: offsetY, width: drawWidth, height: drawHeight };
-
-        ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-
-        // Update HUD
-        const currentNum = String(frameIndex + 1).padStart(3, '0');
-        currentFrameDisplay.textContent = currentNum;
-        const progressPct = (frameIndex / (FRAME_COUNT - 1)) * 100;
-        hudProgress.style.width = `${progressPct}%`;
+        // 4. Bleskový prenos do hlavného plátna (hardware GPU blit)
+        ctx.drawImage(offCanvas, cachedOffsetX, cachedOffsetY);
       }
 
       function initScrollTrigger() {
@@ -2788,9 +2913,9 @@
             id: "sequence-scroll",
             trigger: "#sequence-container",
             start: "top top",
-            end: "+=3800",
+            end: "+=4600",
             pin: true,
-            scrub: 0.5,
+            scrub: 0.8,
             anticipatePin: 1,
             onUpdate: (self) => {
               updateDiagnosticState(self.progress);
@@ -2808,11 +2933,14 @@
       }
 
       function updateDiagnosticState(progress) {
-        if (progress >= 0.85) {
-          diagnosticLayer.classList.add('active');
-          repositionHotspots();
-        } else {
-          diagnosticLayer.classList.remove('active');
+        const shouldBeActive = progress >= 0.85;
+        // Odstránenie zbytočného nastavovania štýlov DOM elementov na každom ticku scrollu
+        if (shouldBeActive !== isDiagnosticActive) {
+          isDiagnosticActive = shouldBeActive;
+          diagnosticLayer.classList.toggle('active', isDiagnosticActive);
+          if (isDiagnosticActive) {
+            repositionHotspots();
+          }
         }
       }
 
@@ -2834,17 +2962,33 @@
             el.style.display = 'none';
           }
 
+          const isHintPin = part.id === 'part-bumper';
+          const hintHtml = isHintPin ? `
+            <div class="hotspot-hint-callout" title="${dict.tooltip_report}">
+              <span class="hint-pulse-dot"></span>
+              <span class="hint-label">${dict.hotspot_hint}</span>
+            </div>
+          ` : '';
+
           el.innerHTML = `
+            ${hintHtml}
             <div class="hotspot-badge">${part.code}</div>
             <div class="hotspot-tooltip">
               <div class="tooltip-category">${loc.category}</div>
               <div class="tooltip-title">${loc.name}</div>
-              <div class="tooltip-action">${dict.tooltip_report}</div>
+              <div class="tooltip-divider"></div>
+              <div class="tooltip-btn">
+                <span>${dict.tooltip_report}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </div>
             </div>
           `;
 
           el.addEventListener('click', (e) => {
             e.stopPropagation();
+            applyCategoryFilter(part.code);
             openBookingModal(part);
           });
 
@@ -2871,14 +3015,14 @@
         });
       }
 
-      // Jump straight to exploded view from Hero CTA
+      // Jump straight to exploded view from Hero CTA (Smooth 3.2s cinematic glide)
       heroJumpBtn.addEventListener('click', () => {
         const trigger = ScrollTrigger.getById('sequence-scroll');
         if (trigger) {
           gsap.to(window, {
             scrollTo: trigger.end - 50,
-            duration: 1.6,
-            ease: "power2.inOut"
+            duration: 3.2,
+            ease: "power1.inOut"
           });
         }
       });
@@ -2891,6 +3035,10 @@
         updateModalLanguage();
 
         problemDescInput.value = '';
+        document.getElementById('cust-name').value = '';
+        document.getElementById('cust-phone').value = '';
+        document.getElementById('cust-email').value = '';
+        document.getElementById('cust-plate').value = '';
         uploadedPhotos = [];
         photoPreviews.innerHTML = '';
         resetAudioRecorder();
@@ -2922,6 +3070,7 @@
       function closeModal() {
         bookingModal.classList.remove('open');
         stopAudioRecording();
+        applyCategoryFilter('all');
       }
 
       modalCloseBtn.addEventListener('click', closeModal);
@@ -2955,15 +3104,82 @@
 
       function resetAudioRecorder() {
         stopAudioRecording();
+        if (currentAudioPlayer) {
+          currentAudioPlayer.pause();
+          currentAudioPlayer = null;
+        }
+        if (recordedAudioUrl) {
+          URL.revokeObjectURL(recordedAudioUrl);
+          recordedAudioUrl = null;
+        }
         recordedAudioBlob = null;
         recordTimer.textContent = '00:00';
         recordBtn.classList.remove('is-recording');
         recordBtnText.textContent = TRANSLATIONS[currentLang].step2_record_start;
         waveformBars.classList.remove('recording');
         audioPlayBtn.style.display = 'none';
+        audioPlayBtn.textContent = TRANSLATIONS[currentLang].step2_play;
+        const bars = waveformBars.querySelectorAll('.wave-bar');
+        bars.forEach(b => { b.style.height = ''; });
       }
 
-      function startAudioRecording() {
+      async function startAudioRecording() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          alert(currentLang === 'sk' 
+            ? 'Váš prehliadač nepodporuje priame nahrávanie zvuku cez mikrofón.' 
+            : 'Your browser does not support microphone recording.');
+          return;
+        }
+
+        try {
+          audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (err) {
+          console.warn('Microphone access denied:', err);
+          alert(currentLang === 'sk'
+            ? 'Prístup k mikrofónu bol zamietnutý. Povoľte prosím prístup k mikrofónu v prehliadači.'
+            : 'Microphone access was denied. Please allow microphone permissions in your browser.');
+          return;
+        }
+
+        audioChunks = [];
+        let options = {};
+        if (typeof MediaRecorder !== 'undefined') {
+          if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+            options = { mimeType: 'audio/webm;codecs=opus' };
+          } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+            options = { mimeType: 'audio/mp4' };
+          } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+            options = { mimeType: 'audio/ogg' };
+          }
+        }
+
+        try {
+          mediaRecorder = new MediaRecorder(audioStream, options);
+        } catch (e) {
+          mediaRecorder = new MediaRecorder(audioStream);
+        }
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data && event.data.size > 0) {
+            audioChunks.push(event.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          if (audioChunks.length > 0) {
+            recordedAudioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+            if (recordedAudioUrl) {
+              URL.revokeObjectURL(recordedAudioUrl);
+            }
+            recordedAudioUrl = URL.createObjectURL(recordedAudioBlob);
+            audioPlayBtn.style.display = 'inline-flex';
+            audioPlayBtn.textContent = TRANSLATIONS[currentLang].step2_play;
+          }
+        };
+
+        setupAudioVisualizer(audioStream);
+
+        mediaRecorder.start(100);
         isRecording = true;
         recordSeconds = 0;
         recordBtn.classList.add('is-recording');
@@ -2976,22 +3192,69 @@
           const mins = String(Math.floor(recordSeconds / 60)).padStart(2, '0');
           const secs = String(recordSeconds % 60).padStart(2, '0');
           recordTimer.textContent = `${mins}:${secs}`;
-          if (recordSeconds >= 30) {
+          if (recordSeconds >= 60) {
             stopAudioRecording();
           }
         }, 1000);
       }
 
+      function setupAudioVisualizer(stream) {
+        try {
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const source = audioCtx.createMediaStreamSource(stream);
+          const analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 64;
+          source.connect(analyser);
+
+          const dataArray = new Uint8Array(analyser.frequencyBinCount);
+          const bars = waveformBars.querySelectorAll('.wave-bar');
+
+          function drawBars() {
+            if (!isRecording) return;
+            audioVisualizerFrame = requestAnimationFrame(drawBars);
+            analyser.getByteFrequencyData(dataArray);
+
+            bars.forEach((bar, index) => {
+              const val = dataArray[index % dataArray.length] || 0;
+              const heightPercent = Math.max(12, Math.min(100, (val / 200) * 100));
+              bar.style.height = `${heightPercent}%`;
+            });
+          }
+          drawBars();
+        } catch (e) {
+          console.warn('AudioContext visualizer error:', e);
+        }
+      }
+
       function stopAudioRecording() {
         if (!isRecording) return;
         isRecording = false;
-        clearInterval(recordInterval);
+
+        if (recordInterval) {
+          clearInterval(recordInterval);
+          recordInterval = null;
+        }
+
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+
+        if (audioStream) {
+          audioStream.getTracks().forEach(track => track.stop());
+          audioStream = null;
+        }
+
+        if (audioVisualizerFrame) {
+          cancelAnimationFrame(audioVisualizerFrame);
+          audioVisualizerFrame = null;
+        }
+
         recordBtn.classList.remove('is-recording');
         recordBtnText.textContent = TRANSLATIONS[currentLang].step2_record_again;
         waveformBars.classList.remove('recording');
 
-        recordedAudioBlob = true;
-        audioPlayBtn.style.display = 'inline-flex';
+        const bars = waveformBars.querySelectorAll('.wave-bar');
+        bars.forEach(b => { b.style.height = ''; });
       }
 
       recordBtn.addEventListener('click', () => {
@@ -3003,24 +3266,32 @@
       });
 
       audioPlayBtn.addEventListener('click', () => {
-        try {
-          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(140, audioCtx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.8);
-          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.8);
-        } catch (e) {}
+        if (!recordedAudioUrl) return;
 
-        const dict = TRANSLATIONS[currentLang];
-        audioPlayBtn.textContent = dict.step2_playing;
-        setTimeout(() => { audioPlayBtn.textContent = dict.step2_play; }, 1000);
+        if (currentAudioPlayer && !currentAudioPlayer.paused) {
+          currentAudioPlayer.pause();
+          currentAudioPlayer.currentTime = 0;
+          audioPlayBtn.textContent = TRANSLATIONS[currentLang].step2_play;
+          waveformBars.classList.remove('recording');
+          return;
+        }
+
+        if (!currentAudioPlayer) {
+          currentAudioPlayer = new Audio();
+        }
+
+        currentAudioPlayer.src = recordedAudioUrl;
+        currentAudioPlayer.play().then(() => {
+          audioPlayBtn.textContent = TRANSLATIONS[currentLang].step2_playing;
+          waveformBars.classList.add('recording');
+        }).catch(err => {
+          console.error('Audio playback error:', err);
+        });
+
+        currentAudioPlayer.onended = () => {
+          audioPlayBtn.textContent = TRANSLATIONS[currentLang].step2_play;
+          waveformBars.classList.remove('recording');
+        };
       });
 
       function buildCalendarDates() {
@@ -3093,12 +3364,56 @@
         });
       });
 
-      submitBookingBtn.addEventListener('click', () => {
-        const custName = document.getElementById('cust-name').value || 'Miroslav Horváth';
-        const custPhone = document.getElementById('cust-phone').value || '+421 948 123 456';
-        const custPlate = document.getElementById('cust-plate').value || 'BA-404EK';
-        const selectedSymptoms = Array.from(modalSymptomsContainer.querySelectorAll('.symptom-chip.selected')).map(c => c.textContent);
+      // Bezpečnostná funkcia: Ochrana pred XSS útokmi pri vkladaní údajov do DOM
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
 
+      // Ochrana súkromia: Maskovanie telefónneho čísla pre verejné zobrazenie na zdieľaných zariadeniach
+      function maskPhone(p) {
+        if (!p || p.length < 6) return '••••••';
+        const clean = p.replace(/\s+/g, '');
+        return clean.slice(0, 4) + ' ••• ••• ' + clean.slice(-2);
+      }
+
+      submitBookingBtn.addEventListener('click', () => {
+        const nameInput = document.getElementById('cust-name');
+        const phoneInput = document.getElementById('cust-phone');
+        const emailInput = document.getElementById('cust-email');
+        const plateInput = document.getElementById('cust-plate');
+
+        const custName = nameInput.value.trim();
+        const custPhone = phoneInput.value.trim();
+        const custEmail = emailInput.value.trim();
+        const custPlate = plateInput.value.trim();
+
+        // Prísna validácia údajov - žiadne anonymné ani podvrhnuté predvolené osoby
+        let hasError = false;
+        if (!custName || custName.length < 2) {
+          nameInput.style.borderColor = '#ff5252';
+          nameInput.focus();
+          hasError = true;
+        } else {
+          nameInput.style.borderColor = '';
+        }
+
+        if (!custPhone || custPhone.length < 9) {
+          phoneInput.style.borderColor = '#ff5252';
+          if (!hasError) phoneInput.focus();
+          hasError = true;
+        } else {
+          phoneInput.style.borderColor = '';
+        }
+
+        if (hasError) return;
+
+        const selectedSymptoms = Array.from(modalSymptomsContainer.querySelectorAll('.symptom-chip.selected')).map(c => c.textContent);
         const bookingId = `JK-${Math.floor(100000 + Math.random() * 900000)}`;
         const loc = currentSelectedPart[currentLang] || currentSelectedPart.sk;
         const dict = TRANSLATIONS[currentLang];
@@ -3113,30 +3428,69 @@
           mechanic: selectedMechanic,
           customer: custName,
           phone: custPhone,
-          plate: custPlate,
+          email: custEmail || 'Nezadaný',
+          plate: custPlate || 'Nezadané',
           symptoms: selectedSymptoms,
+          problemDesc: problemDescInput.value.trim(),
           photosCount: uploadedPhotos.length,
+          photos: uploadedPhotos.slice(0, 4),
           hasAudio: !!recordedAudioBlob,
+          audioData: null,
           urgency: selectedSeverity,
-          price: currentSelectedPart.price
+          price: currentSelectedPart.price,
+          status: 'pending',
+          createdAt: new Date().toISOString()
         };
 
-        activeBookings.push(newBooking);
-        updateActiveBookingsUI();
+        const saveAndRenderBooking = () => {
+          activeBookings.unshift(newBooking);
+          persistBookings();
+          updateActiveBookingsUI();
+
+          // Automatické odoslanie emailového upozornenia na server
+          try {
+            fetch('/api/send-notification', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(newBooking)
+            }).then(r => r.json()).then(data => {
+              console.log('Email notification response:', data);
+            }).catch(err => {
+              console.warn('Email notification fetch failed:', err);
+            });
+          } catch(e) {}
+        };
+
+        if (recordedAudioBlob) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            newBooking.audioData = reader.result;
+            saveAndRenderBooking();
+          };
+          reader.readAsDataURL(recordedAudioBlob);
+        } else {
+          saveAndRenderBooking();
+        }
 
         const audioText = newBooking.hasAudio ? dict.receipt_audio_yes : dict.receipt_audio_no;
         const mediaText = dict.receipt_media_val.replace('{photos}', newBooking.photosCount).replace('{audio}', audioText);
 
         bookingReceiptDetails.innerHTML = `
           <div class="ref-row"><span>${dict.receipt_ref}</span><strong>${bookingId}</strong></div>
-          <div class="ref-row"><span>${dict.receipt_comp}</span><strong>[${newBooking.partCode}] ${newBooking.partName}</strong></div>
+          <div class="ref-row"><span>${dict.receipt_comp}</span><strong>[${newBooking.partCode}] ${escapeHtml(newBooking.partName)}</strong></div>
           <div class="ref-row"><span>${dict.receipt_slot}</span><strong>${newBooking.date} &bull; ${newBooking.time}</strong></div>
-          <div class="ref-row"><span>${dict.receipt_mech}</span><strong>${newBooking.mechanic}</strong></div>
-          <div class="ref-row"><span>${dict.receipt_plate}</span><strong>${newBooking.plate}</strong></div>
+          <div class="ref-row"><span>${dict.receipt_mech}</span><strong>${escapeHtml(newBooking.mechanic)}</strong></div>
+          <div class="ref-row"><span>${dict.receipt_plate}</span><strong>${escapeHtml(newBooking.plate)}</strong></div>
           <div class="ref-row"><span>${dict.receipt_media}</span><strong>${mediaText}</strong></div>
         `;
 
         successScreen.classList.add('active');
+
+        // Okamžité vymazanie osobných údajov z formulára, aby neostali visieť v pamäti prehliadača
+        nameInput.value = '';
+        phoneInput.value = '';
+        emailInput.value = '';
+        plateInput.value = '';
       });
 
       finishBookingBtn.addEventListener('click', closeModal);
@@ -3154,6 +3508,9 @@
             <div style="text-align: center; color: var(--text-muted); margin-top: 40px; font-size: 0.9rem;">
               ${dict.drawer_empty}
             </div>
+            <a href="admin.html" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:6px; margin-top:24px; width:100%; padding:10px 14px; background:rgba(0,229,255,0.08); border:1px dashed rgba(0,229,255,0.35); color:var(--accent); text-decoration:none; border-radius:8px; font-size:0.8rem; font-weight:600; text-align:center;">
+              ⚙️ Správa všetkých rezervácií (Admin) ↗
+            </a>
           `;
           return;
         }
@@ -3167,16 +3524,35 @@
               <span style="font-family:'Space Mono', monospace; font-size:0.75rem; color:var(--accent); font-weight:700;">#${b.id}</span>
               <span style="font-size:0.72rem; background:rgba(0,230,118,0.15); color:var(--accent-green); padding:2px 8px; border-radius:100px; font-weight:600;">${dict.status_confirmed}</span>
             </div>
-            <h4 style="font-size:0.92rem; font-weight:700; margin-bottom:4px;">[${b.partCode}] ${b.partName}</h4>
+            <h4 style="font-size:0.92rem; font-weight:700; margin-bottom:4px;">[${b.partCode}] ${escapeHtml(b.partName)}</h4>
             <div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:6px;">
               📅 ${b.date} &bull; ⏰ ${b.time}
             </div>
             <div style="font-size:0.74rem; color:var(--text-muted);">
-              ${b.mechanic} | ${b.plate}
+              ${escapeHtml(b.mechanic)} &bull; ${escapeHtml(b.customer)} (${escapeHtml(maskPhone(b.phone))})
             </div>
           `;
           drawerItemsList.appendChild(item);
         });
+
+        // Odkaz na administrátorský portál
+        const adminLink = document.createElement('a');
+        adminLink.href = 'admin.html';
+        adminLink.target = '_blank';
+        adminLink.style.cssText = 'display:flex; align-items:center; justify-content:center; gap:6px; margin-top:14px; width:100%; padding:10px 14px; background:rgba(0,229,255,0.08); border:1px dashed rgba(0,229,255,0.35); color:var(--accent); text-decoration:none; border-radius:8px; font-size:0.8rem; font-weight:600; text-align:center; transition:all 0.2s;';
+        adminLink.innerHTML = '⚙️ Správa všetkých rezervácií (Admin) ↗';
+        drawerItemsList.appendChild(adminLink);
+
+        // Tlačidlo na okamžité zmazanie údajov relácie na tomto počítači (ochrana súkromia na zdieľaných zariadeniach)
+        const clearBtn = document.createElement('button');
+        clearBtn.style.cssText = 'margin-top:10px; width:100%; background:rgba(255,82,82,0.1); border:1px solid rgba(255,82,82,0.25); color:#ff8a80; padding:8px 12px; border-radius:8px; font-size:0.78rem; cursor:pointer; font-weight:600;';
+        clearBtn.textContent = '🗑️ Vymazať históriu na tomto zariadení';
+        clearBtn.addEventListener('click', () => {
+          activeBookings = [];
+          localStorage.removeItem('automek_bookings');
+          updateActiveBookingsUI();
+        });
+        drawerItemsList.appendChild(clearBtn);
       }
 
       activeBookingsBadge.addEventListener('click', () => {
@@ -3187,46 +3563,41 @@
         bookingsDrawer.classList.remove('open');
       });
 
-      playPauseBtn.addEventListener('click', () => {
-        const trigger = ScrollTrigger.getById('sequence-scroll');
-        if (!trigger) return;
-
-        if (isAutoPlaying) {
-          if (autoPlayTween) autoPlayTween.pause();
-          isAutoPlaying = false;
-          playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
-        } else {
-          isAutoPlaying = true;
-          playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
-          
-          const startScroll = trigger.start;
-          const endScroll = trigger.end;
-          const currentScroll = window.scrollY;
-
-          if (currentScroll >= endScroll - 10) {
-            window.scrollTo({ top: startScroll, behavior: 'instant' });
-          }
-
-          autoPlayTween = gsap.to(window, {
-            scrollTo: endScroll,
-            duration: 8,
-            ease: "power1.inOut",
-            onComplete: () => {
-              isAutoPlaying = false;
-              playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
-            }
-          });
-        }
-      });
-
-      resetScrollBtn.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-
+      // =========================================================
+      // INTERAKTÍVNE KLÁVESOVÉ SKRATKY [E, I, B, S, X, W, A / ESC]
+      // =========================================================
       window.addEventListener('keydown', (e) => {
-        if (e.code === 'Space' && !bookingModal.classList.contains('open')) {
-          e.preventDefault();
-          playPauseBtn.click();
+        // Ignorovať stlačenia klávesov, ak používateľ píše do poľa formulára
+        const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        if (tag === 'input' || tag === 'textarea') return;
+
+        // Escape: Zatvorenie modálov alebo návrat na všetky kategórie
+        if (e.key === 'Escape') {
+          if (bookingModal.classList.contains('open')) {
+            closeModal();
+          } else if (bookingsDrawer.classList.contains('open')) {
+            bookingsDrawer.classList.remove('open');
+          } else if (currentCategoryFilter !== 'all') {
+            applyCategoryFilter('all');
+          }
+          return;
+        }
+
+        // Ak je otvorené modálne okno rezervácie, klávesové skratky podsystémov nepoužívame
+        if (bookingModal.classList.contains('open')) return;
+
+        const key = e.key.toUpperCase();
+        const validCategories = ['E', 'B', 'I', 'S', 'X', 'W'];
+
+        if (validCategories.includes(key)) {
+          // Nájdeme príslušný diel auta pre dané písmeno kategórie
+          const part = CAR_PARTS_DATA.find(p => p.code === key);
+          if (part) {
+            applyCategoryFilter(key);
+            openBookingModal(part);
+          }
+        } else if (key === 'A' || key === '0') {
+          applyCategoryFilter('all');
         }
       });
 

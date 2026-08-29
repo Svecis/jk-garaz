@@ -1,0 +1,24 @@
+{
+  "name": "new-folder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Svecis/jk-garaz.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Svecis/jk-garaz/issues"
+  },
+  "homepage": "https://github.com/Svecis/jk-garaz#readme",
+  "dependencies": {
+    "nodemailer": "^9.0.6"
+  }
+}

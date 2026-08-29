@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420">
+  <defs>
+    <linearGradient id="bgGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <pattern id="grid1" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  
+  <rect width="640" height="420" fill="url(#bgGrad1)"/>
+  <rect width="640" height="420" fill="url(#grid1)"/>
+  
+  <!-- Engine Bay outline -->
+  <rect x="80" y="50" width="480" height="300" rx="14" fill="#334155" stroke="#64748b" stroke-width="3"/>
+  <rect x="120" y="80" width="400" height="80" rx="8" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+  <text x="320" y="128" fill="#f8fafc" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle">2.0 TFSI V6 ENGINE COVER</text>
+  
+  <!-- Oil Leakage Zone -->
+  <ellipse cx="360" cy="240" rx="75" ry="45" fill="rgba(245, 158, 11, 0.25)" stroke="#f59e0b" stroke-width="3" stroke-dasharray="6 4"/>
+  <path d="M 310 210 Q 360 280 410 230" fill="none" stroke="#d97706" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- Callout Marker -->
+  <rect x="380" y="270" width="160" height="34" rx="6" fill="#ef4444" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.4))"/>
+  <text x="460" y="292" fill="#ffffff" font-family="Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle">⚠ ÚNIK OLEJA</text>
+  <line x1="390" y1="270" x2="360" y2="245" stroke="#ef4444" stroke-width="3"/>
+  
+  <!-- Inspection Stamp footer -->
+  <rect x="0" y="380" width="640" height="40" fill="#090d16"/>
+  <text x="24" y="405" fill="#94a3b8" font-family="monospace" font-size="12">DIAGNOSTICKÁ FOTOGRAFIA #1 &bull; 2.0 TFSI HLAVA VALCOV &bull; 01.09.2026</text>
+</svg>

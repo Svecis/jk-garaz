@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420">
+  <defs>
+    <linearGradient id="bgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <pattern id="grid2" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  
+  <rect width="640" height="420" fill="url(#bgGrad2)"/>
+  <rect width="640" height="420" fill="url(#grid2)"/>
+  
+  <!-- Strut Tower -->
+  <rect x="220" y="40" width="200" height="320" rx="12" fill="#334155" stroke="#64748b" stroke-width="3"/>
+  
+  <!-- Spring coils -->
+  <path d="M 200 100 Q 440 130 200 160 Q 440 190 200 220 Q 440 250 200 280" fill="none" stroke="#94a3b8" stroke-width="14" stroke-linecap="round"/>
+  
+  <!-- Defect Crack highlight -->
+  <circle cx="320" cy="300" r="42" fill="rgba(239, 68, 68, 0.25)" stroke="#ef4444" stroke-width="3" stroke-dasharray="6 4"/>
+  <line x1="300" y1="290" x2="340" y2="315" stroke="#fca5a5" stroke-width="5" stroke-linecap="round"/>
+  
+  <!-- Marker -->
+  <rect x="370" y="285" width="180" height="34" rx="6" fill="#ef4444" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.4))"/>
+  <text x="460" y="307" fill="#ffffff" font-family="Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle">⚠ PRASKNUTÉ ULOŽENIE</text>
+  <line x1="370" y1="302" x2="340" y2="300" stroke="#ef4444" stroke-width="3"/>
+
+  <!-- Footer bar -->
+  <rect x="0" y="380" width="640" height="40" fill="#090d16"/>
+  <text x="24" y="405" fill="#94a3b8" font-family="monospace" font-size="12">DIAGNOSTICKÁ FOTOGRAFIA #2 &bull; HORNÉ ULOŽENIE TLMIČA &bull; 01.09.2026</text>
+</svg>

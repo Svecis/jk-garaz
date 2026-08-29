@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoMek Admin — Správa zákaziek a Kalendár</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090b10;
+      --card-bg: #12151e;
+      --card-elevated: #181c27;
+      --card-hover: #1b202e;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border-strong: rgba(255, 255, 255, 0.15);
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+      --danger: #f87171;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.07) 0%, transparent 50%),
+        radial-gradient(circle at 10% 30%, rgba(99, 102, 241, 0.04) 0%, transparent 40%);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* TOPBAR */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 32px;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(14, 18, 26, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-subtag {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      padding-left: 10px;
+      border-left: 1px solid var(--card-border);
+    }
+
+    /* VIEW SWITCHER TABS */
+    .view-switcher {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .view-tab {
+      padding: 6px 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .view-tab:hover {
+      color: #fff;
+    }
+
+    .view-tab.active {
+      background: #2563eb;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+    }
+
+    .top-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      padding: 4px 10px;
+      border-radius: 100px;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 8px rgba(52, 211, 153, 0.8);
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .top-btn {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.82rem;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.03);
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+
+    .top-btn:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .top-btn-accent {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: rgba(56, 189, 248, 0.3);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .top-btn-accent:hover {
+      background: var(--accent);
+      color: #000;
+    }
+
+    /* MAIN CONTAINER */
+    .content-container {
+      max-width: 1240px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* VIEW SECTIONS */
+    .view-section {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .view-section.active {
+      display: flex;
+    }
+
+    /* SEARCH ROW (TABLE VIEW) */
+    .search-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 0.92rem;
+      outline: none;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      background: #141824;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .results-count {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* TABLE */
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .custom-table th {
+      padding: 14px 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .custom-table td {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+
+    .custom-table tbody tr {
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+
+    .custom-table tbody tr:hover {
+      background: var(--card-hover);
+    }
+
+    .custom-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .id-tag {
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: 0.84rem;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: inline-block;
+      text-decoration: none;
+    }
+
+    .id-tag:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .cust-col {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .cust-name {
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .cust-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .part-col {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .part-badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--accent);
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .part-name {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .urgency-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .urgency-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .dot-crit { background: #f87171; }
+    .dot-mod { background: #fbbf24; }
+    .dot-min { background: #34d399; }
+
+    .row-right {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .status-select {
+      background: var(--card-elevated);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 6px 10px;
+      border-radius: 6px;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .status-select:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .open-card-link {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--accent);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .open-card-link:hover {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .empty-message {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* =========================================================
+       CALENDAR VIEW STYLES
+       ========================================================= */
+    .cal-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .cal-title-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .cal-month-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .cal-nav-btns {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cal-nav-btn {
+      background: var(--card-elevated);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.9rem;
+      transition: all 0.15s;
+    }
+
+    .cal-nav-btn:hover {
+      border-color: var(--accent);
+      background: #1e2433;
+    }
+
+    .cal-today-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .cal-today-btn:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .cal-legend {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* CALENDAR GRID */
+    .cal-grid-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .cal-weekdays-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--card-border);
+      text-align: center;
+    }
+
+    .cal-weekday {
+      padding: 12px 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .cal-days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-auto-rows: minmax(110px, auto);
+      gap: 1px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .cal-day-cell {
+      background: var(--card-bg);
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 110px;
+      transition: background 0.15s;
+    }
+
+    .cal-day-cell:hover {
+      background: #141824;
+    }
+
+    .cal-day-cell.other-month {
+      background: #0d1017;
+      opacity: 0.45;
+    }
+
+    .cal-day-cell.today {
+      background: rgba(56, 189, 248, 0.04);
+      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.3);
+    }
+
+    .cal-day-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cal-day-num {
+      font-weight: 700;
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+    }
+
+    .cal-day-cell.today .cal-day-num {
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.15);
+      border-radius: 4px;
+      padding: 1px 6px;
+    }
+
+    .cal-day-bookings {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .cal-booking-chip {
+      background: var(--card-elevated);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 3px solid #2563eb;
+      padding: 5px 8px;
+      border-radius: 4px;
+      font-size: 0.74rem;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+
+    .cal-booking-chip:hover {
+      border-color: var(--accent);
+      background: #1e2434;
+      transform: translateY(-1px);
+    }
+
+    .cal-booking-chip.chip-pending { border-left-color: #fbbf24; }
+    .cal-booking-chip.chip-confirmed { border-left-color: #38bdf8; }
+    .cal-booking-chip.chip-in_progress { border-left-color: #818cf8; }
+    .cal-booking-chip.chip-completed { border-left-color: #34d399; }
+    .cal-booking-chip.chip-cancelled { border-left-color: #64748b; opacity: 0.6; }
+
+    .chip-time-cust {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .chip-time {
+      font-weight: 700;
+      color: var(--accent);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+    }
+
+    .chip-cust {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chip-detail-sub {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Modal dialog */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #141824;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      max-width: 520px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 12px;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: #fff;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 0.04em;
+    }
+
+    .form-input {
+      background: #1a2030;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    }
+
+    .form-hint {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .modal-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 10px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-test {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-test:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-save {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-save:hover {
+      background: #1d4ed8;
+    }
+
+    .status-msg {
+      font-size: 0.85rem;
+      padding: 10px 14px;
+      border-radius: 8px;
+      display: none;
+      line-height: 1.4;
+    }
+
+    .status-msg.success {
+      display: block;
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      color: #34d399;
+    }
+
+    .status-msg.error {
+      display: block;
+      background: rgba(248, 113, 113, 0.12);
+      border: 1px solid rgba(248, 113, 113, 0.35);
+      color: #f87171;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <header class="top-bar">
+    <div class="brand-section">
+      <span class="brand-title">AutoMek</span>
+      <span class="brand-subtag">Servisný dispečing</span>
+    </div>
+
+    <!-- VIEW SWITCHER (TABLE VS CALENDAR) -->
+    <div class="view-switcher">
+      <button type="button" class="view-tab active" id="tab-table">Tabuľka zákaziek</button>
+      <button type="button" class="view-tab" id="tab-calendar">Servisný kalendár</button>
+    </div>
+
+    <div class="top-links">
+      <div class="live-indicator">
+        <span class="live-dot"></span>
+        <span>Živá synchronizácia</span>
+      </div>
+      <button type="button" class="top-btn top-btn-accent" id="open-brevo-modal-btn">Nastavenia Brevo SMTP</button>
+      <button type="button" class="top-btn" id="add-test-booking-btn">+ Testovacia zákazka</button>
+      <a href="index.html" class="top-btn" target="_blank">Web pre zákazníkov</a>
+    </div>
+  </header>
+
+  <!-- Workspace Container -->
+  <main class="content-container">
+    
+    <!-- ======================================================= -->
+    <!-- VIEW 1: TABLE LIST -->
+    <!-- ======================================================= -->
+    <div class="view-section active" id="section-table">
+      
+      <!-- Search row -->
+      <div class="search-row">
+        <div class="search-box">
+          <input 
+            type="text" 
+            id="search-input" 
+            class="search-input" 
+            placeholder="Vyhľadávanie v zákazkách (meno, EČV, diel, ID)..."
+            autocomplete="off"
+          >
+        </div>
+        <span class="results-count" id="results-count">3 zákazky</span>
+      </div>
+
+      <!-- Table Container -->
+      <div class="table-card">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th style="width: 140px;">id zakazky</th>
+              <th>Meno</th>
+              <th>Kde je chyba</th>
+              <th style="width: 160px;">Závažnosť</th>
+              <th style="width: 250px;">stav zákazky</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- VIEW 2: CALENDAR VIEW -->
+    <!-- ======================================================= -->
+    <div class="view-section" id="section-calendar">
+      
+      <!-- Calendar Controls & Legend -->
+      <div class="cal-header-bar">
+        <div class="cal-title-section">
+          <div class="cal-nav-btns">
+            <button type="button" class="cal-nav-btn" id="cal-prev-btn">&lt;</button>
+            <button type="button" class="cal-nav-btn" id="cal-next-btn">&gt;</button>
+            <button type="button" class="cal-today-btn" id="cal-today-btn">Dnes</button>
+          </div>
+          <span class="cal-month-title" id="cal-month-title">September 2026</span>
+        </div>
+
+        <div class="cal-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:#fbbf24;"></span><span>Nová / Čaká</span></div>
+          <div class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span><span>Schválená</span></div>
+          <div class="legend-item"><span class="legend-dot" style="background:#818cf8;"></span><span>V servise</span></div>
+          <div class="legend-item"><span class="legend-dot" style="background:#34d399;"></span><span>Dokončená</span></div>
+        </div>
+      </div>
+
+      <!-- Calendar Grid Card -->
+      <div class="cal-grid-card">
+        <div class="cal-weekdays-row">
+          <div class="cal-weekday">Pondelok</div>
+          <div class="cal-weekday">Utorok</div>
+          <div class="cal-weekday">Streda</div>
+          <div class="cal-weekday">Štvrtok</div>
+          <div class="cal-weekday">Piatok</div>
+          <div class="cal-weekday">Sobota</div>
+          <div class="cal-weekday">Nedeľa</div>
+        </div>
+        <div class="cal-days-grid" id="cal-days-grid">
+          <!-- Dynamically populated day cells -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Brevo SMTP Settings Modal -->
+  <div class="modal-overlay" id="brevo-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-title">Nastavenia Brevo SMTP / API</span>
+        <button type="button" class="modal-close" id="brevo-close-btn">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">1. Email príjemcu (kam majú chodiť zákazky)</label>
+        <input type="email" id="cfg-recipient" class="form-input" placeholder="naprvaskamchcetedostat@gmail.com">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">2. Brevo prihlasovací email (odosielateľ)</label>
+        <input type="email" id="cfg-brevo-sender" class="form-input" placeholder="b72316001@smtp-brevo.com alebo vas@gmail.com">
+        <span class="form-hint">Prihlasovací Login z Brevo SMTP konfigurácie.</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">3. Brevo API / SMTP Kľúč</label>
+        <input type="password" id="cfg-brevo-key" class="form-input" placeholder="xsmtpsib-... alebo xkeysib-...">
+        <span class="form-hint">Vygenerovaný SMTP alebo API kľúč z Brevo.com.</span>
+      </div>
+
+      <div class="status-msg" id="modal-status-msg"></div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-test" id="btn-test-brevo">Odoslať testovací email</button>
+        <button type="button" class="btn-save" id="btn-save-brevo">Uložiť nastavenia</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'automek_bookings';
+
+      // Switcher
+      const tabTable = document.getElementById('tab-table');
+      const tabCalendar = document.getElementById('tab-calendar');
+      const sectionTable = document.getElementById('section-table');
+      const sectionCalendar = document.getElementById('section-calendar');
+
+      // Table View Elements
+      const searchInput = document.getElementById('search-input');
+      const tableBody = document.getElementById('table-body');
+      const resultsCount = document.getElementById('results-count');
+      const addTestBtn = document.getElementById('add-test-booking-btn');
+
+      // Calendar View Elements
+      const calMonthTitle = document.getElementById('cal-month-title');
+      const calDaysGrid = document.getElementById('cal-days-grid');
+      const calPrevBtn = document.getElementById('cal-prev-btn');
+      const calNextBtn = document.getElementById('cal-next-btn');
+      const calTodayBtn = document.getElementById('cal-today-btn');
+
+      // Brevo Modal Elements
+      const brevoModal = document.getElementById('brevo-modal');
+      const openBrevoBtn = document.getElementById('open-brevo-modal-btn');
+      const closeBrevoBtn = document.getElementById('brevo-close-btn');
+      const cfgRecipient = document.getElementById('cfg-recipient');
+      const cfgSender = document.getElementById('cfg-brevo-sender');
+      const cfgKey = document.getElementById('cfg-brevo-key');
+      const modalStatus = document.getElementById('modal-status-msg');
+      const btnSave = document.getElementById('btn-save-brevo');
+      const btnTest = document.getElementById('btn-test-brevo');
+
+      let bookings = [];
+      let calendarDate = new Date(2026, 8, 1); // September 2026
+
+      const MONTH_NAMES_SK = [
+        'Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún',
+        'Júl', 'August', 'September', 'Október', 'November', 'December'
+      ];
+
+      // Tab Switching
+      tabTable.addEventListener('click', () => {
+        tabTable.classList.add('active');
+        tabCalendar.classList.remove('active');
+        sectionTable.classList.add('active');
+        sectionCalendar.classList.remove('active');
+      });
+
+      tabCalendar.addEventListener('click', () => {
+        tabCalendar.classList.add('active');
+        tabTable.classList.remove('active');
+        sectionCalendar.classList.add('active');
+        sectionTable.classList.remove('active');
+        renderCalendar();
+      });
+
+      function getDefaultDemoBookings() {
+        return [
+          {
+            id: 'JK-482019',
+            customer: 'Peter Novák',
+            phone: '+421 905 456 789',
+            email: 'novak.peter@techfirm.sk',
+            plate: 'BA 892 TT',
+            partName: '2.0 TFSI Motor & Prevodovka',
+            partCode: 'E',
+            urgency: 'critical',
+            date: 'Po, 1. Sep',
+            time: '10:00',
+            price: '180 €',
+            mechanic: 'Markus Vance',
+            problemDesc: 'Pri studenom štarte počuť kovové klepanie z oblasti rozvodov. Na bloku motora je viditeľný únik oleja.',
+            symptoms: ['Klepavý zvuk pri voľnobehu', 'Únik kvapaliny', 'Svieti kontrolka motora'],
+            hasAudio: true,
+            audioData: 'sample_engine_noise.wav',
+            photos: ['sample_photo_motor.svg', 'sample_photo_podvozok.svg'],
+            photosCount: 2,
+            status: 'pending'
+          },
+          {
+            id: 'JK-319402',
+            customer: 'Martina Kováčová',
+            phone: '+421 911 888 222',
+            email: 'm.kovacova@gmail.com',
+            plate: 'KE 401 BE',
+            partName: 'Predná náprava & Podvozok',
+            partCode: 'S',
+            urgency: 'moderate',
+            date: 'Ut, 2. Sep',
+            time: '13:30',
+            price: '85 €',
+            mechanic: 'Viktor Thorne',
+            problemDesc: 'Pri prejazde retardérmi sa ozýva tupé búchanie od pravého predného kolesa. Podozrenie na poškodené horné uloženie tlmiča.',
+            symptoms: ['Búchanie pri nerovnostiach', 'Vôľa v riadení'],
+            hasAudio: false,
+            audioData: null,
+            photos: ['sample_photo_podvozok.svg'],
+            photosCount: 1,
+            status: 'confirmed'
+          },
+          {
+            id: 'JK-110824',
+            customer: 'Miroslav Horváth',
+            phone: '+421 948 123 456',
+            email: 'miroslav@automek.sk',
+            plate: 'NR 777 AX',
+            partName: 'Virtuálny kokpit & Infotainment',
+            partCode: 'I',
+            urgency: 'minor',
+            date: 'St, 3. Sep',
+            time: '15:00',
+            price: '60 €',
+            mechanic: 'Elena Rostova',
+            problemDesc: 'Displej občas zamrzne pri pripojení telefónu cez Apple CarPlay.',
+            symptoms: ['Pomalá odozva systému', 'Chybové hlásenie'],
+            hasAudio: false,
+            audioData: null,
+            photos: [],
+            photosCount: 0,
+            status: 'in_progress'
+          }
+        ];
+      }
+
+      function loadData() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          bookings = raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          bookings = [];
+        }
+
+        let needsSave = false;
+        if (!Array.isArray(bookings) || bookings.length === 0) {
+          bookings = getDefaultDemoBookings();
+          needsSave = true;
+        } else {
+          bookings.forEach(b => {
+            if (b.id === 'JK-482019' && (!b.audioData || !b.photos || b.photos.length === 0)) {
+              b.hasAudio = true;
+              b.audioData = 'sample_engine_noise.wav';
+              b.photos = ['sample_photo_motor.svg', 'sample_photo_podvozok.svg'];
+              b.photosCount = 2;
+              needsSave = true;
+            }
+            if (b.id === 'JK-319402' && (!b.photos || b.photos.length === 0)) {
+              b.photos = ['sample_photo_podvozok.svg'];
+              b.photosCount = 1;
+              needsSave = true;
+            }
+          });
+        }
+        if (needsSave) saveData();
+      }
+
+      function saveData() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+        } catch (e) {}
+      }
+
+      window.addEventListener('storage', (e) => {
+        if (e.key === STORAGE_KEY) {
+          loadData();
+          renderTable();
+          renderCalendar();
+        }
+      });
+
+      // Render Table
+      function renderTable() {
+        const query = searchInput.value.toLowerCase().trim();
+
+        const filtered = bookings.filter(b => {
+          if (!query) return true;
+          return (b.id || '').toLowerCase().includes(query) ||
+                 (b.customer || '').toLowerCase().includes(query) ||
+                 (b.partName || '').toLowerCase().includes(query) ||
+                 (b.plate || '').toLowerCase().includes(query);
+        });
+
+        resultsCount.textContent = `${filtered.length} ${filtered.length === 1 ? 'zákazka' : filtered.length >= 2 && filtered.length <= 4 ? 'zákazky' : 'zákaziek'}`;
+
+        if (filtered.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="5" class="empty-message">Nenašli sa žiadne zákazky zodpovedajúce vyhľadávaniu.</td></tr>';
+          return;
+        }
+
+        tableBody.innerHTML = '';
+        filtered.forEach(b => {
+          const tr = document.createElement('tr');
+
+          let dotClass = 'dot-min';
+          let urgencyLabel = 'Bežná';
+          if (b.urgency === 'critical') { dotClass = 'dot-crit'; urgencyLabel = 'Kritická'; }
+          else if (b.urgency === 'moderate') { dotClass = 'dot-mod'; urgencyLabel = 'Výrazná'; }
+
+          const orderUrl = 'order.html?id=' + encodeURIComponent(b.id);
+
+          tr.innerHTML = `
+            <td>
+              <a href="${orderUrl}" target="_blank" class="id-tag" title="Otvoriť zákazku v novej karte">#${escapeHtml(b.id)}</a>
+            </td>
+            <td>
+              <div class="cust-col">
+                <span class="cust-name">${escapeHtml(b.customer)}</span>
+                <span class="cust-sub">${escapeHtml(formatPlate(b.plate))} &bull; ${escapeHtml(b.phone || '-')}</span>
+              </div>
+            </td>
+            <td>
+              <div class="part-col">
+                <span class="part-badge">${escapeHtml(b.partCode || 'P')}</span>
+                <span class="part-name">${escapeHtml(b.partName)}</span>
+              </div>
+            </td>
+            <td>
+              <span class="urgency-pill">
+                <span class="urgency-dot ${dotClass}"></span>
+                <span>${urgencyLabel}</span>
+              </span>
+            </td>
+            <td>
+              <div class="row-right">
+                <select class="status-select row-status" data-id="${b.id}">
+                  <option value="pending" ${b.status === 'pending' ? 'selected' : ''}>Nová (Čaká)</option>
+                  <option value="confirmed" ${b.status === 'confirmed' ? 'selected' : ''}>Schválená</option>
+                  <option value="in_progress" ${b.status === 'in_progress' ? 'selected' : ''}>V servise</option>
+                  <option value="completed" ${b.status === 'completed' ? 'selected' : ''}>Dokončená</option>
+                  <option value="cancelled" ${b.status === 'cancelled' ? 'selected' : ''}>Zrušená</option>
+                </select>
+                <a href="${orderUrl}" target="_blank" class="open-card-link">
+                  <span>Otvoriť kartu</span>
+                </a>
+              </div>
+            </td>
+          `;
+
+          tr.addEventListener('click', (e) => {
+            if (e.target.closest('select') || e.target.closest('a')) return;
+            window.open(orderUrl, '_blank');
+          });
+
+          const sel = tr.querySelector('.row-status');
+          sel.addEventListener('change', (e) => {
+            b.status = e.target.value;
+            saveData();
+            renderCalendar();
+          });
+
+          tableBody.appendChild(tr);
+        });
+      }
+
+      // =========================================================
+      // CALENDAR RENDER ENGINE
+      // =========================================================
+      function renderCalendar() {
+        const year = calendarDate.getFullYear();
+        const month = calendarDate.getMonth();
+
+        calMonthTitle.textContent = `${MONTH_NAMES_SK[month]} ${year}`;
+
+        // First day of month and total days
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const totalDays = lastDay.getDate();
+
+        // Day of week for 1st (0 = Sunday, 1 = Monday... convert to Mon=0, Sun=6)
+        let startDayOfWeek = firstDay.getDay() - 1;
+        if (startDayOfWeek === -1) startDayOfWeek = 6;
+
+        const prevMonthLastDay = new Date(year, month, 0).getDate();
+
+        calDaysGrid.innerHTML = '';
+
+        // Previous month filler days
+        for (let i = startDayOfWeek - 1; i >= 0; i--) {
+          const dayNum = prevMonthLastDay - i;
+          const cell = document.createElement('div');
+          cell.className = 'cal-day-cell other-month';
+          cell.innerHTML = `<div class="cal-day-header"><span class="cal-day-num">${dayNum}</span></div>`;
+          calDaysGrid.appendChild(cell);
+        }
+
+        const todayObj = new Date();
+        const isCurrentMonth = todayObj.getFullYear() === year && todayObj.getMonth() === month;
+        const todayDateNum = todayObj.getDate();
+
+        // Current month days
+        for (let day = 1; day <= totalDays; day++) {
+          const cell = document.createElement('div');
+          cell.className = 'cal-day-cell';
+          if (isCurrentMonth && day === todayDateNum) {
+            cell.classList.add('today');
+          }
+
+          // Header
+          const dayHeader = document.createElement('div');
+          dayHeader.className = 'cal-day-header';
+          dayHeader.innerHTML = `<span class="cal-day-num">${day}</span>`;
+          cell.appendChild(dayHeader);
+
+          // Find bookings for this day
+          const dayBookingsContainer = document.createElement('div');
+          dayBookingsContainer.className = 'cal-day-bookings';
+
+          // Match by string parsing (e.g. "1. Sep", "2. Sep", "15. Sep") or exact date
+          const matchingBookings = bookings.filter(b => {
+            if (!b.date) return false;
+            // Match pattern like "Po, 1. Sep" or "1. Sep"
+            const numMatch = b.date.match(/(\d+)\./);
+            if (numMatch && parseInt(numMatch[1], 10) === day) {
+              return true;
+            }
+            return false;
+          });
+
+          matchingBookings.forEach(b => {
+            const chip = document.createElement('a');
+            chip.href = 'order.html?id=' + encodeURIComponent(b.id);
+            chip.target = '_blank';
+            chip.className = `cal-booking-chip chip-${b.status || 'pending'}`;
+            
+            const plateClean = formatPlate(b.plate);
+
+            chip.innerHTML = `
+              <div class="chip-time-cust">
+                <span class="chip-time">${escapeHtml(b.time || '10:00')}</span>
+                <span class="chip-cust">${escapeHtml(b.customer || 'Zákazník')}</span>
+              </div>
+              <div class="chip-detail-sub">${escapeHtml(plateClean)} &bull; [${escapeHtml(b.partCode || 'P')}]</div>
+            `;
+
+            chip.title = `Zákazka #${b.id}: ${b.customer} (${plateClean}) - ${b.partName}`;
+
+            dayBookingsContainer.appendChild(chip);
+          });
+
+          cell.appendChild(dayBookingsContainer);
+          calDaysGrid.appendChild(cell);
+        }
+
+        // Next month filler days to complete 7-day grid rows (35 or 42 cells)
+        const totalRendered = startDayOfWeek + totalDays;
+        const remainingCells = (totalRendered % 7 === 0) ? 0 : (7 - (totalRendered % 7));
+        for (let j = 1; j <= remainingCells; j++) {
+          const cell = document.createElement('div');
+          cell.className = 'cal-day-cell other-month';
+          cell.innerHTML = `<div class="cal-day-header"><span class="cal-day-num">${j}</span></div>`;
+          calDaysGrid.appendChild(cell);
+        }
+      }
+
+      // Calendar Navigation Events
+      calPrevBtn.addEventListener('click', () => {
+        calendarDate.setMonth(calendarDate.getMonth() - 1);
+        renderCalendar();
+      });
+
+      calNextBtn.addEventListener('click', () => {
+        calendarDate.setMonth(calendarDate.getMonth() + 1);
+        renderCalendar();
+      });
+
+      calTodayBtn.addEventListener('click', () => {
+        calendarDate = new Date(2026, 8, 1); // September 2026
+        renderCalendar();
+      });
+
+      searchInput.addEventListener('input', renderTable);
+
+      addTestBtn.addEventListener('click', () => {
+        const id = 'JK-' + Math.floor(100000 + Math.random() * 900000);
+        bookings.unshift({
+          id: id,
+          customer: 'Jozef Valko',
+          phone: '+421 903 555 777',
+          email: 'valko@automek.sk',
+          plate: 'TT 456 BB',
+          partName: 'Kované disky & Športové brzdy',
+          partCode: 'W',
+          urgency: 'moderate',
+          date: 'Pi, 5. Sep',
+          time: '11:00',
+          price: '110 €',
+          mechanic: 'Viktor Thorne',
+          problemDesc: 'Pískanie bŕzd pri miernom dobrzďovaní v nízkych rýchlostiach.',
+          symptoms: ['Pískanie bŕzd', 'Vibrácie volantu'],
+          hasAudio: false,
+          audioData: null,
+          photos: [],
+          photosCount: 0,
+          status: 'pending'
+        });
+        saveData();
+        renderTable();
+        renderCalendar();
+      });
+
+      // Brevo Modal Events
+      openBrevoBtn.addEventListener('click', () => {
+        modalStatus.style.display = 'none';
+        fetch('/api/get-settings')
+          .then(r => r.json())
+          .then(cfg => {
+            if (cfg.recipientEmail && cfg.recipientEmail !== 'servis@automek.sk') cfgRecipient.value = cfg.recipientEmail;
+            if (cfg.brevoSender) cfgSender.value = cfg.brevoSender;
+            if (cfg.brevoKey) cfgKey.value = cfg.brevoKey;
+            brevoModal.classList.add('open');
+          })
+          .catch(() => {
+            brevoModal.classList.add('open');
+          });
+      });
+
+      closeBrevoBtn.addEventListener('click', () => {
+        brevoModal.classList.remove('open');
+      });
+
+      brevoModal.addEventListener('click', (e) => {
+        if (e.target === brevoModal) brevoModal.classList.remove('open');
+      });
+
+      btnSave.addEventListener('click', () => {
+        const payload = {
+          recipientEmail: cfgRecipient.value.trim(),
+          brevoSender: cfgSender.value.trim(),
+          brevoKey: cfgKey.value.trim()
+        };
+
+        if (!payload.recipientEmail || !payload.recipientEmail.includes('@')) {
+          showStatus('Zadajte platný email príjemcu.', true);
+          return;
+        }
+
+        fetch('/api/save-settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(res => {
+          if (res.success) {
+            showStatus('Brevo nastavenia boli úspešne uložené!');
+          } else {
+            showStatus('Chyba: ' + (res.error || 'Neznáma chyba'), true);
+          }
+        })
+        .catch(err => showStatus('Chyba spojenia: ' + err.message, true));
+      });
+
+      btnTest.addEventListener('click', () => {
+        const payload = {
+          recipientEmail: cfgRecipient.value.trim(),
+          brevoSender: cfgSender.value.trim(),
+          brevoKey: cfgKey.value.trim()
+        };
+
+        if (!payload.recipientEmail || !payload.brevoSender || !payload.brevoKey) {
+          showStatus('Vyplňte všetky 3 políčka pred odoslaním testu.', true);
+          return;
+        }
+
+        showStatus('Odosielam testovací email cez Brevo server...');
+
+        fetch('/api/test-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(res => {
+          if (res.success) {
+            showStatus(res.message || 'Email bol úspešne odoslaný!');
+          } else {
+            showStatus('Brevo chyba: ' + (res.error || 'Neznáma chyba'), true);
+          }
+        })
+        .catch(err => showStatus('Chyba spojenia: ' + err.message, true));
+      });
+
+      function showStatus(text, isError = false) {
+        modalStatus.textContent = text;
+        modalStatus.className = isError ? 'status-msg error' : 'status-msg success';
+        modalStatus.style.display = 'block';
+      }
+
+      function formatPlate(plate) {
+        if (!plate || plate === 'Nezadané' || plate === '-') return '-';
+        let clean = String(plate).replace(/-/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
+        const noSpace = clean.replace(/\s/g, '');
+        if (/^[A-Z]{2}[0-9]{3}[A-Z]{2}$/.test(noSpace)) {
+          return noSpace.slice(0, 2) + ' ' + noSpace.slice(2, 5) + ' ' + noSpace.slice(5);
+        }
+        return clean;
+      }
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      loadData();
+      renderTable();
+      renderCalendar();
+    })();
+  </script>
+</body>
+</html>

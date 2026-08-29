@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Svecis/jk-garaz#readme",
   "dependencies": {
+    "isomorphic-git": "^1.41.9",
     "nodemailer": "^9.0.6"
   }
 }

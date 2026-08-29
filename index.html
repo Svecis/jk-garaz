@@ -1518,21 +1518,17 @@
     /* RESPONSIVENESS */
     @media (max-width: 768px) {
       .top-nav-bar {
-        top: 14px;
-        right: 14px;
+        top: 12px;
+        right: 12px;
         gap: 8px;
       }
       .lang-btn {
-        padding: 5px 10px;
-        font-size: 0.74rem;
+        padding: 5px 9px;
+        font-size: 0.72rem;
       }
       #active-bookings-badge {
         padding: 6px 12px;
-        font-size: 0.76rem;
-      }
-      .admin-portal-link {
-        padding: 6px 12px;
-        font-size: 0.76rem;
+        font-size: 0.75rem;
       }
       .part-category-bar {
         width: 95%;
@@ -2847,8 +2843,7 @@
         offCanvas.width = cachedDw;
         offCanvas.height = cachedDh;
 
-        // Široký zmäkčovací prechod na okraje snímky (plynulé vtieranie do tmavého pozadia bez ostrých hrán)
-        const f = Math.round(Math.min(cachedDw, cachedDh) * 0.18);
+        const f = 28;
         cachedGradLeft = offCtx.createLinearGradient(0, 0, f, 0);
         cachedGradLeft.addColorStop(0, 'rgba(0,0,0,1)');
         cachedGradLeft.addColorStop(1, 'rgba(0,0,0,0)');
@@ -2886,10 +2881,30 @@
           }
         }
 
-        if (!img) return;
+        if (!img || !cachedBgGradient) return;
 
-        ctx.clearRect(0, 0, cachedCw, cachedCh);
-        ctx.drawImage(img, cachedOffsetX, cachedOffsetY, cachedDw, cachedDh);
+        // 1. Podklad s predpočítaným gradientom (0 ms zdržanie, žiadne layout reflows)
+        ctx.fillStyle = cachedBgGradient;
+        ctx.fillRect(0, 0, cachedCw, cachedCh);
+
+        // 2. Vykreslenie snímky do offscreen canvasu
+        offCtx.clearRect(0, 0, cachedDw, cachedDh);
+        offCtx.drawImage(img, 0, 0, cachedDw, cachedDh);
+
+        // 3. Aplikácia predpočítaných zmäkčovacích prechodov na okraje
+        offCtx.globalCompositeOperation = 'destination-out';
+        offCtx.fillStyle = cachedGradLeft;
+        offCtx.fillRect(0, 0, 28, cachedDh);
+        offCtx.fillStyle = cachedGradRight;
+        offCtx.fillRect(cachedDw - 28, 0, 28, cachedDh);
+        offCtx.fillStyle = cachedGradTop;
+        offCtx.fillRect(0, 0, cachedDw, 28);
+        offCtx.fillStyle = cachedGradBottom;
+        offCtx.fillRect(0, cachedDh - 28, cachedDw, 28);
+        offCtx.globalCompositeOperation = 'source-over';
+
+        // 4. Bleskový prenos do hlavného plátna (hardware GPU blit)
+        ctx.drawImage(offCanvas, cachedOffsetX, cachedOffsetY);
       }
 
       function initScrollTrigger() {
@@ -3000,15 +3015,14 @@
         });
       }
 
-      // Jump straight to exploded view from Hero CTA (Čistý 1-fázový plynulý scroll bez sekania a bez dvojitého prehrávania)
+      // Jump straight to exploded view from Hero CTA (Smooth 3.2s cinematic glide)
       heroJumpBtn.addEventListener('click', () => {
         const trigger = ScrollTrigger.getById('sequence-scroll');
         if (trigger) {
           gsap.to(window, {
             scrollTo: trigger.end - 50,
-            duration: 2.8,
-            ease: "power2.inOut",
-            overwrite: "auto"
+            duration: 3.2,
+            ease: "power1.inOut"
           });
         }
       });

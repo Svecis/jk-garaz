@@ -3019,19 +3019,31 @@
         });
       }
 
-      // Jump straight to exploded view from Hero CTA (Plynulá animácia snímok priamo na canvas)
+      // Jump straight to exploded view from Hero CTA (Plynulá animácia priamo pred očami)
       heroJumpBtn.addEventListener('click', () => {
         const trigger = ScrollTrigger.getById('sequence-scroll');
         if (trigger) {
-          // 1. Plynulý posun okna
-          gsap.to(window, {
+          // Začneme od zmontovaného auta
+          playhead.frame = 0;
+          render();
+
+          const tl = gsap.timeline();
+
+          // 1. Fáza: Plynulé zarovnanie na stred plátna s celým autom (0.4s)
+          tl.to(window, {
+            scrollTo: trigger.start,
+            duration: 0.45,
+            ease: "power2.out"
+          });
+
+          // 2. Fáza: Pomalý a filmový rozklad auta priamo na obrazovke (4.2s)
+          tl.to(window, {
             scrollTo: trigger.end - 50,
             duration: 4.2,
             ease: "power1.inOut"
-          });
+          }, "+=0.05");
 
-          // 2. Priame animovanie snímok 60fps pre mobil aj PC (zaručuje plynulý rozklad bez spoliehania sa na scroll eventy)
-          gsap.to(playhead, {
+          tl.to(playhead, {
             frame: FRAME_COUNT - 1,
             duration: 4.2,
             ease: "power1.inOut",
@@ -3039,7 +3051,7 @@
               render();
               updateDiagnosticState(playhead.frame / (FRAME_COUNT - 1));
             }
-          });
+          }, "<");
         }
       });
 

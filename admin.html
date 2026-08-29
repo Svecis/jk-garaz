@@ -958,7 +958,8 @@
         <span>Živá synchronizácia</span>
       </div>
       <button type="button" class="top-btn top-btn-accent" id="open-brevo-modal-btn">Nastavenia Brevo SMTP</button>
-      <button type="button" class="top-btn" id="add-test-booking-btn">+ Testovacia zákazka</button>
+      <button type="button" class="top-btn" id="btn-reset-demo-data" style="color:var(--accent); border-color:rgba(56,189,248,0.3); font-weight:600;">Obnoviť 10 demo zákaziek</button>
+      <button type="button" class="top-btn" id="add-test-booking-btn">+ Pridať zákazku</button>
       <a href="index.html" class="top-btn" target="_blank">Web pre zákazníkov</a>
     </div>
   </header>
@@ -1365,7 +1366,7 @@
         }
 
         let needsSave = false;
-        if (!Array.isArray(bookings) || bookings.length < 5) {
+        if (!Array.isArray(bookings) || bookings.length < 8) {
           bookings = getDefaultDemoBookings();
           needsSave = true;
         } else {
@@ -1755,6 +1756,18 @@
       });
 
       searchInput.addEventListener('input', renderTable);
+
+      
+      const btnResetDemo = document.getElementById('btn-reset-demo-data');
+      if (btnResetDemo) {
+        btnResetDemo.addEventListener('click', () => {
+          bookings = getDefaultDemoBookings();
+          saveData();
+          renderTable();
+          renderCalendar();
+          showRescheduleToast('Úspešne načítaných 10 testovacích zákaziek!');
+        });
+      }
 
       addTestBtn.addEventListener('click', () => {
         const id = 'JK-' + Math.floor(100000 + Math.random() * 900000);

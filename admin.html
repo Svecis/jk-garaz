@@ -576,7 +576,35 @@
       box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.3);
     }
 
+    
     .cal-day-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .cal-day-num {
+      font-weight: 700;
+      font-size: 0.86rem;
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .cal-day-name {
+      font-size: 0.70rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .cal-day-cell.today .cal-day-name {
+      color: var(--accent);
+    }
+
+    .cal-day-header-old {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1114,15 +1142,7 @@
 
       <!-- Calendar Grid Card -->
       <div class="cal-grid-card">
-        <div class="cal-weekdays-row">
-          <div class="cal-weekday">Pondelok</div>
-          <div class="cal-weekday">Utorok</div>
-          <div class="cal-weekday">Streda</div>
-          <div class="cal-weekday">Štvrtok</div>
-          <div class="cal-weekday">Piatok</div>
-          <div class="cal-weekday">Sobota</div>
-          <div class="cal-weekday">Nedeľa</div>
-        </div>
+
         <div class="cal-days-grid" id="cal-days-grid">
           <!-- Dynamically populated day cells -->
         </div>
@@ -1892,12 +1912,17 @@
 
         calDaysGrid.innerHTML = '';
 
+        // Weekday names
+      const WEEKDAYS_NAMES_SK = ['Nedeľa', 'Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota'];
+
         // Previous month filler days
         for (let i = startDayOfWeek - 1; i >= 0; i--) {
           const dayNum = prevMonthLastDay - i;
           const cell = document.createElement('div');
           cell.className = 'cal-day-cell other-month';
-          cell.innerHTML = `<div class="cal-day-header"><span class="cal-day-num">${dayNum}</span></div>`;
+          const prevDateObj = new Date(year, month - 1, dayNum);
+          const dayName = WEEKDAYS_NAMES_SK[prevDateObj.getDay()];
+          cell.innerHTML = `<div class="cal-day-header"><span class="cal-day-num">${dayNum}</span><span class="cal-day-name">${dayName}</span></div>`;
           calDaysGrid.appendChild(cell);
         }
 
@@ -1917,10 +1942,13 @@
             cell.classList.add('today');
           }
 
-          // Header
+          const curDateObj = new Date(year, month, day);
+          const dayName = WEEKDAYS_NAMES_SK[curDateObj.getDay()];
+
+          // Header with Date number and Day Name
           const dayHeader = document.createElement('div');
           dayHeader.className = 'cal-day-header';
-          dayHeader.innerHTML = `<span class="cal-day-num">${day}</span>`;
+          dayHeader.innerHTML = `<span class="cal-day-num">${day}</span><span class="cal-day-name">${dayName}</span>`;
           cell.appendChild(dayHeader);
 
           // Bookings container
@@ -2046,7 +2074,9 @@
         for (let j = 1; j <= remainingCells; j++) {
           const cell = document.createElement('div');
           cell.className = 'cal-day-cell other-month';
-          cell.innerHTML = `<div class="cal-day-header"><span class="cal-day-num">${j}</span></div>`;
+          const nextDateObj = new Date(year, month + 1, j);
+          const dayName = WEEKDAYS_NAMES_SK[nextDateObj.getDay()];
+          cell.innerHTML = `<div class="cal-day-header"><span class="cal-day-num">${j}</span><span class="cal-day-name">${dayName}</span></div>`;
           calDaysGrid.appendChild(cell);
         }
       }

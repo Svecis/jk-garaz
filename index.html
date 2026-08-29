@@ -1518,17 +1518,31 @@
     /* RESPONSIVENESS */
     @media (max-width: 768px) {
       .top-nav-bar {
-        top: 12px;
-        right: 12px;
-        gap: 8px;
+        top: 8px;
+        right: 8px;
+        gap: 5px;
+        z-index: 120;
+      }
+      .lang-switcher-box {
+        padding: 2px;
+        gap: 2px;
       }
       .lang-btn {
-        padding: 5px 9px;
-        font-size: 0.72rem;
+        padding: 4px 7px;
+        font-size: 0.68rem;
       }
       #active-bookings-badge {
-        padding: 6px 12px;
-        font-size: 0.75rem;
+        padding: 5px 8px;
+        font-size: 0.72rem;
+        gap: 5px;
+      }
+      #active-bookings-badge span[data-i18n="nav_bookings"] {
+        display: none;
+      }
+      .admin-portal-link {
+        padding: 5px 8px;
+        font-size: 0.72rem;
+        gap: 4px;
       }
       .part-category-bar {
         width: 95%;
@@ -3015,13 +3029,14 @@
         });
       }
 
-      // Jump straight to exploded view from Hero CTA (Smooth 3.2s cinematic glide)
+// Jump straight to exploded view from Hero CTA (Slow, cinematic, silky smooth on mobile & PC)
       heroJumpBtn.addEventListener('click', () => {
         const trigger = ScrollTrigger.getById('sequence-scroll');
         if (trigger) {
+          const isMobile = window.innerWidth <= 768;
           gsap.to(window, {
             scrollTo: trigger.end - 50,
-            duration: 3.2,
+            duration: isMobile ? 5.5 : 3.8, // Extra slow & majestic on mobile
             ease: "power1.inOut"
           });
         }

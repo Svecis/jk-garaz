@@ -1643,6 +1643,16 @@
             return false;
           });
 
+          // Chronologické zoradenie podľa času (od rána do večera)
+          matchingBookings.sort((a, b) => {
+            const timeToMin = (t) => {
+              if (!t) return 0;
+              const p = String(t).trim().split(':');
+              return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
+            };
+            return timeToMin(a.time) - timeToMin(b.time);
+          });
+
           matchingBookings.forEach(b => {
             const chip = document.createElement('div');
             chip.className = `cal-booking-chip chip-${b.status || 'pending'}`;

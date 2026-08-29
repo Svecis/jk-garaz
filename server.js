@@ -49,6 +49,7 @@ const MIME_TYPES = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.svg': 'image/svg+xml',
+  '.webp': 'image/webp',
   '.wav': 'audio/wav',
   '.mp3': 'audio/mpeg',
   '.ico': 'image/x-icon'

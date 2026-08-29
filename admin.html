@@ -920,6 +920,107 @@
       from { transform: translateY(20px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
+  
+    /* =========================================================
+       MOBILE RESPONSIVE STYLES
+       ========================================================= */
+    @media (max-width: 768px) {
+      .top-bar {
+        padding: 12px 16px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .brand-section {
+        justify-content: space-between;
+      }
+
+      .view-switcher {
+        width: 100%;
+      }
+
+      .view-tab {
+        flex: 1;
+        text-align: center;
+        padding: 8px 10px;
+      }
+
+      .top-links {
+        overflow-x: auto;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+        gap: 8px;
+      }
+
+      .content-container {
+        padding: 16px 12px;
+        gap: 16px;
+      }
+
+      .search-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .search-box {
+        max-width: 100%;
+      }
+
+      .table-card {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .custom-table {
+        min-width: 600px;
+      }
+
+      .cal-header-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .cal-title-section {
+        justify-content: space-between;
+      }
+
+      .cal-legend {
+        justify-content: flex-start;
+        gap: 10px;
+      }
+
+      .cal-grid-card {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .cal-weekdays-row, .cal-days-grid {
+        min-width: 620px;
+      }
+
+      .cal-day-cell {
+        min-height: 95px;
+        padding: 6px 6px;
+      }
+
+      .cal-booking-chip {
+        padding: 4px 6px;
+      }
+
+      .time-modal-card, .modal-card {
+        padding: 20px 16px;
+        max-width: 95%;
+      }
+
+      .time-grid-slots {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
   </style>
 </head>
 <body>

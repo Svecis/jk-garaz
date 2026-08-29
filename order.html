@@ -701,7 +701,12 @@
                 </div>
                 <div class="kv-row">
                   <span class="kv-label">Termín pristavenia vozidla</span>
-                  <span class="kv-val">${escapeHtml(b.date || '-')} o ${escapeHtml(b.time || '-')}</span>
+                  <span class="kv-val">
+                    ${escapeHtml(b.date || '-')} o 
+                    <select id="order-time-select" style="background:#181c27; border:1px solid rgba(255,255,255,0.15); color:#fff; font-family:'Space Mono', monospace; font-size:0.85rem; font-weight:700; padding:2px 8px; border-radius:6px; outline:none; cursor:pointer;">
+                      ${['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'].map(t => `<option value="${t}" ${b.time === t ? 'selected' : ''}>${t}</option>`).join('')}
+                    </select>
+                  </span>
                 </div>
                 <div class="kv-row">
                   <span class="kv-label">Pridelený mechanik</span>
@@ -838,6 +843,15 @@
             lightboxOverlay.classList.add('open');
           });
         });
+
+        // Zmena času
+        const timeSelect = document.getElementById('order-time-select');
+        if (timeSelect) {
+          timeSelect.addEventListener('change', (e) => {
+            b.time = e.target.value;
+            saveAllBookings(bookings);
+          });
+        }
 
         // Zmazanie
         document.getElementById('delete-order-btn').addEventListener('click', () => {

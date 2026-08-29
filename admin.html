@@ -564,6 +564,83 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
+    
+    /* Time Button on Chip */
+    .chip-time-btn {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: var(--accent);
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: 0.72rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.15s;
+    }
+
+    .chip-time-btn:hover {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .chip-time-arrow {
+      font-size: 0.6rem;
+      opacity: 0.8;
+    }
+
+    /* Time Picker Modal */
+    .time-modal-card {
+      background: #141824;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      max-width: 440px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .time-grid-slots {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .time-slot-btn {
+      background: var(--card-elevated);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 4px;
+      border-radius: 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .time-slot-btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .time-slot-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
     /* CALENDAR GRID */
     .cal-grid-card {
       background: var(--card-bg);
@@ -1262,12 +1339,31 @@
       }
 
       // =========================================================
-      // CALENDAR RENDER ENGINE WITH DRAG & DROP
+      // CALENDAR RENDER ENGINE WITH DRAG & DROP & TIME CHANGER
       // =========================================================
       const WEEKDAYS_SHORT_SK = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'];
       const MONTHS_SHORT_SK = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
       const rescheduleToast = document.getElementById('reschedule-toast');
       let toastTimer = null;
+
+      // Time Picker Modal Elements
+      const timePickerModal = document.getElementById('time-picker-modal');
+      const timeModalTitle = document.getElementById('time-modal-title');
+      const timeModalSubtitle = document.getElementById('time-modal-subtitle');
+      const timeModalClose = document.getElementById('time-modal-close');
+      const timeSlotsContainer = document.getElementById('time-slots-container');
+      const customTimeInput = document.getElementById('custom-time-input');
+      const btnSaveCustomTime = document.getElementById('btn-save-custom-time');
+
+      let activeTimeBooking = null;
+
+      const TIME_SLOTS = [
+        '08:00', '08:30', '09:00', '09:30',
+        '10:00', '10:30', '11:00', '11:30',
+        '12:00', '12:30', '13:00', '13:30',
+        '14:00', '14:30', '15:00', '15:30',
+        '16:00', '16:30', '17:00', '17:30'
+      ];
 
       function showRescheduleToast(msg) {
         if (!rescheduleToast) return;
@@ -1278,6 +1374,54 @@
           rescheduleToast.style.display = 'none';
         }, 3500);
       }
+
+      function openTimePicker(booking) {
+        activeTimeBooking = booking;
+        timeModalSubtitle.textContent = `Zákazka #${booking.id} • ${booking.customer} (${formatPlate(booking.plate)})`;
+        customTimeInput.value = booking.time || '10:00';
+
+        timeSlotsContainer.innerHTML = '';
+        TIME_SLOTS.forEach(slot => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `time-slot-btn ${(booking.time === slot) ? 'active' : ''}`;
+          btn.textContent = slot;
+
+          btn.addEventListener('click', () => {
+            applyNewTime(slot);
+          });
+
+          timeSlotsContainer.appendChild(btn);
+        });
+
+        timePickerModal.classList.add('open');
+      }
+
+      function applyNewTime(newTime) {
+        if (!activeTimeBooking || !newTime) return;
+        const cleanTime = newTime.trim();
+        activeTimeBooking.time = cleanTime;
+        saveData();
+        renderCalendar();
+        renderTable();
+        timePickerModal.classList.remove('open');
+        showRescheduleToast(`Čas zákazky #${activeTimeBooking.id} (${activeTimeBooking.customer}) bol zmenený na ${cleanTime}!`);
+      }
+
+      timeModalClose.addEventListener('click', () => {
+        timePickerModal.classList.remove('open');
+      });
+
+      timePickerModal.addEventListener('click', (e) => {
+        if (e.target === timePickerModal) timePickerModal.classList.remove('open');
+      });
+
+      btnSaveCustomTime.addEventListener('click', () => {
+        const val = customTimeInput.value.trim();
+        if (val) {
+          applyNewTime(val);
+        }
+      });
 
       function renderCalendar() {
         const year = calendarDate.getFullYear();
@@ -1351,16 +1495,28 @@
 
             chip.innerHTML = `
               <div class="chip-time-cust">
-                <span class="chip-time">${escapeHtml(b.time || '10:00')}</span>
+                <button type="button" class="chip-time-btn" title="Kliknite pre zmenu času">
+                  <span>${escapeHtml(b.time || '10:00')}</span>
+                  <span class="chip-time-arrow">&#9662;</span>
+                </button>
                 <span class="chip-cust">${escapeHtml(b.customer || 'Zákazník')}</span>
               </div>
               <div class="chip-detail-sub">${escapeHtml(plateClean)} &bull; [${escapeHtml(b.partCode || 'P')}]</div>
             `;
 
-            chip.title = `Uchopením presuniete na iný deň. Dvojklikom otvoríte kartu.`;
+            chip.title = `Uchopením presuniete na iný deň. Kliknutím na čas zmeníte hodinu. Kliknutím mimo času otvoríte kartu.`;
 
-            // Click to open order
+            // Time button click event
+            const timeBtn = chip.querySelector('.chip-time-btn');
+            timeBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              openTimePicker(b);
+            });
+
+            // Click to open order (if not clicking time button)
             chip.addEventListener('click', (e) => {
+              if (e.target.closest('.chip-time-btn')) return;
               if (chip.classList.contains('dragged-recently')) return;
               window.open('order.html?id=' + encodeURIComponent(b.id), '_blank');
             });
@@ -1434,6 +1590,12 @@
           calDaysGrid.appendChild(cell);
         }
       }
+
+      // CALENDAR NAVIGATION (PREV / NEXT / TODAY)
+      calPrevBtn.addEventListener('click', () => {
+        calendarDate.setMonth(calendarDate.getMonth() - 1);
+        renderCalendar();
+      });
 
       calNextBtn.addEventListener('click', () => {
         calendarDate.setMonth(calendarDate.getMonth() + 1);
@@ -1589,5 +1751,34 @@
     })();
   </script>
   <div class="reschedule-toast" id="reschedule-toast"></div>
+
+  <!-- Time Picker Modal -->
+  <div class="modal-overlay" id="time-picker-modal">
+    <div class="time-modal-card">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="time-modal-title">Zmena času termínu</div>
+          <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;" id="time-modal-subtitle">Zákazka #JK-482019 &bull; Peter Novák</div>
+        </div>
+        <button type="button" class="modal-close" id="time-modal-close">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Vyberte nový čas príchodu do servisu:</label>
+        <div class="time-grid-slots" id="time-slots-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:4px;">
+        <label class="form-label">Alebo zadajte vlastný čas:</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="custom-time-input" class="form-input" placeholder="napr. 09:15" style="flex:1;">
+          <button type="button" class="btn-save" id="btn-save-custom-time" style="padding:8px 16px;">Nastaviť</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

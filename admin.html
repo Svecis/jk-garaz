@@ -516,6 +516,54 @@
       border-radius: 50%;
     }
 
+    
+    /* Drag & Drop Visuals */
+    .cal-booking-chip {
+      cursor: grab;
+      user-select: none;
+      -webkit-user-drag: element;
+    }
+
+    .cal-booking-chip:active {
+      cursor: grabbing;
+    }
+
+    .cal-booking-chip.dragging {
+      opacity: 0.35;
+      transform: scale(0.96);
+    }
+
+    .cal-day-cell.drag-over {
+      background: rgba(56, 189, 248, 0.12) !important;
+      outline: 2px dashed var(--accent) !important;
+      outline-offset: -2px;
+    }
+
+    /* Reschedule Toast */
+    .reschedule-toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: #1e293b;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      animation: slideUpToast 0.25s ease-out;
+    }
+
+    @keyframes slideUpToast {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
     /* CALENDAR GRID */
     .cal-grid-card {
       background: var(--card-bg);
@@ -1214,20 +1262,33 @@
       }
 
       // =========================================================
-      // CALENDAR RENDER ENGINE
+      // CALENDAR RENDER ENGINE WITH DRAG & DROP
       // =========================================================
+      const WEEKDAYS_SHORT_SK = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'];
+      const MONTHS_SHORT_SK = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
+      const rescheduleToast = document.getElementById('reschedule-toast');
+      let toastTimer = null;
+
+      function showRescheduleToast(msg) {
+        if (!rescheduleToast) return;
+        rescheduleToast.textContent = msg;
+        rescheduleToast.style.display = 'flex';
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          rescheduleToast.style.display = 'none';
+        }, 3500);
+      }
+
       function renderCalendar() {
         const year = calendarDate.getFullYear();
         const month = calendarDate.getMonth();
 
         calMonthTitle.textContent = `${MONTH_NAMES_SK[month]} ${year}`;
 
-        // First day of month and total days
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
         const totalDays = lastDay.getDate();
 
-        // Day of week for 1st (0 = Sunday, 1 = Monday... convert to Mon=0, Sun=6)
         let startDayOfWeek = firstDay.getDay() - 1;
         if (startDayOfWeek === -1) startDayOfWeek = 6;
 
@@ -1252,6 +1313,10 @@
         for (let day = 1; day <= totalDays; day++) {
           const cell = document.createElement('div');
           cell.className = 'cal-day-cell';
+          cell.dataset.day = day;
+          cell.dataset.month = month;
+          cell.dataset.year = year;
+
           if (isCurrentMonth && day === todayDateNum) {
             cell.classList.add('today');
           }
@@ -1262,14 +1327,13 @@
           dayHeader.innerHTML = `<span class="cal-day-num">${day}</span>`;
           cell.appendChild(dayHeader);
 
-          // Find bookings for this day
+          // Bookings container
           const dayBookingsContainer = document.createElement('div');
           dayBookingsContainer.className = 'cal-day-bookings';
 
-          // Match by string parsing (e.g. "1. Sep", "2. Sep", "15. Sep") or exact date
+          // Match bookings by date
           const matchingBookings = bookings.filter(b => {
             if (!b.date) return false;
-            // Match pattern like "Po, 1. Sep" or "1. Sep"
             const numMatch = b.date.match(/(\d+)\./);
             if (numMatch && parseInt(numMatch[1], 10) === day) {
               return true;
@@ -1278,10 +1342,10 @@
           });
 
           matchingBookings.forEach(b => {
-            const chip = document.createElement('a');
-            chip.href = 'order.html?id=' + encodeURIComponent(b.id);
-            chip.target = '_blank';
+            const chip = document.createElement('div');
             chip.className = `cal-booking-chip chip-${b.status || 'pending'}`;
+            chip.setAttribute('draggable', 'true');
+            chip.dataset.id = b.id;
             
             const plateClean = formatPlate(b.plate);
 
@@ -1293,16 +1357,74 @@
               <div class="chip-detail-sub">${escapeHtml(plateClean)} &bull; [${escapeHtml(b.partCode || 'P')}]</div>
             `;
 
-            chip.title = `Zákazka #${b.id}: ${b.customer} (${plateClean}) - ${b.partName}`;
+            chip.title = `Uchopením presuniete na iný deň. Dvojklikom otvoríte kartu.`;
+
+            // Click to open order
+            chip.addEventListener('click', (e) => {
+              if (chip.classList.contains('dragged-recently')) return;
+              window.open('order.html?id=' + encodeURIComponent(b.id), '_blank');
+            });
+
+            // DRAG EVENTS FOR CHIP
+            chip.addEventListener('dragstart', (e) => {
+              e.dataTransfer.setData('text/plain', b.id);
+              e.dataTransfer.effectAllowed = 'move';
+              chip.classList.add('dragging');
+            });
+
+            chip.addEventListener('dragend', () => {
+              chip.classList.remove('dragging');
+              chip.classList.add('dragged-recently');
+              setTimeout(() => chip.classList.remove('dragged-recently'), 300);
+            });
 
             dayBookingsContainer.appendChild(chip);
           });
 
           cell.appendChild(dayBookingsContainer);
+
+          // DROP ZONE EVENTS FOR DAY CELL
+          cell.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            cell.classList.add('drag-over');
+          });
+
+          cell.addEventListener('dragleave', (e) => {
+            if (!cell.contains(e.relatedTarget)) {
+              cell.classList.remove('drag-over');
+            }
+          });
+
+          cell.addEventListener('drop', (e) => {
+            e.preventDefault();
+            cell.classList.remove('drag-over');
+
+            const draggedId = e.dataTransfer.getData('text/plain');
+            if (!draggedId) return;
+
+            const targetBooking = bookings.find(x => x.id === draggedId);
+            if (!targetBooking) return;
+
+            const targetDateObj = new Date(year, month, day);
+            const weekdayName = WEEKDAYS_SHORT_SK[targetDateObj.getDay()];
+            const monthName = MONTHS_SHORT_SK[month];
+            const newDateString = `${weekdayName}, ${day}. ${monthName}`;
+
+            if (targetBooking.date === newDateString) return;
+
+            targetBooking.date = newDateString;
+            saveData();
+            renderCalendar();
+            renderTable();
+
+            showRescheduleToast(`Zákazka #${targetBooking.id} (${targetBooking.customer}) bola presunutá na ${newDateString}!`);
+          });
+
           calDaysGrid.appendChild(cell);
         }
 
-        // Next month filler days to complete 7-day grid rows (35 or 42 cells)
+        // Next month filler days
         const totalRendered = startDayOfWeek + totalDays;
         const remainingCells = (totalRendered % 7 === 0) ? 0 : (7 - (totalRendered % 7));
         for (let j = 1; j <= remainingCells; j++) {
@@ -1312,12 +1434,6 @@
           calDaysGrid.appendChild(cell);
         }
       }
-
-      // Calendar Navigation Events
-      calPrevBtn.addEventListener('click', () => {
-        calendarDate.setMonth(calendarDate.getMonth() - 1);
-        renderCalendar();
-      });
 
       calNextBtn.addEventListener('click', () => {
         calendarDate.setMonth(calendarDate.getMonth() + 1);
@@ -1472,5 +1588,6 @@
       renderCalendar();
     })();
   </script>
+  <div class="reschedule-toast" id="reschedule-toast"></div>
 </body>
 </html>

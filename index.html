@@ -3022,7 +3022,10 @@
           gsap.to(window, {
             scrollTo: trigger.end - 50,
             duration: 3.2,
-            ease: "power1.inOut"
+            ease: "power1.inOut",
+            onUpdate: () => {
+              ScrollTrigger.update();
+            }
           });
         }
       });

@@ -2888,28 +2888,8 @@
 
         if (!img) return;
 
-        // 1. Čisté plátno splývajúce s tmavým pozadím
         ctx.clearRect(0, 0, cachedCw, cachedCh);
-
-        // 2. Vykreslenie snímky do offscreen canvasu
-        offCtx.clearRect(0, 0, cachedDw, cachedDh);
-        offCtx.drawImage(img, 0, 0, cachedDw, cachedDh);
-
-        // 3. Aplikácia zmäkčovacích prechodov na všetky 4 strany
-        const f = Math.round(Math.min(cachedDw, cachedDh) * 0.18);
-        offCtx.globalCompositeOperation = 'destination-out';
-        offCtx.fillStyle = cachedGradLeft;
-        offCtx.fillRect(0, 0, f, cachedDh);
-        offCtx.fillStyle = cachedGradRight;
-        offCtx.fillRect(cachedDw - f, 0, f, cachedDh);
-        offCtx.fillStyle = cachedGradTop;
-        offCtx.fillRect(0, 0, cachedDw, f);
-        offCtx.fillStyle = cachedGradBottom;
-        offCtx.fillRect(0, cachedDh - f, cachedDw, f);
-        offCtx.globalCompositeOperation = 'source-over';
-
-        // 4. Bleskový prenos do hlavného plátna (hardware GPU blit)
-        ctx.drawImage(offCanvas, cachedOffsetX, cachedOffsetY);
+        ctx.drawImage(img, cachedOffsetX, cachedOffsetY, cachedDw, cachedDh);
       }
 
       function initScrollTrigger() {
@@ -3020,34 +3000,17 @@
         });
       }
 
-      // Jump straight to exploded view from Hero CTA (100% plynulý rozklad pre iOS Safari aj PC)
+      // Jump straight to exploded view from Hero CTA (Čistý 1-fázový plynulý scroll bez sekania a bez dvojitého prehrávania)
       heroJumpBtn.addEventListener('click', () => {
         const trigger = ScrollTrigger.getById('sequence-scroll');
-        if (!trigger) return;
-
-        // 1. Rýchle vycentrovanie na plátno
-        window.scrollTo({ top: trigger.start, behavior: 'smooth' });
-
-        // 2. Inicializácia celého auta
-        playhead.frame = 0;
-        render();
-
-        // 3. Spustenie rozkladu priamo na canvas po usadení scrollu
-        setTimeout(() => {
-          gsap.to(playhead, {
-            frame: FRAME_COUNT - 1,
-            duration: 3.8,
-            ease: "power1.inOut",
-            onUpdate: () => {
-              render();
-              updateDiagnosticState(playhead.frame / (FRAME_COUNT - 1));
-            },
-            onComplete: () => {
-              window.scrollTo({ top: trigger.end - 50, behavior: 'auto' });
-              updateDiagnosticState(1);
-            }
+        if (trigger) {
+          gsap.to(window, {
+            scrollTo: trigger.end - 50,
+            duration: 2.8,
+            ease: "power2.inOut",
+            overwrite: "auto"
           });
-        }, 250);
+        }
       });
 
       // =========================================================

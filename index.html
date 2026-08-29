@@ -3019,14 +3019,26 @@
         });
       }
 
-// Jump straight to exploded view from Hero CTA (Slow, smooth, cinematic 4.5s glide)
+      // Jump straight to exploded view from Hero CTA (Plynulá animácia snímok priamo na canvas)
       heroJumpBtn.addEventListener('click', () => {
         const trigger = ScrollTrigger.getById('sequence-scroll');
         if (trigger) {
+          // 1. Plynulý posun okna
           gsap.to(window, {
             scrollTo: trigger.end - 50,
-            duration: 4.5,
+            duration: 4.2,
             ease: "power1.inOut"
+          });
+
+          // 2. Priame animovanie snímok 60fps pre mobil aj PC (zaručuje plynulý rozklad bez spoliehania sa na scroll eventy)
+          gsap.to(playhead, {
+            frame: FRAME_COUNT - 1,
+            duration: 4.2,
+            ease: "power1.inOut",
+            onUpdate: () => {
+              render();
+              updateDiagnosticState(playhead.frame / (FRAME_COUNT - 1));
+            }
           });
         }
       });

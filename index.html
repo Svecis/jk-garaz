@@ -3019,40 +3019,34 @@
         });
       }
 
-      // Jump straight to exploded view from Hero CTA (Plynulá animácia priamo pred očami)
+      // Jump straight to exploded view from Hero CTA (100% plynulý rozklad pre iOS Safari aj PC)
       heroJumpBtn.addEventListener('click', () => {
         const trigger = ScrollTrigger.getById('sequence-scroll');
-        if (trigger) {
-          // Začneme od zmontovaného auta
-          playhead.frame = 0;
-          render();
+        if (!trigger) return;
 
-          const tl = gsap.timeline();
+        // 1. Rýchle vycentrovanie na plátno
+        window.scrollTo({ top: trigger.start, behavior: 'smooth' });
 
-          // 1. Fáza: Plynulé zarovnanie na stred plátna s celým autom (0.4s)
-          tl.to(window, {
-            scrollTo: trigger.start,
-            duration: 0.45,
-            ease: "power2.out"
-          });
+        // 2. Inicializácia celého auta
+        playhead.frame = 0;
+        render();
 
-          // 2. Fáza: Pomalý a filmový rozklad auta priamo na obrazovke (4.2s)
-          tl.to(window, {
-            scrollTo: trigger.end - 50,
-            duration: 4.2,
-            ease: "power1.inOut"
-          }, "+=0.05");
-
-          tl.to(playhead, {
+        // 3. Spustenie rozkladu priamo na canvas po usadení scrollu
+        setTimeout(() => {
+          gsap.to(playhead, {
             frame: FRAME_COUNT - 1,
-            duration: 4.2,
+            duration: 3.8,
             ease: "power1.inOut",
             onUpdate: () => {
               render();
               updateDiagnosticState(playhead.frame / (FRAME_COUNT - 1));
+            },
+            onComplete: () => {
+              window.scrollTo({ top: trigger.end - 50, behavior: 'auto' });
+              updateDiagnosticState(1);
             }
-          }, "<");
-        }
+          });
+        }, 250);
       });
 
       // =========================================================

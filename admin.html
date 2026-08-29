@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AutoMek Admin — Správa zákaziek a Kalendár</title>
+  <title>AutoMek Admin — Správa zákaziek a Servisný kalendár</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -516,131 +516,6 @@
       border-radius: 50%;
     }
 
-    
-    /* Drag & Drop Visuals */
-    .cal-booking-chip {
-      cursor: grab;
-      user-select: none;
-      -webkit-user-drag: element;
-    }
-
-    .cal-booking-chip:active {
-      cursor: grabbing;
-    }
-
-    .cal-booking-chip.dragging {
-      opacity: 0.35;
-      transform: scale(0.96);
-    }
-
-    .cal-day-cell.drag-over {
-      background: rgba(56, 189, 248, 0.12) !important;
-      outline: 2px dashed var(--accent) !important;
-      outline-offset: -2px;
-    }
-
-    /* Reschedule Toast */
-    .reschedule-toast {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      background: #1e293b;
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      z-index: 200;
-      display: none;
-      align-items: center;
-      gap: 10px;
-      animation: slideUpToast 0.25s ease-out;
-    }
-
-    @keyframes slideUpToast {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    
-    /* Time Button on Chip */
-    .chip-time-btn {
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      color: var(--accent);
-      font-family: 'Space Mono', monospace;
-      font-weight: 700;
-      font-size: 0.72rem;
-      padding: 1px 6px;
-      border-radius: 4px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      transition: all 0.15s;
-    }
-
-    .chip-time-btn:hover {
-      background: var(--accent);
-      color: #000;
-      border-color: var(--accent);
-    }
-
-    .chip-time-arrow {
-      font-size: 0.6rem;
-      opacity: 0.8;
-    }
-
-    /* Time Picker Modal */
-    .time-modal-card {
-      background: #141824;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 14px;
-      max-width: 440px;
-      width: 100%;
-      padding: 24px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .time-grid-slots {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-top: 6px;
-    }
-
-    .time-slot-btn {
-      background: var(--card-elevated);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #fff;
-      font-family: 'Space Mono', monospace;
-      font-size: 0.85rem;
-      font-weight: 600;
-      padding: 8px 4px;
-      border-radius: 6px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .time-slot-btn:hover {
-      background: rgba(56, 189, 248, 0.15);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .time-slot-btn.active {
-      background: var(--accent);
-      color: #000;
-      border-color: var(--accent);
-      font-weight: 700;
-    }
-
     /* CALENDAR GRID */
     .cal-grid-card {
       background: var(--card-bg);
@@ -733,12 +608,28 @@
       border-radius: 4px;
       font-size: 0.74rem;
       color: #fff;
-      cursor: pointer;
+      cursor: grab;
       display: flex;
       flex-direction: column;
       gap: 2px;
       transition: all 0.15s;
       text-decoration: none;
+      user-select: none;
+    }
+
+    .cal-booking-chip:active {
+      cursor: grabbing;
+    }
+
+    .cal-booking-chip.dragging {
+      opacity: 0.35;
+      transform: scale(0.96);
+    }
+
+    .cal-day-cell.drag-over {
+      background: rgba(56, 189, 248, 0.12) !important;
+      outline: 2px dashed var(--accent) !important;
+      outline-offset: -2px;
     }
 
     .cal-booking-chip:hover {
@@ -760,11 +651,31 @@
       gap: 4px;
     }
 
-    .chip-time {
-      font-weight: 700;
+    .chip-time-btn {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
       color: var(--accent);
       font-family: 'Space Mono', monospace;
-      font-size: 0.7rem;
+      font-weight: 700;
+      font-size: 0.72rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.15s;
+    }
+
+    .chip-time-btn:hover {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .chip-time-arrow {
+      font-size: 0.6rem;
+      opacity: 0.8;
     }
 
     .chip-cust {
@@ -811,6 +722,53 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
+    }
+
+    .time-modal-card {
+      background: #141824;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      max-width: 440px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .time-grid-slots {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .time-slot-btn {
+      background: var(--card-elevated);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 4px;
+      border-radius: 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .time-slot-btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .time-slot-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-weight: 700;
     }
 
     .modal-header {
@@ -935,6 +893,31 @@
       border: 1px solid rgba(248, 113, 113, 0.35);
       color: #f87171;
     }
+
+    /* Reschedule Toast */
+    .reschedule-toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: #1e293b;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      animation: slideUpToast 0.25s ease-out;
+    }
+
+    @keyframes slideUpToast {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -957,9 +940,9 @@
         <span class="live-dot"></span>
         <span>Živá synchronizácia</span>
       </div>
-      <button type="button" class="top-btn top-btn-accent" id="open-brevo-modal-btn">Nastavenia Brevo SMTP</button>
       <button type="button" class="top-btn" id="btn-reset-demo-data" style="color:var(--accent); border-color:rgba(56,189,248,0.3); font-weight:600;">Obnoviť 10 demo zákaziek</button>
       <button type="button" class="top-btn" id="add-test-booking-btn">+ Pridať zákazku</button>
+      <button type="button" class="top-btn top-btn-accent" id="open-brevo-modal-btn">Nastavenia Brevo SMTP</button>
       <a href="index.html" class="top-btn" target="_blank">Web pre zákazníkov</a>
     </div>
   </header>
@@ -967,9 +950,7 @@
   <!-- Workspace Container -->
   <main class="content-container">
     
-    <!-- ======================================================= -->
     <!-- VIEW 1: TABLE LIST -->
-    <!-- ======================================================= -->
     <div class="view-section active" id="section-table">
       
       <!-- Search row -->
@@ -983,7 +964,7 @@
             autocomplete="off"
           >
         </div>
-        <span class="results-count" id="results-count">3 zákazky</span>
+        <span class="results-count" id="results-count">10 zákaziek</span>
       </div>
 
       <!-- Table Container -->
@@ -1006,9 +987,7 @@
 
     </div>
 
-    <!-- ======================================================= -->
     <!-- VIEW 2: CALENDAR VIEW -->
-    <!-- ======================================================= -->
     <div class="view-section" id="section-calendar">
       
       <!-- Calendar Controls & Legend -->
@@ -1084,6 +1063,37 @@
     </div>
   </div>
 
+  <!-- Time Picker Modal -->
+  <div class="modal-overlay" id="time-picker-modal">
+    <div class="time-modal-card">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="time-modal-title">Zmena času termínu</div>
+          <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;" id="time-modal-subtitle">Zákazka #JK-482019 &bull; Peter Novák</div>
+        </div>
+        <button type="button" class="modal-close" id="time-modal-close">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Vyberte nový čas príchodu do servisu:</label>
+        <div class="time-grid-slots" id="time-slots-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:4px;">
+        <label class="form-label">Alebo zadajte vlastný čas:</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="custom-time-input" class="form-input" placeholder="napr. 09:15" style="flex:1;">
+          <button type="button" class="btn-save" id="btn-save-custom-time" style="padding:8px 16px;">Nastaviť</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reschedule-toast" id="reschedule-toast"></div>
+
+  <!-- MAIN SCRIPT -->
   <script>
     (function() {
       const STORAGE_KEY = 'automek_bookings';
@@ -1099,6 +1109,7 @@
       const tableBody = document.getElementById('table-body');
       const resultsCount = document.getElementById('results-count');
       const addTestBtn = document.getElementById('add-test-booking-btn');
+      const btnResetDemo = document.getElementById('btn-reset-demo-data');
 
       // Calendar View Elements
       const calMonthTitle = document.getElementById('cal-month-title');
@@ -1106,6 +1117,18 @@
       const calPrevBtn = document.getElementById('cal-prev-btn');
       const calNextBtn = document.getElementById('cal-next-btn');
       const calTodayBtn = document.getElementById('cal-today-btn');
+
+      // Time Picker Modal Elements
+      const timePickerModal = document.getElementById('time-picker-modal');
+      const timeModalTitle = document.getElementById('time-modal-title');
+      const timeModalSubtitle = document.getElementById('time-modal-subtitle');
+      const timeModalClose = document.getElementById('time-modal-close');
+      const timeSlotsContainer = document.getElementById('time-slots-container');
+      const customTimeInput = document.getElementById('custom-time-input');
+      const btnSaveCustomTime = document.getElementById('btn-save-custom-time');
+      const rescheduleToast = document.getElementById('reschedule-toast');
+      let toastTimer = null;
+      let activeTimeBooking = null;
 
       // Brevo Modal Elements
       const brevoModal = document.getElementById('brevo-modal');
@@ -1115,8 +1138,8 @@
       const cfgSender = document.getElementById('cfg-brevo-sender');
       const cfgKey = document.getElementById('cfg-brevo-key');
       const modalStatus = document.getElementById('modal-status-msg');
-      const btnSave = document.getElementById('btn-save-brevo');
-      const btnTest = document.getElementById('btn-test-brevo');
+      const btnSaveBrevo = document.getElementById('btn-save-brevo');
+      const btnTestBrevo = document.getElementById('btn-test-brevo');
 
       let bookings = [];
       let calendarDate = new Date(2026, 8, 1); // September 2026
@@ -1125,22 +1148,26 @@
         'Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún',
         'Júl', 'August', 'September', 'Október', 'November', 'December'
       ];
+      const WEEKDAYS_SHORT_SK = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'];
+      const MONTHS_SHORT_SK = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
 
-      // Tab Switching
-      tabTable.addEventListener('click', () => {
-        tabTable.classList.add('active');
-        tabCalendar.classList.remove('active');
-        sectionTable.classList.add('active');
-        sectionCalendar.classList.remove('active');
-      });
+      const TIME_SLOTS = [
+        '08:00', '08:30', '09:00', '09:30',
+        '10:00', '10:30', '11:00', '11:30',
+        '12:00', '12:30', '13:00', '13:30',
+        '14:00', '14:30', '15:00', '15:30',
+        '16:00', '16:30', '17:00', '17:30'
+      ];
 
-      tabCalendar.addEventListener('click', () => {
-        tabCalendar.classList.add('active');
-        tabTable.classList.remove('active');
-        sectionCalendar.classList.add('active');
-        sectionTable.classList.remove('active');
-        renderCalendar();
-      });
+      function showRescheduleToast(msg) {
+        if (!rescheduleToast) return;
+        rescheduleToast.textContent = msg;
+        rescheduleToast.style.display = 'flex';
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          rescheduleToast.style.display = 'none';
+        }, 3500);
+      }
 
       function getDefaultDemoBookings() {
         return [
@@ -1402,6 +1429,71 @@
         }
       });
 
+      // Tab Switching
+      tabTable.addEventListener('click', () => {
+        tabTable.classList.add('active');
+        tabCalendar.classList.remove('active');
+        sectionTable.classList.add('active');
+        sectionCalendar.classList.remove('active');
+      });
+
+      tabCalendar.addEventListener('click', () => {
+        tabCalendar.classList.add('active');
+        tabTable.classList.remove('active');
+        sectionCalendar.classList.add('active');
+        sectionTable.classList.remove('active');
+        renderCalendar();
+      });
+
+      // Time Picker Functions
+      function openTimePicker(booking) {
+        activeTimeBooking = booking;
+        timeModalSubtitle.textContent = `Zákazka #${booking.id} • ${booking.customer} (${formatPlate(booking.plate)})`;
+        customTimeInput.value = booking.time || '10:00';
+
+        timeSlotsContainer.innerHTML = '';
+        TIME_SLOTS.forEach(slot => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `time-slot-btn ${(booking.time === slot) ? 'active' : ''}`;
+          btn.textContent = slot;
+
+          btn.addEventListener('click', () => {
+            applyNewTime(slot);
+          });
+
+          timeSlotsContainer.appendChild(btn);
+        });
+
+        timePickerModal.classList.add('open');
+      }
+
+      function applyNewTime(newTime) {
+        if (!activeTimeBooking || !newTime) return;
+        const cleanTime = newTime.trim();
+        activeTimeBooking.time = cleanTime;
+        saveData();
+        renderCalendar();
+        renderTable();
+        timePickerModal.classList.remove('open');
+        showRescheduleToast(`Čas zákazky #${activeTimeBooking.id} (${activeTimeBooking.customer}) bol zmenený na ${cleanTime}!`);
+      }
+
+      timeModalClose.addEventListener('click', () => {
+        timePickerModal.classList.remove('open');
+      });
+
+      timePickerModal.addEventListener('click', (e) => {
+        if (e.target === timePickerModal) timePickerModal.classList.remove('open');
+      });
+
+      btnSaveCustomTime.addEventListener('click', () => {
+        const val = customTimeInput.value.trim();
+        if (val) {
+          applyNewTime(val);
+        }
+      });
+
       // Render Table
       function renderTable() {
         const query = searchInput.value.toLowerCase().trim();
@@ -1489,88 +1581,6 @@
       // =========================================================
       // CALENDAR RENDER ENGINE WITH DRAG & DROP & TIME CHANGER
       // =========================================================
-      const WEEKDAYS_SHORT_SK = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'];
-      const MONTHS_SHORT_SK = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
-      const rescheduleToast = document.getElementById('reschedule-toast');
-      let toastTimer = null;
-
-      // Time Picker Modal Elements
-      const timePickerModal = document.getElementById('time-picker-modal');
-      const timeModalTitle = document.getElementById('time-modal-title');
-      const timeModalSubtitle = document.getElementById('time-modal-subtitle');
-      const timeModalClose = document.getElementById('time-modal-close');
-      const timeSlotsContainer = document.getElementById('time-slots-container');
-      const customTimeInput = document.getElementById('custom-time-input');
-      const btnSaveCustomTime = document.getElementById('btn-save-custom-time');
-
-      let activeTimeBooking = null;
-
-      const TIME_SLOTS = [
-        '08:00', '08:30', '09:00', '09:30',
-        '10:00', '10:30', '11:00', '11:30',
-        '12:00', '12:30', '13:00', '13:30',
-        '14:00', '14:30', '15:00', '15:30',
-        '16:00', '16:30', '17:00', '17:30'
-      ];
-
-      function showRescheduleToast(msg) {
-        if (!rescheduleToast) return;
-        rescheduleToast.textContent = msg;
-        rescheduleToast.style.display = 'flex';
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => {
-          rescheduleToast.style.display = 'none';
-        }, 3500);
-      }
-
-      function openTimePicker(booking) {
-        activeTimeBooking = booking;
-        timeModalSubtitle.textContent = `Zákazka #${booking.id} • ${booking.customer} (${formatPlate(booking.plate)})`;
-        customTimeInput.value = booking.time || '10:00';
-
-        timeSlotsContainer.innerHTML = '';
-        TIME_SLOTS.forEach(slot => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = `time-slot-btn ${(booking.time === slot) ? 'active' : ''}`;
-          btn.textContent = slot;
-
-          btn.addEventListener('click', () => {
-            applyNewTime(slot);
-          });
-
-          timeSlotsContainer.appendChild(btn);
-        });
-
-        timePickerModal.classList.add('open');
-      }
-
-      function applyNewTime(newTime) {
-        if (!activeTimeBooking || !newTime) return;
-        const cleanTime = newTime.trim();
-        activeTimeBooking.time = cleanTime;
-        saveData();
-        renderCalendar();
-        renderTable();
-        timePickerModal.classList.remove('open');
-        showRescheduleToast(`Čas zákazky #${activeTimeBooking.id} (${activeTimeBooking.customer}) bol zmenený na ${cleanTime}!`);
-      }
-
-      timeModalClose.addEventListener('click', () => {
-        timePickerModal.classList.remove('open');
-      });
-
-      timePickerModal.addEventListener('click', (e) => {
-        if (e.target === timePickerModal) timePickerModal.classList.remove('open');
-      });
-
-      btnSaveCustomTime.addEventListener('click', () => {
-        const val = customTimeInput.value.trim();
-        if (val) {
-          applyNewTime(val);
-        }
-      });
-
       function renderCalendar() {
         const year = calendarDate.getFullYear();
         const month = calendarDate.getMonth();
@@ -1757,18 +1767,16 @@
 
       searchInput.addEventListener('input', renderTable);
 
-      
-      const btnResetDemo = document.getElementById('btn-reset-demo-data');
-      if (btnResetDemo) {
-        btnResetDemo.addEventListener('click', () => {
-          bookings = getDefaultDemoBookings();
-          saveData();
-          renderTable();
-          renderCalendar();
-          showRescheduleToast('Úspešne načítaných 10 testovacích zákaziek!');
-        });
-      }
+      // RESET DEMO DATA BUTTON
+      btnResetDemo.addEventListener('click', () => {
+        bookings = getDefaultDemoBookings();
+        saveData();
+        renderTable();
+        renderCalendar();
+        showRescheduleToast('Úspešne načítaných 10 testovacích zákaziek!');
+      });
 
+      // ADD TEST BOOKING
       addTestBtn.addEventListener('click', () => {
         const id = 'JK-' + Math.floor(100000 + Math.random() * 900000);
         bookings.unshift({
@@ -1780,7 +1788,7 @@
           partName: 'Kované disky & Športové brzdy',
           partCode: 'W',
           urgency: 'moderate',
-          date: 'Pi, 5. Sep',
+          date: 'Pi, 18. Sep',
           time: '11:00',
           price: '110 €',
           mechanic: 'Viktor Thorne',
@@ -1795,6 +1803,7 @@
         saveData();
         renderTable();
         renderCalendar();
+        showRescheduleToast('Nová testovacia zákazka bola pridaná!');
       });
 
       // Brevo Modal Events
@@ -1821,7 +1830,7 @@
         if (e.target === brevoModal) brevoModal.classList.remove('open');
       });
 
-      btnSave.addEventListener('click', () => {
+      btnSaveBrevo.addEventListener('click', () => {
         const payload = {
           recipientEmail: cfgRecipient.value.trim(),
           brevoSender: cfgSender.value.trim(),
@@ -1849,7 +1858,7 @@
         .catch(err => showStatus('Chyba spojenia: ' + err.message, true));
       });
 
-      btnTest.addEventListener('click', () => {
+      btnTestBrevo.addEventListener('click', () => {
         const payload = {
           recipientEmail: cfgRecipient.value.trim(),
           brevoSender: cfgSender.value.trim(),
@@ -1905,40 +1914,11 @@
           .replace(/'/g, '&#039;');
       }
 
+      // INITIALIZE
       loadData();
       renderTable();
       renderCalendar();
     })();
   </script>
-  <div class="reschedule-toast" id="reschedule-toast"></div>
-
-  <!-- Time Picker Modal -->
-  <div class="modal-overlay" id="time-picker-modal">
-    <div class="time-modal-card">
-      <div class="modal-header">
-        <div>
-          <div class="modal-title" id="time-modal-title">Zmena času termínu</div>
-          <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;" id="time-modal-subtitle">Zákazka #JK-482019 &bull; Peter Novák</div>
-        </div>
-        <button type="button" class="modal-close" id="time-modal-close">&times;</button>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Vyberte nový čas príchodu do servisu:</label>
-        <div class="time-grid-slots" id="time-slots-container">
-          <!-- Populated by JS -->
-        </div>
-      </div>
-
-      <div class="form-group" style="margin-top:4px;">
-        <label class="form-label">Alebo zadajte vlastný čas:</label>
-        <div style="display:flex; gap:8px;">
-          <input type="text" id="custom-time-input" class="form-input" placeholder="napr. 09:15" style="flex:1;">
-          <button type="button" class="btn-save" id="btn-save-custom-time" style="padding:8px 16px;">Nastaviť</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
 </body>
 </html>

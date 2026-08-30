@@ -2281,11 +2281,58 @@
         renderCalendar();
       });
 
-      // Time Picker Functions
+      // Helper to accurately parse any booking date string into a Date object
+      function parseBookingToDateObj(b) {
+        if (!b || !b.date) return new Date();
+        const s = String(b.date).trim();
+        
+        // 1. ISO YYYY-MM-DD
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+          const [y, m, d] = s.split('-').map(Number);
+          return new Date(y, m - 1, d);
+        }
+
+        // 2. D.M.YYYY
+        const dmyMatch = s.match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
+        if (dmyMatch) {
+          return new Date(parseInt(dmyMatch[3], 10), parseInt(dmyMatch[2], 10) - 1, parseInt(dmyMatch[1], 10));
+        }
+
+        // 3. Textový formát s názvom mesiaca, napr. 'Pondelok, 27. Júl 2026' alebo '27. August 2026'
+        const dayMatch = s.match(/(\d{1,2})\./);
+        const day = dayMatch ? parseInt(dayMatch[1], 10) : 1;
+
+        const yearMatch = s.match(/\b(20\d\d)\b/);
+        const year = yearMatch ? parseInt(yearMatch[1], 10) : new Date().getFullYear();
+
+        const monthsSK = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
+        let month = new Date().getMonth();
+        for (let i = 0; i < 12; i++) {
+          if (s.includes(MONTH_NAMES_SK[i]) || s.includes(monthsSK[i])) {
+            month = i;
+            break;
+          }
+        }
+
+        return new Date(year, month, day);
+      }
+
+      function parseBookingToIso(b) {
+        const d = parseBookingToDateObj(b);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+
+      // Time & Date Picker Functions
       function openTimePicker(booking) {
         activeTimeBooking = booking;
         timeModalSubtitle.textContent = `Zákazka #${booking.id} • ${booking.customer} (${formatPlate(booking.plate)})`;
         customTimeInput.value = booking.time || '10:00';
+        if (rescheduleDatePicker) {
+          rescheduleDatePicker.value = parseBookingToIso(booking);
+        }
 
         timeSlotsContainer.innerHTML = '';
         TIME_SLOTS.forEach(slot => {
@@ -2295,7 +2342,7 @@
           btn.textContent = slot;
 
           btn.addEventListener('click', () => {
-            applyNewTime(slot);
+            applyNewDateAndTime(rescheduleDatePicker ? rescheduleDatePicker.value : '', slot);
           });
 
           timeSlotsContainer.appendChild(btn);
@@ -2304,15 +2351,34 @@
         timePickerModal.classList.add('open');
       }
 
-      function applyNewTime(newTime) {
-        if (!activeTimeBooking || !newTime) return;
-        const cleanTime = newTime.trim();
-        activeTimeBooking.time = cleanTime;
+      function applyNewDateAndTime(newDateIso, newTime) {
+        if (!activeTimeBooking) return;
+        
+        let dateChanged = false;
+        if (newDateIso && /^\d{4}-\d{2}-\d{2}$/.test(newDateIso)) {
+          const [y, m, d] = newDateIso.split('-').map(Number);
+          const newDateObj = new Date(y, m - 1, d);
+          const newFormattedDate = formatDateForBooking(newDateObj);
+          
+          if (activeTimeBooking.date !== newFormattedDate) {
+            activeTimeBooking.date = newFormattedDate;
+            dateChanged = true;
+          }
+          
+          // Switch calendar view directly to the new month & day!
+          calendarDate = new Date(y, m - 1, 1);
+          selectedAgendaDate = new Date(y, m - 1, d);
+        }
+
+        if (newTime) {
+          activeTimeBooking.time = newTime.trim();
+        }
+
         saveData();
         renderCalendar();
         renderTable();
         timePickerModal.classList.remove('open');
-        showRescheduleToast(`Čas zákazky #${activeTimeBooking.id} (${activeTimeBooking.customer}) bol zmenený na ${cleanTime}!`);
+        showRescheduleToast(`Zákazka #${activeTimeBooking.id} (${activeTimeBooking.customer}) úspešne presunutá na ${activeTimeBooking.date} o ${activeTimeBooking.time}!`);
       }
 
       timeModalClose.addEventListener('click', () => {
@@ -2325,10 +2391,21 @@
 
       btnSaveCustomTime.addEventListener('click', () => {
         const val = customTimeInput.value.trim();
-        if (val) {
-          applyNewTime(val);
+        const dateVal = rescheduleDatePicker ? rescheduleDatePicker.value : '';
+        if (val || dateVal) {
+          applyNewDateAndTime(dateVal, val || activeTimeBooking.time);
         }
       });
+
+      if (btnSaveCustomDate) {
+        btnSaveCustomDate.addEventListener('click', () => {
+          const dateVal = rescheduleDatePicker ? rescheduleDatePicker.value : '';
+          const val = customTimeInput.value.trim();
+          if (dateVal) {
+            applyNewDateAndTime(dateVal, val || activeTimeBooking.time);
+          }
+        });
+      }
 
       // Render Table
       function renderTable() {

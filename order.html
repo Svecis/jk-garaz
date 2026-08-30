@@ -701,8 +701,9 @@
                 </div>
                 <div class="kv-row">
                   <span class="kv-label">Termín pristavenia vozidla</span>
-                  <span class="kv-val">
-                    ${escapeHtml(b.date || '-')} o 
+                  <span class="kv-val" style="display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <input type="date" id="order-date-input" value="${parseBookingToIso(b)}" style="background:#181c27; border:1px solid rgba(255,255,255,0.15); color:#fff; font-family:inherit; font-size:0.85rem; font-weight:600; padding:2px 8px; border-radius:6px; outline:none; cursor:pointer;">
+                    <span>o</span>
                     <select id="order-time-select" style="background:#181c27; border:1px solid rgba(255,255,255,0.15); color:#fff; font-family:'Space Mono', monospace; font-size:0.85rem; font-weight:700; padding:2px 8px; border-radius:6px; outline:none; cursor:pointer;">
                       ${['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'].map(t => `<option value="${t}" ${b.time === t ? 'selected' : ''}>${t}</option>`).join('')}
                     </select>

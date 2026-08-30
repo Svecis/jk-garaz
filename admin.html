@@ -1148,9 +1148,27 @@
       padding: 20px;
       margin-top: 16px;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
-      display: flex;
+      display: none; /* Skryté na desktope, zobrazuje sa len na mobile */
       flex-direction: column;
       gap: 14px;
+    }
+
+    .cal-day-title-group {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+      flex-wrap: nowrap;
+    }
+
+    .cal-day-weekday-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: -0.01em;
+    }
+
+    .cal-day-cell.today .cal-day-weekday-tag {
+      color: var(--accent);
     }
 
     .agenda-header {
@@ -1377,6 +1395,11 @@
       .cal-legend {
         font-size: 0.72rem;
         gap: 10px;
+      }
+
+      /* Zobrazenie dennej agendy LEN na mobile */
+      .cal-selected-day-agenda {
+        display: flex;
       }
 
       /* Compact 7-column calendar on mobile */
@@ -2526,9 +2549,18 @@
         // Previous month filler days
         for (let i = startDayOfWeek - 1; i >= 0; i--) {
           const dayNum = prevMonthLastDay - i;
+          const prevCellDate = new Date(year, month - 1, dayNum);
+          const prevWeekdayFull = WEEKDAYS_FULL_SK[prevCellDate.getDay()];
           const cell = document.createElement('div');
           cell.className = 'cal-day-cell other-month';
-          cell.innerHTML = `<div class="cal-day-header"><span class="cal-day-num">${dayNum}</span></div>`;
+          cell.innerHTML = `
+            <div class="cal-day-header">
+              <div class="cal-day-title-group">
+                <span class="cal-day-num">${dayNum}</span>
+                <span class="cal-day-weekday-tag">${prevWeekdayFull}</span>
+              </div>
+            </div>
+          `;
           calDaysGrid.appendChild(cell);
         }
 
@@ -2556,10 +2588,18 @@
             cell.classList.add('selected');
           }
 
-          // Header
+          // Header with Day number and Day of the week (Pondelok, Utorok...)
+          const cellDateObj = new Date(year, month, day);
+          const cellWeekdayFull = WEEKDAYS_FULL_SK[cellDateObj.getDay()];
+
           const dayHeader = document.createElement('div');
           dayHeader.className = 'cal-day-header';
-          dayHeader.innerHTML = `<span class="cal-day-num">${day}</span>`;
+          dayHeader.innerHTML = `
+            <div class="cal-day-title-group">
+              <span class="cal-day-num">${day}</span>
+              <span class="cal-day-weekday-tag">${cellWeekdayFull}</span>
+            </div>
+          `;
           cell.appendChild(dayHeader);
 
           // Match bookings strictly by EXACT Day, Month, and Year!
@@ -2702,9 +2742,18 @@
         const totalRendered = startDayOfWeek + totalDays;
         const remainingCells = (totalRendered % 7 === 0) ? 0 : (7 - (totalRendered % 7));
         for (let j = 1; j <= remainingCells; j++) {
+          const nextCellDate = new Date(year, month + 1, j);
+          const nextWeekdayFull = WEEKDAYS_FULL_SK[nextCellDate.getDay()];
           const cell = document.createElement('div');
           cell.className = 'cal-day-cell other-month';
-          cell.innerHTML = `<div class="cal-day-header"><span class="cal-day-num">${j}</span></div>`;
+          cell.innerHTML = `
+            <div class="cal-day-header">
+              <div class="cal-day-title-group">
+                <span class="cal-day-num">${j}</span>
+                <span class="cal-day-weekday-tag">${nextWeekdayFull}</span>
+              </div>
+            </div>
+          `;
           calDaysGrid.appendChild(cell);
         }
 

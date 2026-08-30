@@ -1582,9 +1582,9 @@
     <!-- VIEW 1: TABLE LIST -->
     <div class="view-section active" id="section-table">
       
-      <!-- Search row -->
-      <div class="search-row">
-        <div class="search-box">
+      <!-- Search and Status Filter row -->
+      <div class="search-row" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div class="search-box" style="flex:1; min-width:260px;">
           <input 
             type="text" 
             id="search-input" 
@@ -1593,6 +1593,19 @@
             autocomplete="off"
           >
         </div>
+
+        <div class="filter-box" style="display:inline-flex; align-items:center; gap:8px;">
+          <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted); white-space:nowrap;">Stav zákazky:</span>
+          <select id="status-filter-select" style="background:#131722; border:1px solid rgba(255,255,255,0.15); color:#fff; font-family:inherit; font-size:0.85rem; font-weight:600; padding:7px 12px; border-radius:8px; outline:none; cursor:pointer;">
+            <option value="all">Všetky stavy (Všetko)</option>
+            <option value="pending">Nová (Čaká)</option>
+            <option value="confirmed">Schválená</option>
+            <option value="in_progress">V servise</option>
+            <option value="completed">Dokončená</option>
+            <option value="cancelled">Zrušená</option>
+          </select>
+        </div>
+
         <span class="results-count" id="results-count">10 zákaziek</span>
       </div>
 
@@ -1604,7 +1617,19 @@
               <th style="width: 140px;">id zakazky</th>
               <th>Meno</th>
               <th>Kde je chyba</th>
-              <th style="width: 250px;">stav zákazky</th>
+              <th style="width: 260px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
+                  <span>stav zákazky</span>
+                  <select id="th-status-filter" style="background:#181c27; border:1px solid rgba(255,255,255,0.15); color:var(--accent); font-family:inherit; font-size:0.75rem; font-weight:600; padding:2px 6px; border-radius:5px; outline:none; cursor:pointer;" title="Rýchly filter podľa stavu">
+                    <option value="all">Všetky</option>
+                    <option value="pending">Nová</option>
+                    <option value="confirmed">Schválená</option>
+                    <option value="in_progress">V servise</option>
+                    <option value="completed">Dokončená</option>
+                    <option value="cancelled">Zrušená</option>
+                  </select>
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody id="table-body">
@@ -2619,16 +2644,24 @@
         });
       }
 
-      // Render Table
+      // Render Table with Search and Status Filter
+      const statusFilterSelect = document.getElementById('status-filter-select');
+      const thStatusFilter = document.getElementById('th-status-filter');
+
       function renderTable() {
         const query = searchInput.value.toLowerCase().trim();
+        const statusFilter = (statusFilterSelect ? statusFilterSelect.value : 'all');
 
         const filtered = bookings.filter(b => {
-          if (!query) return true;
-          return (b.id || '').toLowerCase().includes(query) ||
-                 (b.customer || '').toLowerCase().includes(query) ||
-                 (b.partName || '').toLowerCase().includes(query) ||
-                 (b.plate || '').toLowerCase().includes(query);
+          const matchesQuery = !query || 
+            (b.id || '').toLowerCase().includes(query) ||
+            (b.customer || '').toLowerCase().includes(query) ||
+            (b.partName || '').toLowerCase().includes(query) ||
+            (b.plate || '').toLowerCase().includes(query);
+
+          const matchesStatus = (statusFilter === 'all') || (b.status === statusFilter);
+
+          return matchesQuery && matchesStatus;
         });
 
         resultsCount.textContent = `${filtered.length} ${filtered.length === 1 ? 'zákazka' : filtered.length >= 2 && filtered.length <= 4 ? 'zákazky' : 'zákaziek'}`;
@@ -3084,6 +3117,20 @@
       }
 
       searchInput.addEventListener('input', renderTable);
+
+      if (statusFilterSelect) {
+        statusFilterSelect.addEventListener('change', (e) => {
+          if (thStatusFilter) thStatusFilter.value = e.target.value;
+          renderTable();
+        });
+      }
+
+      if (thStatusFilter) {
+        thStatusFilter.addEventListener('change', (e) => {
+          if (statusFilterSelect) statusFilterSelect.value = e.target.value;
+          renderTable();
+        });
+      }
 
       // ADD TEST BOOKING (Endless random bookings)
       const TEST_NAMES = ['Jozef Valko', 'Patrik Hric', 'Lucia Vrbovská', 'Matej Slanina', 'Boris Kysel', 'Adriana Tóthová', 'Gabriel Varga', 'Daniela Mečiarová'];

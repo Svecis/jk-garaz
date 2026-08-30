@@ -1582,9 +1582,9 @@
     <!-- VIEW 1: TABLE LIST -->
     <div class="view-section active" id="section-table">
       
-      <!-- Search and Status Filter row -->
-      <div class="search-row" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-        <div class="search-box" style="flex:1; min-width:260px;">
+      <!-- Search row -->
+      <div class="search-row">
+        <div class="search-box">
           <input 
             type="text" 
             id="search-input" 
@@ -1593,19 +1593,6 @@
             autocomplete="off"
           >
         </div>
-
-        <div class="filter-box" style="display:inline-flex; align-items:center; gap:8px;">
-          <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted); white-space:nowrap;">Stav zákazky:</span>
-          <select id="status-filter-select" style="background:#131722; border:1px solid rgba(255,255,255,0.15); color:#fff; font-family:inherit; font-size:0.85rem; font-weight:600; padding:7px 12px; border-radius:8px; outline:none; cursor:pointer;">
-            <option value="all">Všetky stavy (Všetko)</option>
-            <option value="pending">Nová (Čaká)</option>
-            <option value="confirmed">Schválená</option>
-            <option value="in_progress">V servise</option>
-            <option value="completed">Dokončená</option>
-            <option value="cancelled">Zrušená</option>
-          </select>
-        </div>
-
         <span class="results-count" id="results-count">10 zákaziek</span>
       </div>
 
@@ -2645,12 +2632,11 @@
       }
 
       // Render Table with Search and Status Filter
-      const statusFilterSelect = document.getElementById('status-filter-select');
       const thStatusFilter = document.getElementById('th-status-filter');
 
       function renderTable() {
         const query = searchInput.value.toLowerCase().trim();
-        const statusFilter = (statusFilterSelect ? statusFilterSelect.value : 'all');
+        const statusFilter = (thStatusFilter ? thStatusFilter.value : 'all');
 
         const filtered = bookings.filter(b => {
           const matchesQuery = !query || 
@@ -3118,18 +3104,8 @@
 
       searchInput.addEventListener('input', renderTable);
 
-      if (statusFilterSelect) {
-        statusFilterSelect.addEventListener('change', (e) => {
-          if (thStatusFilter) thStatusFilter.value = e.target.value;
-          renderTable();
-        });
-      }
-
       if (thStatusFilter) {
-        thStatusFilter.addEventListener('change', (e) => {
-          if (statusFilterSelect) statusFilterSelect.value = e.target.value;
-          renderTable();
-        });
+        thStatusFilter.addEventListener('change', renderTable);
       }
 
       // ADD TEST BOOKING (Endless random bookings)

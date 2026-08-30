@@ -3128,6 +3128,7 @@
   <script>
     // Register GSAP Plugins
     gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+    ScrollTrigger.normalizeScroll(true);
 
     (function() {
       // =========================================================
@@ -4076,16 +4077,23 @@
         ctx.drawImage(offCanvas, cachedOffsetX, cachedOffsetY);
       }
 
+      function getScrollDistance() {
+        const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const isMobileWidth = window.innerWidth <= 768;
+        return (isTouch || isMobileWidth) ? 7500 : 4600;
+      }
+
       function initScrollTrigger() {
         const sequenceTimeline = gsap.timeline({
           scrollTrigger: {
             id: "sequence-scroll",
             trigger: "#sequence-container",
             start: "top top",
-            end: "+=4600",
+            end: () => "+=" + getScrollDistance(),
             pin: true,
             scrub: 0.8,
             anticipatePin: 1,
+            invalidateOnRefresh: true,
             onUpdate: (self) => {
               updateDiagnosticState(self.progress);
             }
@@ -4098,7 +4106,17 @@
           onUpdate: render
         });
 
-        window.addEventListener('resize', resizeCanvas);
+        function handleWindowResize() {
+          resizeCanvas();
+          const trigger = ScrollTrigger.getById('sequence-scroll');
+          if (trigger) {
+            trigger.vars.end = () => "+=" + getScrollDistance();
+          }
+          ScrollTrigger.refresh();
+        }
+
+        window.addEventListener('resize', handleWindowResize);
+        window.addEventListener('orientationchange', handleWindowResize);
       }
 
       function updateDiagnosticState(progress) {

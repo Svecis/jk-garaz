@@ -1596,20 +1596,8 @@
 </head>
 <body>
 
-  <!-- TOP NAVIGATION: RESERVATIONS BADGE + LANGUAGE SWITCHER -->
+  <!-- TOP NAVIGATION: ADMIN PORTAL + LANGUAGE SWITCHER -->
   <div class="top-nav-bar">
-    <!-- Active Bookings Button -->
-    <div id="active-bookings-badge" title="Zobraziť rezervácie">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-        <line x1="16" y1="2" x2="16" y2="6"></line>
-        <line x1="8" y1="2" x2="8" y2="6"></line>
-        <line x1="3" y1="10" x2="21" y2="10"></line>
-      </svg>
-      <span data-i18n="nav_bookings">Rezervácie</span>
-      <span id="bookings-count-pill" class="booking-count-pill">0</span>
-    </div>
-
     <!-- Admin Portal Button -->
     <a href="admin.html" class="admin-portal-link" title="Administrátorský portál" target="_blank">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -3578,8 +3566,11 @@
       });
 
       function updateActiveBookingsUI() {
-        bookingsCountPill.textContent = activeBookings.length;
+        if (bookingsCountPill) {
+          bookingsCountPill.textContent = activeBookings.length;
+        }
         const dict = TRANSLATIONS[currentLang];
+        if (!drawerItemsList) return;
 
         if (activeBookings.length === 0) {
           drawerItemsList.innerHTML = `
@@ -3633,13 +3624,17 @@
         drawerItemsList.appendChild(clearBtn);
       }
 
-      activeBookingsBadge.addEventListener('click', () => {
-        bookingsDrawer.classList.add('open');
-      });
+      if (activeBookingsBadge && bookingsDrawer) {
+        activeBookingsBadge.addEventListener('click', () => {
+          bookingsDrawer.classList.add('open');
+        });
+      }
 
-      closeDrawerBtn.addEventListener('click', () => {
-        bookingsDrawer.classList.remove('open');
-      });
+      if (closeDrawerBtn && bookingsDrawer) {
+        closeDrawerBtn.addEventListener('click', () => {
+          bookingsDrawer.classList.remove('open');
+        });
+      }
 
       // =========================================================
       // INTERAKTÍVNE KLÁVESOVÉ SKRATKY [E, I, B, S, X, W, A / ESC]

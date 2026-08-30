@@ -1596,7 +1596,6 @@
               <th style="width: 140px;">id zakazky</th>
               <th>Meno</th>
               <th>Kde je chyba</th>
-              <th style="width: 160px;">Závažnosť</th>
               <th style="width: 250px;">stav zákazky</th>
             </tr>
           </thead>
@@ -2459,18 +2458,13 @@
         resultsCount.textContent = `${filtered.length} ${filtered.length === 1 ? 'zákazka' : filtered.length >= 2 && filtered.length <= 4 ? 'zákazky' : 'zákaziek'}`;
 
         if (filtered.length === 0) {
-          tableBody.innerHTML = '<tr><td colspan="5" class="empty-message">Nenašli sa žiadne zákazky zodpovedajúce vyhľadávaniu.</td></tr>';
+          tableBody.innerHTML = '<tr><td colspan="4" class="empty-message">Nenašli sa žiadne zákazky zodpovedajúce vyhľadávaniu.</td></tr>';
           return;
         }
 
         tableBody.innerHTML = '';
         filtered.forEach(b => {
           const tr = document.createElement('tr');
-
-          let dotClass = 'dot-min';
-          let urgencyLabel = 'Bežná';
-          if (b.urgency === 'critical') { dotClass = 'dot-crit'; urgencyLabel = 'Kritická'; }
-          else if (b.urgency === 'moderate') { dotClass = 'dot-mod'; urgencyLabel = 'Výrazná'; }
 
           const orderUrl = 'order.html?id=' + encodeURIComponent(b.id);
 
@@ -2489,12 +2483,6 @@
                 <span class="part-badge">${escapeHtml(b.partCode || 'P')}</span>
                 <span class="part-name">${escapeHtml(b.partName)}</span>
               </div>
-            </td>
-            <td>
-              <span class="urgency-pill">
-                <span class="urgency-dot ${dotClass}"></span>
-                <span>${urgencyLabel}</span>
-              </span>
             </td>
             <td>
               <div class="row-right">

@@ -700,6 +700,10 @@
     /* =========================================================
        BOOKIO-STYLE MECHANIC DIAGNOSTIC & RESERVATION MODAL
        ========================================================= */
+    body.modal-open {
+      overflow: hidden !important;
+    }
+
     #booking-modal {
       position: fixed;
       inset: 0;
@@ -714,6 +718,7 @@
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.35s ease, visibility 0.35s ease;
+      overscroll-behavior: contain;
     }
 
     #booking-modal.open {
@@ -734,6 +739,7 @@
       overflow: hidden;
       transform: scale(0.95) translateY(20px);
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      overscroll-behavior: contain;
     }
 
     #booking-modal.open .modal-container {
@@ -811,6 +817,8 @@
       display: flex;
       flex-direction: column;
       gap: 28px;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
 
     .form-section {
@@ -3087,6 +3095,7 @@
         resetAudioRecorder();
         successScreen.classList.remove('active');
 
+        document.body.classList.add('modal-open');
         bookingModal.classList.add('open');
       }
 
@@ -3104,6 +3113,7 @@
       }
 
       function closeModal() {
+        document.body.classList.remove('modal-open');
         bookingModal.classList.remove('open');
         successScreen.classList.remove('active');
         stopAudioRecording();
@@ -3115,6 +3125,27 @@
       bookingModal.addEventListener('click', (e) => {
         if (e.target === bookingModal) closeModal();
       });
+
+      // Zamedzenie pretekania scrollu a rolovania hlavnej stránky na pozadí
+      bookingModal.addEventListener('wheel', (e) => {
+        const modalBody = e.target.closest('.modal-body');
+        if (!modalBody) {
+          e.preventDefault();
+          return;
+        }
+        const atTop = modalBody.scrollTop <= 0;
+        const atBottom = modalBody.scrollTop + modalBody.clientHeight >= modalBody.scrollHeight - 1;
+        if ((e.deltaY < 0 && atTop) || (e.deltaY > 0 && atBottom)) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      bookingModal.addEventListener('touchmove', (e) => {
+        const modalBody = e.target.closest('.modal-body');
+        if (!modalBody) {
+          e.preventDefault();
+        }
+      }, { passive: false });
 
       photoInput.addEventListener('change', (e) => {
         const files = Array.from(e.target.files);

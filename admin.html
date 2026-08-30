@@ -1556,7 +1556,15 @@
       </div>
       <button type="button" class="top-btn" id="add-test-booking-btn">+ Pridať zákazku</button>
       <button type="button" class="top-btn top-btn-accent" id="open-brevo-modal-btn">Nastavenia Brevo SMTP</button>
-      <a href="index.html" class="top-btn" target="_blank">Web pre zákazníkov</a>
+      <button type="button" class="top-btn" id="import-ics-btn" title="Importovať termíny a zákazky z .ics súboru (Google Kalendár, Apple Kalendár, Outlook)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:3px;">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Importovať .ICS</span>
+      </button>
+      <input type="file" id="ics-file-input" accept=".ics,text/calendar" style="display:none;">
       <button type="button" class="top-btn" id="admin-logout-btn" title="Odhlásiť sa z portálu" style="border-color: rgba(248, 113, 113, 0.35); color: #f87171; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -2440,6 +2448,173 @@
           if (dateVal) {
             applyNewDateAndTime(dateVal, val || activeTimeBooking.time);
           }
+        });
+      }
+
+      // =========================================================
+      // ICS / ICALENDAR IMPORT ENGINE
+      // =========================================================
+      const importIcsBtn = document.getElementById('import-ics-btn');
+      const icsFileInput = document.getElementById('ics-file-input');
+
+      function parseIcsCalendar(icsContent) {
+        const lines = icsContent.split(/\r\n|\n|\r/);
+        const events = [];
+        let currentEvent = null;
+
+        for (let i = 0; i < lines.length; i++) {
+          let line = lines[i];
+          while (i + 1 < lines.length && (lines[i + 1].startsWith(' ') || lines[i + 1].startsWith('\t'))) {
+            line += lines[i + 1].substring(1);
+            i++;
+          }
+
+          const trimmed = line.trim();
+          if (trimmed === 'BEGIN:VEVENT') {
+            currentEvent = {};
+          } else if (trimmed === 'END:VEVENT' && currentEvent) {
+            events.push(currentEvent);
+            currentEvent = null;
+          } else if (currentEvent) {
+            const colonIdx = line.indexOf(':');
+            if (colonIdx !== -1) {
+              const rawKey = line.substring(0, colonIdx);
+              const val = line.substring(colonIdx + 1).trim();
+              const key = rawKey.split(';')[0].toUpperCase().trim();
+
+              if (key === 'SUMMARY') currentEvent.summary = val;
+              else if (key === 'DESCRIPTION') currentEvent.description = val;
+              else if (key === 'LOCATION') currentEvent.location = val;
+              else if (key === 'DTSTART') currentEvent.dtstart = val;
+              else if (key === 'STATUS') currentEvent.status = val;
+              else if (key === 'UID') currentEvent.uid = val;
+            }
+          }
+        }
+
+        return events;
+      }
+
+      function parseIcsDate(dtStr) {
+        if (!dtStr) return { dateObj: new Date(), timeStr: '10:00' };
+        const clean = dtStr.replace(/[^0-9T]/g, '');
+        const match = clean.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2}))?/);
+        if (match) {
+          const y = parseInt(match[1], 10);
+          const m = parseInt(match[2], 10) - 1;
+          const d = parseInt(match[3], 10);
+          const hh = match[4] ? match[4] : '10';
+          const mm = match[5] ? match[5] : '00';
+          return {
+            dateObj: new Date(y, m, d),
+            timeStr: `${hh}:${mm}`
+          };
+        }
+        return { dateObj: new Date(), timeStr: '10:00' };
+      }
+
+      if (importIcsBtn && icsFileInput) {
+        importIcsBtn.addEventListener('click', () => {
+          icsFileInput.value = '';
+          icsFileInput.click();
+        });
+
+        icsFileInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            try {
+              const icsText = ev.target.result;
+              const events = parseIcsCalendar(icsText);
+
+              if (events.length === 0) {
+                alert('V súbore sa nenašli žiadne udalosti (VEVENT) formátu iCalendar (.ics).');
+                return;
+              }
+
+              let addedCount = 0;
+              let firstDateObj = null;
+
+              events.forEach((item, idx) => {
+                const dateInfo = parseIcsDate(item.dtstart);
+                if (!firstDateObj) firstDateObj = dateInfo.dateObj;
+
+                let customerName = 'Zákazník z kalendára';
+                let plate = 'BA ' + Math.floor(100 + Math.random() * 900) + ' XX';
+                let partName = 'Servisná prehliadka & Kontrola';
+                let partCode = 'S';
+
+                const summaryClean = (item.summary || '').replace(/\\,/g, ',').replace(/\\;/g, ';');
+                const descClean = (item.description || '').replace(/\\n/g, ' ').replace(/\\,/g, ',');
+
+                // Extract plate if present in brackets (e.g. (BA 123 AB))
+                const plateMatch = summaryClean.match(/\(([A-Z]{2}\s*[0-9]{3}\s*[A-Z]{2})\)/i) || descClean.match(/([A-Z]{2}\s*[0-9]{3}\s*[A-Z]{2})/i);
+                if (plateMatch) {
+                  plate = plateMatch[1].toUpperCase();
+                }
+
+                // Extract customer name
+                if (summaryClean) {
+                  const parts = summaryClean.split('-');
+                  if (parts.length >= 2) {
+                    partName = parts[0].trim();
+                    customerName = parts[1].replace(/\([^)]*\)/g, '').trim();
+                  } else {
+                    customerName = summaryClean.replace(/\([^)]*\)/g, '').trim();
+                  }
+                }
+
+                // Phone extract
+                let phone = '+421 90' + Math.floor(1000000 + Math.random() * 9000000);
+                const phoneMatch = descClean.match(/(\+421\s*[0-9\s]{9,13}|09[0-9\s]{8,11})/);
+                if (phoneMatch) {
+                  phone = phoneMatch[1].trim();
+                }
+
+                const newBooking = {
+                  id: 'JK-' + Math.floor(100000 + Math.random() * 900000),
+                  customer: customerName || 'Zákazník',
+                  phone: phone,
+                  email: customerName.toLowerCase().replace(/[^a-z0-9]/g, '.') + '@gmail.com',
+                  plate: plate,
+                  partName: partName || 'Servisná prehliadka',
+                  partCode: partCode,
+                  urgency: 'moderate',
+                  date: formatDateForBooking(dateInfo.dateObj),
+                  time: dateInfo.timeStr,
+                  price: '90 €',
+                  mechanic: 'Viktor Thorne',
+                  problemDesc: descClean || summaryClean || 'Udalosť importovaná z externého .ics kalendára.',
+                  symptoms: ['Import z .ics'],
+                  hasAudio: false,
+                  audioData: null,
+                  photos: [],
+                  photosCount: 0,
+                  status: (item.status && item.status.toLowerCase().includes('confirm')) ? 'confirmed' : 'pending'
+                };
+
+                bookings.unshift(newBooking);
+                addedCount++;
+              });
+
+              if (firstDateObj) {
+                calendarDate = new Date(firstDateObj.getFullYear(), firstDateObj.getMonth(), 1);
+                selectedAgendaDate = new Date(firstDateObj);
+              }
+
+              saveData();
+              renderTable();
+              renderCalendar();
+
+              showRescheduleToast(`Úspešne importovaných ${addedCount} termínov zo súboru ${file.name}!`);
+            } catch (err) {
+              console.error('ICS parse error:', err);
+              alert('Nepodarilo sa spracovať .ics súbor. Skontrolujte formát.');
+            }
+          };
+          reader.readAsText(file);
         });
       }
 

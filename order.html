@@ -597,6 +597,54 @@
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings)); } catch (e) {}
       }
 
+      const MONTH_NAMES_SK = [
+        'Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún',
+        'Júl', 'August', 'September', 'Október', 'November', 'December'
+      ];
+      const WEEKDAYS_FULL_SK = ['Nedeľa', 'Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota'];
+
+      function formatDateForBooking(dateObj) {
+        const weekdayFullName = WEEKDAYS_FULL_SK[dateObj.getDay()];
+        const day = dateObj.getDate();
+        const monthName = MONTH_NAMES_SK[dateObj.getMonth()];
+        const year = dateObj.getFullYear();
+        return `${weekdayFullName}, ${day}. ${monthName} ${year}`;
+      }
+
+      function parseBookingToDateObj(b) {
+        if (!b || !b.date) return new Date();
+        const s = String(b.date).trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+          const [y, m, d] = s.split('-').map(Number);
+          return new Date(y, m - 1, d);
+        }
+        const dmyMatch = s.match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
+        if (dmyMatch) {
+          return new Date(parseInt(dmyMatch[3], 10), parseInt(dmyMatch[2], 10) - 1, parseInt(dmyMatch[1], 10));
+        }
+        const dayMatch = s.match(/(\d{1,2})\./);
+        const day = dayMatch ? parseInt(dayMatch[1], 10) : 1;
+        const yearMatch = s.match(/\b(20\d\d)\b/);
+        const year = yearMatch ? parseInt(yearMatch[1], 10) : new Date().getFullYear();
+        const monthsSK = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
+        let month = new Date().getMonth();
+        for (let i = 0; i < 12; i++) {
+          if (s.includes(MONTH_NAMES_SK[i]) || s.includes(monthsSK[i])) {
+            month = i;
+            break;
+          }
+        }
+        return new Date(year, month, day);
+      }
+
+      function parseBookingToIso(b) {
+        const d = parseBookingToDateObj(b);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+
       let booking = null;
       if (targetId) {
         booking = bookings.find(b => {
@@ -845,11 +893,22 @@
           });
         });
 
-        // Zmena času
+        // Zmena času a dátumu
         const timeSelect = document.getElementById('order-time-select');
         if (timeSelect) {
           timeSelect.addEventListener('change', (e) => {
             b.time = e.target.value;
+            saveAllBookings(bookings);
+          });
+        }
+
+        const dateInput = document.getElementById('order-date-input');
+        if (dateInput) {
+          dateInput.addEventListener('change', (e) => {
+            if (!e.target.value) return;
+            const [y, m, d] = e.target.value.split('-').map(Number);
+            const newDateObj = new Date(y, m - 1, d);
+            b.date = formatDateForBooking(newDateObj);
             saveAllBookings(bookings);
           });
         }

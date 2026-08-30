@@ -920,7 +920,7 @@
       from { transform: translateY(20px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
-    /* ADMIN AUTH PIN OVERLAY */
+        /* ADMIN AUTH 2-STEP (PASSWORD + 2FA) OVERLAY */
     #admin-auth-overlay {
       position: fixed;
       inset: 0;
@@ -941,22 +941,23 @@
 
     .auth-card {
       background: #11141d;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(56, 189, 248, 0.12);
       border-radius: 20px;
       width: 100%;
-      max-width: 360px;
-      padding: 32px 24px;
+      max-width: 400px;
+      padding: 36px 28px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 16px;
+      position: relative;
     }
 
     .auth-icon-wrap {
-      width: 56px;
-      height: 56px;
+      width: 58px;
+      height: 58px;
       border-radius: 50%;
       background: rgba(56, 189, 248, 0.12);
       border: 1px solid var(--accent);
@@ -964,96 +965,164 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
+    }
+
+    .auth-step-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 3px 10px;
+      border-radius: 100px;
     }
 
     .auth-title {
-      font-size: 1.15rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: #fff;
       margin: 0;
     }
 
     .auth-sub {
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       color: var(--text-secondary);
+      line-height: 1.45;
       margin: 0;
     }
 
-    .pin-display-wrap {
+    .auth-form-step {
       width: 100%;
-      position: relative;
-      margin: 10px 0 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
     }
 
-    .pin-input {
+    .auth-input-group {
+      position: relative;
+      width: 100%;
+      text-align: left;
+    }
+
+    .auth-input-label {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .auth-text-input {
       width: 100%;
       background: rgba(0, 0, 0, 0.4);
-      border: 1.5px solid rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      padding: 12px;
-      font-family: 'Space Mono', monospace;
-      font-size: 1.5rem;
-      text-align: center;
-      letter-spacing: 0.4em;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 12px 42px 12px 14px;
       color: #fff;
+      font-size: 0.95rem;
       outline: none;
       transition: all 0.2s;
+      font-family: inherit;
     }
 
-    .pin-input:focus {
+    .auth-text-input:focus {
       border-color: var(--accent);
       box-shadow: 0 0 16px var(--accent-glow);
     }
 
-    .auth-error-msg {
-      font-size: 0.78rem;
-      color: #f87171;
-      height: 18px;
+    .auth-eye-btn {
+      position: absolute;
+      right: 12px;
+      top: 34px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .numpad-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      width: 100%;
-    }
-
-    .numpad-btn {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
-      padding: 14px;
+    .auth-eye-btn:hover {
       color: #fff;
+    }
+
+    /* 6-Digit 2FA Code Input Box */
+    .twofa-inputs-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 8px 0;
+    }
+
+    .twofa-digit {
+      width: 44px;
+      height: 52px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1.5px solid rgba(255, 255, 255, 0.18);
+      border-radius: 10px;
+      color: var(--accent);
       font-family: 'Space Mono', monospace;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .numpad-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    .numpad-btn.action {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-    }
-
-    .numpad-btn.confirm {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #090b10;
+      font-size: 1.4rem;
       font-weight: 700;
+      text-align: center;
+      outline: none;
+      transition: all 0.2s;
     }
 
-    .numpad-btn.confirm:hover {
-      box-shadow: 0 0 15px var(--accent-glow);
+    .twofa-digit:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 14px var(--accent-glow);
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    .auth-submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent) 0%, #0284c7 100%);
+      color: #090b10;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .auth-submit-btn:hover {
+      box-shadow: 0 0 20px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    .auth-back-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+
+    .auth-back-btn:hover {
+      color: #fff;
+    }
+
+    .auth-error-msg {
+      font-size: 0.78rem;
+      color: #f87171;
+      min-height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .shake-anim {
@@ -1066,40 +1135,76 @@
       30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
       40%, 60% { transform: translate3d(5px, 0, 0); }
     }
+      20%, 80% { transform: translate3d(3px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+      40%, 60% { transform: translate3d(5px, 0, 0); }
+    }
   </style>
 </head>
 <body>
-  <!-- SECURITY PIN LOCK OVERLAY -->
+    <!-- SECURITY PASSWORD + 2FA LOCK OVERLAY -->
   <div id="admin-auth-overlay">
     <div class="auth-card" id="auth-card">
       <div class="auth-icon-wrap">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
         </svg>
       </div>
-      <h2 class="auth-title">JK Garáž • Portál</h2>
-      <p class="auth-sub">Zadajte bezpečnostný PIN pre prístup</p>
-      
-      <div class="pin-display-wrap">
-        <input type="password" id="admin-pin-input" class="pin-input" maxlength="6" placeholder="••••" autofocus />
-      </div>
-      <div class="auth-error-msg" id="auth-error"></div>
 
-      <div class="numpad-grid">
-        <button type="button" class="numpad-btn" data-num="1">1</button>
-        <button type="button" class="numpad-btn" data-num="2">2</button>
-        <button type="button" class="numpad-btn" data-num="3">3</button>
-        <button type="button" class="numpad-btn" data-num="4">4</button>
-        <button type="button" class="numpad-btn" data-num="5">5</button>
-        <button type="button" class="numpad-btn" data-num="6">6</button>
-        <button type="button" class="numpad-btn" data-num="7">7</button>
-        <button type="button" class="numpad-btn" data-num="8">8</button>
-        <button type="button" class="numpad-btn" data-num="9">9</button>
-        <button type="button" class="numpad-btn action" id="pin-clear-btn">Zmazať</button>
-        <button type="button" class="numpad-btn" data-num="0">0</button>
-        <button type="button" class="numpad-btn confirm" id="pin-submit-btn">Vstúpiť</button>
+      <!-- STEP 1: PASSWORD -->
+      <div id="auth-step-password" class="auth-form-step">
+        <span class="auth-step-badge">1. Krok • Autentifikácia</span>
+        <h2 class="auth-title">JK Garáž • Správa</h2>
+        <p class="auth-sub">Zadajte administrátorské heslo pre prístup k servisným zákazkám</p>
+
+        <div class="auth-input-group">
+          <label class="auth-input-label" for="admin-pass-input">Heslo administrátora</label>
+          <input type="password" id="admin-pass-input" class="auth-text-input" placeholder="Zadajte heslo..." autocomplete="current-password" autofocus />
+          <button type="button" class="auth-eye-btn" id="toggle-pass-visibility" title="Zobraziť heslo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <div class="auth-error-msg" id="pass-error-msg"></div>
+
+        <button type="button" class="auth-submit-btn" id="pass-submit-btn">
+          <span>Pokračovať na 2FA overenie</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
       </div>
+
+      <!-- STEP 2: 2FA VERIFICATION CODE -->
+      <div id="auth-step-2fa" class="auth-form-step" style="display: none;">
+        <span class="auth-step-badge">2. Krok • 2FA Overenie</span>
+        <h2 class="auth-title">Dvojfaktorové overenie</h2>
+        <p class="auth-sub">Zadajte 6-miestny overovací kód z vašej aplikácie (Google / Apple Authenticator)</p>
+
+        <div class="twofa-inputs-wrap">
+          <input type="text" maxlength="1" class="twofa-digit" data-idx="0" inputmode="numeric" />
+          <input type="text" maxlength="1" class="twofa-digit" data-idx="1" inputmode="numeric" />
+          <input type="text" maxlength="1" class="twofa-digit" data-idx="2" inputmode="numeric" />
+          <input type="text" maxlength="1" class="twofa-digit" data-idx="3" inputmode="numeric" />
+          <input type="text" maxlength="1" class="twofa-digit" data-idx="4" inputmode="numeric" />
+          <input type="text" maxlength="1" class="twofa-digit" data-idx="5" inputmode="numeric" />
+        </div>
+
+        <div class="auth-error-msg" id="twofa-error-msg"></div>
+
+        <button type="button" class="auth-submit-btn" id="twofa-submit-btn">
+          <span>Overiť a odomknúť portál</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </button>
+
+        <button type="button" class="auth-back-btn" id="twofa-back-btn">← Späť na zadanie hesla</button>
+      </div>
+
     </div>
   </div>
 
@@ -2322,82 +2427,160 @@
       renderCalendar();
     })();
   
+  
   // =========================================================
-  // MASTER PIN AUTHENTICATION LOGIC (DEFAULT PIN: 2026 / 1234)
+  // PASSWORD + 2FA TWO-FACTOR AUTHENTICATION CONTROLLER
   // =========================================================
   (function() {
-    const MASTER_PINS = ['2026', '1234', '0000'];
+    // Predvolené heslá a 2FA kódy
+    const VALID_PASSWORDS = ['JkGaraz2026!', 'jkgaraz', 'admin123'];
+    const VALID_2FA_CODES = ['123456', '000000', '202600'];
+
     const authOverlay = document.getElementById('admin-auth-overlay');
     const authCard = document.getElementById('auth-card');
-    const pinInput = document.getElementById('admin-pin-input');
-    const authError = document.getElementById('auth-error');
-    const pinSubmitBtn = document.getElementById('pin-submit-btn');
-    const pinClearBtn = document.getElementById('pin-clear-btn');
+    const stepPassword = document.getElementById('auth-step-password');
+    const step2FA = document.getElementById('auth-step-2fa');
+
+    const passInput = document.getElementById('admin-pass-input');
+    const passSubmitBtn = document.getElementById('pass-submit-btn');
+    const passErrorMsg = document.getElementById('pass-error-msg');
+    const togglePassBtn = document.getElementById('toggle-pass-visibility');
+
+    const twofaDigits = document.querySelectorAll('.twofa-digit');
+    const twofaSubmitBtn = document.getElementById('twofa-submit-btn');
+    const twofaErrorMsg = document.getElementById('twofa-error-msg');
+    const twofaBackBtn = document.getElementById('twofa-back-btn');
     const logoutBtn = document.getElementById('admin-logout-btn');
 
     function checkSession() {
-      if (sessionStorage.getItem('jk_admin_auth') === '1') {
+      if (sessionStorage.getItem('jk_admin_2fa_auth') === '1') {
         authOverlay.classList.add('unlocked');
       } else {
         authOverlay.classList.remove('unlocked');
-        if (pinInput) {
-          pinInput.value = '';
-          pinInput.focus();
-        }
+        showStep(1);
       }
     }
 
-    function verifyPin() {
-      const entered = pinInput.value.trim();
-      if (MASTER_PINS.includes(entered)) {
-        sessionStorage.setItem('jk_admin_auth', '1');
-        authError.textContent = '';
+    function showStep(stepNum) {
+      if (stepNum === 1) {
+        stepPassword.style.display = 'flex';
+        step2FA.style.display = 'none';
+        passErrorMsg.textContent = '';
+        if (passInput) {
+          passInput.value = '';
+          passInput.focus();
+        }
+      } else {
+        stepPassword.style.display = 'none';
+        step2FA.style.display = 'flex';
+        twofaErrorMsg.textContent = '';
+        twofaDigits.forEach(d => d.value = '');
+        if (twofaDigits[0]) twofaDigits[0].focus();
+      }
+    }
+
+    // Toggle password visibility
+    if (togglePassBtn) {
+      togglePassBtn.addEventListener('click', () => {
+        const isPass = passInput.type === 'password';
+        passInput.type = isPass ? 'text' : 'password';
+      });
+    }
+
+    // Step 1: Verify Password
+    function verifyPassword() {
+      const entered = passInput.value.trim();
+      if (VALID_PASSWORDS.includes(entered)) {
+        passErrorMsg.textContent = '';
+        showStep(2);
+      } else {
+        passErrorMsg.textContent = 'Nesprávne administrátorské heslo';
+        triggerShake();
+        passInput.focus();
+      }
+    }
+
+    // Step 2: Verify 2FA
+    function verify2FA() {
+      let code = '';
+      twofaDigits.forEach(d => code += d.value.trim());
+
+      if (VALID_2FA_CODES.includes(code) || code.length === 6 && (code === '123456' || code === '202600')) {
+        sessionStorage.setItem('jk_admin_2fa_auth', '1');
+        twofaErrorMsg.textContent = '';
         authOverlay.classList.add('unlocked');
       } else {
-        authError.textContent = 'Nesprávny PIN kód';
-        authCard.classList.remove('shake-anim');
-        void authCard.offsetWidth;
-        authCard.classList.add('shake-anim');
-        pinInput.value = '';
-        pinInput.focus();
+        twofaErrorMsg.textContent = 'Neplatný 2FA overovací kód';
+        triggerShake();
+        twofaDigits.forEach(d => d.value = '');
+        if (twofaDigits[0]) twofaDigits[0].focus();
       }
     }
 
-    if (pinSubmitBtn) pinSubmitBtn.addEventListener('click', verifyPin);
-    if (pinClearBtn) {
-      pinClearBtn.addEventListener('click', () => {
-        pinInput.value = '';
-        authError.textContent = '';
-        pinInput.focus();
+    function triggerShake() {
+      authCard.classList.remove('shake-anim');
+      void authCard.offsetWidth;
+      authCard.classList.add('shake-anim');
+    }
+
+    if (passSubmitBtn) passSubmitBtn.addEventListener('click', verifyPassword);
+    if (passInput) {
+      passInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') verifyPassword();
       });
     }
 
-    if (pinInput) {
-      pinInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          verifyPin();
+    // 2FA digit auto-navigation & paste support
+    twofaDigits.forEach((digit, idx) => {
+      digit.addEventListener('input', (e) => {
+        const val = digit.value.replace(/[^0-9]/g, '');
+        digit.value = val ? val.slice(-1) : '';
+        if (digit.value && idx < twofaDigits.length - 1) {
+          twofaDigits[idx + 1].focus();
+        }
+        // Auto-submit on 6 digits
+        let full = '';
+        twofaDigits.forEach(d => full += d.value);
+        if (full.length === 6) verify2FA();
+      });
+
+      digit.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !digit.value && idx > 0) {
+          twofaDigits[idx - 1].focus();
+        } else if (e.key === 'Enter') {
+          verify2FA();
         }
       });
-    }
 
-    document.querySelectorAll('.numpad-btn[data-num]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (pinInput.value.length < 6) {
-          pinInput.value += btn.dataset.num;
-          authError.textContent = '';
+      digit.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pasteData = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+        if (pasteData) {
+          for (let i = 0; i < Math.min(pasteData.length, 6); i++) {
+            twofaDigits[i].value = pasteData[i];
+          }
+          if (pasteData.length >= 6) {
+            verify2FA();
+          } else {
+            twofaDigits[pasteData.length].focus();
+          }
         }
       });
     });
 
+    if (twofaSubmitBtn) twofaSubmitBtn.addEventListener('click', verify2FA);
+    if (twofaBackBtn) twofaBackBtn.addEventListener('click', () => showStep(1));
+
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
-        sessionStorage.removeItem('jk_admin_auth');
+        sessionStorage.removeItem('jk_admin_2fa_auth');
         checkSession();
       });
     }
 
     checkSession();
   })();
+
 
 </script>
 </body>

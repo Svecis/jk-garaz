@@ -4470,7 +4470,7 @@
       let currentCalYear = 2026;
       let currentCalMonth = 7; // 0-indexed: 7 = August 2026
       let selectedDateObj = new Date(2026, 7, 31); // Default Monday Aug 31, 2026
-      selectedDateStr = 'Po, 31. Aug 2026';
+      selectedDateStr = 'Pondelok, 31. August 2026';
 
       const modalCalPrev = document.getElementById('modal-cal-prev');
       const modalCalNext = document.getElementById('modal-cal-next');
@@ -4481,10 +4481,10 @@
 
       function updateSelectedDateBadge() {
         if (!selectedDateObj) return;
-        const daysSK = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pia', 'So'];
-        const monthsSK = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
-        const daysEN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const daysSK = ['Nedeľa', 'Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota'];
+        const monthsSK = ['Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún', 'Júl', 'August', 'September', 'Október', 'November', 'December'];
+        const daysEN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const monthsEN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
         const days = currentLang === 'sk' ? daysSK : daysEN;
         const months = currentLang === 'sk' ? monthsSK : monthsEN;

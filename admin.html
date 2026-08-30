@@ -1460,7 +1460,53 @@
         const weekdayName = WEEKDAYS_SHORT_SK[dateObj.getDay()];
         const day = dateObj.getDate();
         const monthName = MONTHS_SHORT_SK[dateObj.getMonth()];
-        return `${weekdayName}, ${day}. ${monthName}`;
+        const year = dateObj.getFullYear();
+        return `${weekdayName}, ${day}. ${monthName} ${year}`;
+      }
+
+      function isBookingOnDate(b, year, month, day) {
+        if (!b || !b.date) return false;
+        const dateStr = String(b.date).trim();
+
+        // 1. ISO formát 'YYYY-MM-DD'
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+          const [y, m, d] = dateStr.split('-').map(Number);
+          return y === year && (m - 1) === month && d === day;
+        }
+
+        // 2. Formát 'D.M.YYYY' alebo 'DD.MM.YYYY'
+        const dmyMatch = dateStr.match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
+        if (dmyMatch) {
+          const d = parseInt(dmyMatch[1], 10);
+          const m = parseInt(dmyMatch[2], 10);
+          const y = parseInt(dmyMatch[3], 10);
+          return y === year && (m - 1) === month && d === day;
+        }
+
+        // 3. Textový formát s názvom mesiaca, napr. 'Ut, 1. Sep 2026'
+        const dayMatch = dateStr.match(/(\d{1,2})\./);
+        if (dayMatch) {
+          const bDay = parseInt(dayMatch[1], 10);
+          if (bDay !== day) return false;
+
+          const yearMatch = dateStr.match(/\b(20\d\d)\b/);
+          if (yearMatch) {
+            const bYear = parseInt(yearMatch[1], 10);
+            if (bYear !== year) return false;
+          } else {
+            // Ak v starom zázname rok chýba, patrí iba do aktuálneho roka
+            if (year !== new Date().getFullYear()) return false;
+          }
+
+          const monthsSK = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
+          const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+          const hasMonth = dateStr.includes(monthsSK[month]) || 
+                           dateStr.includes(monthsEN[month]) || 
+                           dateStr.includes(MONTH_NAMES_SK[month]);
+          return hasMonth;
+        }
+
+        return false;
       }
 
       function getDefaultDemoBookings() {
@@ -2110,15 +2156,8 @@
           const dayBookingsContainer = document.createElement('div');
           dayBookingsContainer.className = 'cal-day-bookings';
 
-          // Match bookings by BOTH day number and month!
-          const matchingBookings = bookings.filter(b => {
-            if (!b.date) return false;
-            const numMatch = b.date.match(/(\d+)\./);
-            if (!numMatch) return false;
-            const bDay = parseInt(numMatch[1], 10);
-            const hasMonth = b.date.includes(curMonthShort);
-            return bDay === day && hasMonth;
-          });
+          // Match bookings strictly by EXACT Day, Month, and Year!
+          const matchingBookings = bookings.filter(b => isBookingOnDate(b, year, month, day));
 
           // Chronological sort by time (08:00 before 09:30 before 14:00, etc.)
           matchingBookings.sort((a, b) => {

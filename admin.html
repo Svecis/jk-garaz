@@ -1140,23 +1140,10 @@
       40%, 60% { transform: translate3d(5px, 0, 0); }
     }
 
-    /* SELECTED DAY AGENDA (FOR MOBILE & TOUCH) */
-    .cal-selected-day-agenda {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 20px;
-      margin-top: 16px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
-      display: none; /* Skryté na desktope, zobrazuje sa len na mobile */
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .cal-day-title-group {
+        .cal-day-title-group {
       display: flex;
       align-items: baseline;
-      gap: 5px;
+      gap: 6px;
       flex-wrap: nowrap;
     }
 
@@ -1169,182 +1156,6 @@
 
     .cal-day-cell.today .cal-day-weekday-tag {
       color: var(--accent);
-    }
-
-    .agenda-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 12px;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .agenda-header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .agenda-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .agenda-badge {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--accent);
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      padding: 3px 10px;
-      border-radius: 100px;
-    }
-
-    .agenda-items-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .agenda-empty-msg {
-      padding: 24px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.88rem;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 10px;
-      border: 1px dashed rgba(255, 255, 255, 0.08);
-    }
-
-    .agenda-order-card {
-      background: var(--card-elevated);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-left: 4px solid var(--accent);
-      border-radius: 10px;
-      padding: 14px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      transition: all 0.15s;
-    }
-
-    .agenda-order-card:hover {
-      border-color: rgba(255, 255, 255, 0.18);
-      background: #1e2433;
-    }
-
-    .agenda-order-card.status-pending { border-left-color: #fbbf24; }
-    .agenda-order-card.status-confirmed { border-left-color: #38bdf8; }
-    .agenda-order-card.status-in_progress { border-left-color: #818cf8; }
-    .agenda-order-card.status-completed { border-left-color: #34d399; }
-    .agenda-order-card.status-cancelled { border-left-color: #f87171; }
-
-    .agenda-card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .agenda-time-pill {
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      color: var(--accent);
-      font-family: 'Space Mono', monospace;
-      font-weight: 700;
-      font-size: 0.82rem;
-      padding: 4px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .agenda-time-pill:hover {
-      background: var(--accent);
-      color: #000;
-    }
-
-    .agenda-cust-info {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .agenda-cust-name {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: #fff;
-    }
-
-    .agenda-cust-phone {
-      font-size: 0.8rem;
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .agenda-cust-phone:hover {
-      text-decoration: underline;
-    }
-
-    .agenda-card-body {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .agenda-part-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-    }
-
-    .agenda-card-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    /* Mobile dot indicator on day cell */
-    .cal-day-dots-wrap {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      margin-top: auto;
-    }
-
-    .cal-status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-    }
-    .cal-status-dot.dot-pending { background: #fbbf24; }
-    .cal-status-dot.dot-confirmed { background: #38bdf8; }
-    .cal-status-dot.dot-in_progress { background: #818cf8; }
-    .cal-status-dot.dot-completed { background: #34d399; }
-
-    .cal-day-cell.selected {
-      background: rgba(56, 189, 248, 0.08) !important;
-      box-shadow: inset 0 0 0 2px var(--accent) !important;
-    }
-
-    .cal-day-cell.selected .cal-day-num {
-      color: var(--accent) !important;
-      font-weight: 700;
     }
 
     /* RESPONSIVE MOBILE MEDIA QUERIES */
@@ -1397,40 +1208,14 @@
         gap: 10px;
       }
 
-      /* Zobrazenie dennej agendy LEN na mobile */
-      .cal-selected-day-agenda {
-        display: flex;
+      .cal-grid-card {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
       }
 
-      /* Compact 7-column calendar on mobile */
+      .cal-weekdays-row,
       .cal-days-grid {
-        grid-auto-rows: minmax(52px, auto);
-      }
-
-      .cal-day-cell {
-        min-height: 52px;
-        padding: 4px;
-        gap: 2px;
-        cursor: pointer;
-      }
-
-      .cal-day-num {
-        font-size: 0.78rem;
-      }
-
-      /* Hide bulky chips inside small cells on mobile */
-      .cal-day-bookings {
-        display: none;
-      }
-
-      /* Show touch status dots instead */
-      .cal-day-dots-wrap {
-        display: flex;
-      }
-
-      .cal-weekdays-row .cal-weekday {
-        padding: 8px 2px;
-        font-size: 0.68rem;
+        min-width: 720px;
       }
 
       .search-box {
@@ -1620,21 +1405,7 @@
         </div>
       </div>
 
-      <!-- SELECTED DAY AGENDA (MOBILE & QUICK TOUCH VIEW) -->
-      <div class="cal-selected-day-agenda" id="cal-selected-day-agenda">
-        <div class="agenda-header">
-          <div class="agenda-header-left">
-            <span class="agenda-title" id="agenda-date-title">Pondelok, 31. August 2026</span>
-            <span class="agenda-badge" id="agenda-count-badge">0 zákaziek</span>
           </div>
-          <span style="font-size: 0.75rem; color: var(--text-muted);">Kliknutím na dátum v kalendári zobrazíte detail dňa</span>
-        </div>
-        <div class="agenda-items-list" id="agenda-items-list">
-          <!-- Dynamically populated agenda items -->
-        </div>
-      </div>
-
-    </div>
 
   </main>
 
@@ -2576,16 +2347,8 @@
           cell.dataset.month = month;
           cell.dataset.year = year;
 
-          const isSelectedDay = selectedAgendaDate &&
-                                selectedAgendaDate.getFullYear() === year &&
-                                selectedAgendaDate.getMonth() === month &&
-                                selectedAgendaDate.getDate() === day;
-
           if (isCurrentMonth && day === todayDateNum) {
             cell.classList.add('today');
-          }
-          if (isSelectedDay) {
-            cell.classList.add('selected');
           }
 
           // Header with Day number and Day of the week (Pondelok, Utorok...)
@@ -2605,24 +2368,7 @@
           // Match bookings strictly by EXACT Day, Month, and Year!
           const matchingBookings = bookings.filter(b => isBookingOnDate(b, year, month, day));
 
-          // Mobile Status Dots Wrap
-          const dotsWrap = document.createElement('div');
-          dotsWrap.className = 'cal-day-dots-wrap';
-          matchingBookings.slice(0, 3).forEach(b => {
-            const dot = document.createElement('span');
-            dot.className = `cal-status-dot dot-${b.status || 'pending'}`;
-            dotsWrap.appendChild(dot);
-          });
-          if (matchingBookings.length > 3) {
-            const moreBadge = document.createElement('span');
-            moreBadge.style.fontSize = '0.65rem';
-            moreBadge.style.color = 'var(--accent)';
-            moreBadge.textContent = '+' + (matchingBookings.length - 3);
-            dotsWrap.appendChild(moreBadge);
-          }
-          cell.appendChild(dotsWrap);
-
-          // Bookings container (desktop chips)
+          // Bookings container (chips)
           const dayBookingsContainer = document.createElement('div');
           dayBookingsContainer.className = 'cal-day-bookings';
 
@@ -2690,15 +2436,6 @@
 
           cell.appendChild(dayBookingsContainer);
 
-          // Click on day cell to select date & show agenda
-          cell.addEventListener('click', (e) => {
-            if (e.target.closest('.chip-time-btn') || e.target.closest('.cal-booking-chip')) return;
-            selectedAgendaDate = new Date(year, month, day);
-            document.querySelectorAll('.cal-day-cell').forEach(c => c.classList.remove('selected'));
-            cell.classList.add('selected');
-            renderAgendaForDate(selectedAgendaDate);
-          });
-
           // DROP ZONE EVENTS FOR DAY CELL
           cell.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -2757,8 +2494,6 @@
           calDaysGrid.appendChild(cell);
         }
 
-        // Render agenda for selected date
-        renderAgendaForDate(selectedAgendaDate);
       }
 
       // CALENDAR NAVIGATION (PREV / NEXT / TODAY)

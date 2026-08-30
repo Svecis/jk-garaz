@@ -525,25 +525,6 @@
       border-radius: 14px;
       overflow: hidden;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
-    }
-
-    .cal-weekdays-row {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      background: rgba(255, 255, 255, 0.02);
-      border-bottom: 1px solid var(--card-border);
-      text-align: center;
-    }
-
-    .cal-weekday {
-      padding: 12px 6px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
     .cal-days-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -1213,7 +1194,6 @@
         -webkit-overflow-scrolling: touch;
       }
 
-      .cal-weekdays-row,
       .cal-days-grid {
         min-width: 720px;
       }
@@ -1391,15 +1371,6 @@
 
       <!-- Calendar Grid Card -->
       <div class="cal-grid-card">
-        <div class="cal-weekdays-row">
-          <div class="cal-weekday">Pondelok</div>
-          <div class="cal-weekday">Utorok</div>
-          <div class="cal-weekday">Streda</div>
-          <div class="cal-weekday">Štvrtok</div>
-          <div class="cal-weekday">Piatok</div>
-          <div class="cal-weekday">Sobota</div>
-          <div class="cal-weekday">Nedeľa</div>
-        </div>
         <div class="cal-days-grid" id="cal-days-grid">
           <!-- Dynamically populated day cells -->
         </div>

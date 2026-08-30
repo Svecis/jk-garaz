@@ -2452,169 +2452,101 @@
       }
 
       // =========================================================
-      // ICS / ICALENDAR IMPORT ENGINE
+      // ICS / ICALENDAR EXPORT & SYNC ENGINE (iOS, Android, Windows)
       // =========================================================
-      const importIcsBtn = document.getElementById('import-ics-btn');
-      const icsFileInput = document.getElementById('ics-file-input');
+      const exportIcsBtn = document.getElementById('export-ics-btn');
 
-      function parseIcsCalendar(icsContent) {
-        const lines = icsContent.split(/\r\n|\n|\r/);
-        const events = [];
-        let currentEvent = null;
-
-        for (let i = 0; i < lines.length; i++) {
-          let line = lines[i];
-          while (i + 1 < lines.length && (lines[i + 1].startsWith(' ') || lines[i + 1].startsWith('\t'))) {
-            line += lines[i + 1].substring(1);
-            i++;
-          }
-
-          const trimmed = line.trim();
-          if (trimmed === 'BEGIN:VEVENT') {
-            currentEvent = {};
-          } else if (trimmed === 'END:VEVENT' && currentEvent) {
-            events.push(currentEvent);
-            currentEvent = null;
-          } else if (currentEvent) {
-            const colonIdx = line.indexOf(':');
-            if (colonIdx !== -1) {
-              const rawKey = line.substring(0, colonIdx);
-              const val = line.substring(colonIdx + 1).trim();
-              const key = rawKey.split(';')[0].toUpperCase().trim();
-
-              if (key === 'SUMMARY') currentEvent.summary = val;
-              else if (key === 'DESCRIPTION') currentEvent.description = val;
-              else if (key === 'LOCATION') currentEvent.location = val;
-              else if (key === 'DTSTART') currentEvent.dtstart = val;
-              else if (key === 'STATUS') currentEvent.status = val;
-              else if (key === 'UID') currentEvent.uid = val;
-            }
-          }
+      function formatIcsDateTime(dateObj, timeStr, durationMinutes = 60) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        
+        let hh = '10';
+        let mm = '00';
+        if (timeStr && timeStr.includes(':')) {
+          const parts = timeStr.split(':');
+          hh = String(parts[0]).padStart(2, '0');
+          mm = String(parts[1]).padStart(2, '0');
         }
 
-        return events;
+        const startIso = `${y}${m}${d}T${hh}${mm}00`;
+        
+        // Calculate End Time
+        const endD = new Date(y, dateObj.getMonth(), parseInt(d, 10), parseInt(hh, 10), parseInt(mm, 10) + durationMinutes);
+        const endY = endD.getFullYear();
+        const endM = String(endD.getMonth() + 1).padStart(2, '0');
+        const endDay = String(endD.getDate()).padStart(2, '0');
+        const endHh = String(endD.getHours()).padStart(2, '0');
+        const endMm = String(endD.getMinutes()).padStart(2, '0');
+        const endIso = `${endY}${endM}${endDay}T${endHh}${endMm}00`;
+
+        return { startIso, endIso };
       }
 
-      function parseIcsDate(dtStr) {
-        if (!dtStr) return { dateObj: new Date(), timeStr: '10:00' };
-        const clean = dtStr.replace(/[^0-9T]/g, '');
-        const match = clean.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2}))?/);
-        if (match) {
-          const y = parseInt(match[1], 10);
-          const m = parseInt(match[2], 10) - 1;
-          const d = parseInt(match[3], 10);
-          const hh = match[4] ? match[4] : '10';
-          const mm = match[5] ? match[5] : '00';
-          return {
-            dateObj: new Date(y, m, d),
-            timeStr: `${hh}:${mm}`
-          };
-        }
-        return { dateObj: new Date(), timeStr: '10:00' };
-      }
+      function generateIcsFileContent(bookingList) {
+        const now = new Date();
+        const stamp = now.getFullYear() +
+                      String(now.getMonth() + 1).padStart(2, '0') +
+                      String(now.getDate()).padStart(2, '0') + 'T' +
+                      String(now.getHours()).padStart(2, '0') +
+                      String(now.getMinutes()).padStart(2, '0') + '00Z';
 
-      if (importIcsBtn && icsFileInput) {
-        importIcsBtn.addEventListener('click', () => {
-          icsFileInput.value = '';
-          icsFileInput.click();
+        let ics = [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//AutoMek JK Garaz//Servisny Kalendar//SK',
+          'CALSCALE:GREGORIAN',
+          'METHOD:PUBLISH',
+          'X-WR-CALNAME:JK Garáž - Servisné termíny',
+          'X-WR-TIMEZONE:Europe/Bratislava'
+        ];
+
+        bookingList.forEach(b => {
+          const dateObj = parseBookingToDateObj(b);
+          const { startIso, endIso } = formatIcsDateTime(dateObj, b.time || '10:00');
+          const plateClean = formatPlate(b.plate);
+          const uid = (b.id || Math.random()) + '@jk-garaz.sk';
+
+          const summary = `JK Garáž: ${b.customer || 'Zákazník'} (${plateClean}) - ${b.partName || 'Servis'}`;
+          const description = `Zákazka: #${b.id}\nZákazník: ${b.customer || '-'}\nTelefón: ${b.phone || '-'}\nEČV: ${plateClean}\nDiel: ${b.partName || '-'}\nOdhadovaná cena: ${b.price || '-'}\nStav: ${b.status || 'pending'}\nPopis: ${b.problemDesc || '-'}`;
+
+          ics.push('BEGIN:VEVENT');
+          ics.push(`UID:${uid}`);
+          ics.push(`DTSTAMP:${stamp}`);
+          ics.push(`DTSTART:${startIso}`);
+          ics.push(`DTEND:${endIso}`);
+          ics.push(`SUMMARY:${summary.replace(/,/g, '\\,').replace(/;/g, '\\;')}`);
+          ics.push(`DESCRIPTION:${description.replace(/\n/g, '\\n').replace(/,/g, '\\,')}`);
+          ics.push('LOCATION:JK Garáž Servis, Priemyselná 4');
+          ics.push('STATUS:CONFIRMED');
+          ics.push('END:VEVENT');
         });
 
-        icsFileInput.addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
+        ics.push('END:VCALENDAR');
+        return ics.join('\r\n');
+      }
 
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            try {
-              const icsText = ev.target.result;
-              const events = parseIcsCalendar(icsText);
+      function downloadIcsCalendar(bookingList, filename = 'jk_garaz_kalendar.ics') {
+        const icsData = generateIcsFileContent(bookingList);
+        const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
 
-              if (events.length === 0) {
-                alert('V súbore sa nenašli žiadne udalosti (VEVENT) formátu iCalendar (.ics).');
-                return;
-              }
-
-              let addedCount = 0;
-              let firstDateObj = null;
-
-              events.forEach((item, idx) => {
-                const dateInfo = parseIcsDate(item.dtstart);
-                if (!firstDateObj) firstDateObj = dateInfo.dateObj;
-
-                let customerName = 'Zákazník z kalendára';
-                let plate = 'BA ' + Math.floor(100 + Math.random() * 900) + ' XX';
-                let partName = 'Servisná prehliadka & Kontrola';
-                let partCode = 'S';
-
-                const summaryClean = (item.summary || '').replace(/\\,/g, ',').replace(/\\;/g, ';');
-                const descClean = (item.description || '').replace(/\\n/g, ' ').replace(/\\,/g, ',');
-
-                // Extract plate if present in brackets (e.g. (BA 123 AB))
-                const plateMatch = summaryClean.match(/\(([A-Z]{2}\s*[0-9]{3}\s*[A-Z]{2})\)/i) || descClean.match(/([A-Z]{2}\s*[0-9]{3}\s*[A-Z]{2})/i);
-                if (plateMatch) {
-                  plate = plateMatch[1].toUpperCase();
-                }
-
-                // Extract customer name
-                if (summaryClean) {
-                  const parts = summaryClean.split('-');
-                  if (parts.length >= 2) {
-                    partName = parts[0].trim();
-                    customerName = parts[1].replace(/\([^)]*\)/g, '').trim();
-                  } else {
-                    customerName = summaryClean.replace(/\([^)]*\)/g, '').trim();
-                  }
-                }
-
-                // Phone extract
-                let phone = '+421 90' + Math.floor(1000000 + Math.random() * 9000000);
-                const phoneMatch = descClean.match(/(\+421\s*[0-9\s]{9,13}|09[0-9\s]{8,11})/);
-                if (phoneMatch) {
-                  phone = phoneMatch[1].trim();
-                }
-
-                const newBooking = {
-                  id: 'JK-' + Math.floor(100000 + Math.random() * 900000),
-                  customer: customerName || 'Zákazník',
-                  phone: phone,
-                  email: customerName.toLowerCase().replace(/[^a-z0-9]/g, '.') + '@gmail.com',
-                  plate: plate,
-                  partName: partName || 'Servisná prehliadka',
-                  partCode: partCode,
-                  urgency: 'moderate',
-                  date: formatDateForBooking(dateInfo.dateObj),
-                  time: dateInfo.timeStr,
-                  price: '90 €',
-                  mechanic: 'Viktor Thorne',
-                  problemDesc: descClean || summaryClean || 'Udalosť importovaná z externého .ics kalendára.',
-                  symptoms: ['Import z .ics'],
-                  hasAudio: false,
-                  audioData: null,
-                  photos: [],
-                  photosCount: 0,
-                  status: (item.status && item.status.toLowerCase().includes('confirm')) ? 'confirmed' : 'pending'
-                };
-
-                bookings.unshift(newBooking);
-                addedCount++;
-              });
-
-              if (firstDateObj) {
-                calendarDate = new Date(firstDateObj.getFullYear(), firstDateObj.getMonth(), 1);
-                selectedAgendaDate = new Date(firstDateObj);
-              }
-
-              saveData();
-              renderTable();
-              renderCalendar();
-
-              showRescheduleToast(`Úspešne importovaných ${addedCount} termínov zo súboru ${file.name}!`);
-            } catch (err) {
-              console.error('ICS parse error:', err);
-              alert('Nepodarilo sa spracovať .ics súbor. Skontrolujte formát.');
-            }
-          };
-          reader.readAsText(file);
+      if (exportIcsBtn) {
+        exportIcsBtn.addEventListener('click', () => {
+          if (!bookings || bookings.length === 0) {
+            alert('V systéme nie sú žiadne zákazky na export.');
+            return;
+          }
+          downloadIcsCalendar(bookings, 'jk_garaz_servisny_kalendar.ics');
+          showRescheduleToast('Kalendár (.ICS) bol stiahnutý! Otvorte ho pre pridanie termínov do mobilu (iPhone/Android) alebo PC (Outlook/Windows).');
         });
       }
 

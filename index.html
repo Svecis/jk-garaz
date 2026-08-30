@@ -102,28 +102,7 @@
     }
 
     /* Active Bookings Floating Badge */
-    #active-bookings-badge {
-      background: rgba(18, 22, 30, 0.85);
-      border: 1px solid rgba(0, 230, 118, 0.4);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 8px 16px;
-      border-radius: 100px;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      font-size: 0.82rem;
-      font-weight: 600;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      transition: all 0.2s;
-    }
-    #active-bookings-badge:hover {
-      transform: translateY(-2px);
-      border-color: var(--accent-green);
-      box-shadow: 0 10px 30px rgba(0, 230, 118, 0.25);
-    }
+    
     .booking-count-pill {
       background: var(--accent-green);
       color: #08110b;
@@ -1376,28 +1355,7 @@
     }
 
     /* Active Bookings Floating Badge */
-    #active-bookings-badge {
-      background: rgba(18, 22, 30, 0.85);
-      border: 1px solid rgba(0, 230, 118, 0.4);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 8px 16px;
-      border-radius: 100px;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      font-size: 0.82rem;
-      font-weight: 600;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      transition: all 0.2s;
-    }
-    #active-bookings-badge:hover {
-      transform: translateY(-2px);
-      border-color: var(--accent-green);
-      box-shadow: 0 10px 30px rgba(0, 230, 118, 0.25);
-    }
+    
     .booking-count-pill {
       background: var(--accent-green);
       color: #08110b;
@@ -2191,44 +2149,6 @@
       border-color: var(--accent);
     }
 
-    /* Severity Radio Buttons */
-    .severity-selector {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .severity-option {
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 10px 12px;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
-      background: rgba(255, 255, 255, 0.02);
-    }
-    .severity-option:hover {
-      background: rgba(255, 255, 255, 0.05);
-    }
-    .severity-option.active {
-      border-color: var(--accent);
-      background: rgba(0, 229, 255, 0.1);
-    }
-    .severity-option.active.urgent {
-      border-color: var(--accent-warm);
-      background: rgba(255, 107, 53, 0.12);
-    }
-    .severity-label {
-      font-size: 0.82rem;
-      font-weight: 700;
-      margin-bottom: 2px;
-    }
-    .severity-desc {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-    }
-
     /* MEDIA ATTACHMENTS (PHOTO + AUDIO SOUND RECORDER) */
     .media-grid {
       display: grid;
@@ -2642,48 +2562,7 @@
     .ref-row span { color: var(--text-muted); }
     .ref-row strong { color: #fff; font-family: 'Space Mono', monospace; }
 
-    /* BOOKINGS DRAWER */
-    #bookings-drawer {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 380px;
-      max-width: 90vw;
-      height: 100vh;
-      background: #11141c;
-      border-left: 1px solid var(--glass-border);
-      box-shadow: -10px 0 40px rgba(0,0,0,0.7);
-      z-index: 10001;
-      display: flex;
-      flex-direction: column;
-      transform: translateX(100%);
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    #bookings-drawer.open {
-      transform: translateX(0);
-    }
-    .drawer-header {
-      padding: 24px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .drawer-body {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .booked-item-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 16px;
-      position: relative;
-    }
+    
 
 
 
@@ -2844,10 +2723,6 @@
         padding: 5px 9px;
         font-size: 0.72rem;
       }
-      #active-bookings-badge {
-        padding: 6px 12px;
-        font-size: 0.75rem;
-      }
       .part-category-bar {
         width: 95%;
         top: 14px;
@@ -2856,9 +2731,7 @@
       .media-grid, .mechanic-grid, .contact-inputs-grid {
         grid-template-columns: 1fr;
       }
-      .severity-selector {
-        grid-template-columns: 1fr;
-      }
+
       .modal-body {
         padding: 20px;
       }
@@ -2883,8 +2756,8 @@
 
     <!-- Language Switcher Box -->
     <div class="lang-switcher-box" id="lang-switcher">
-      <button class="lang-btn active" data-lang="sk">🇸🇰 SK</button>
-      <button class="lang-btn" data-lang="en">🇬🇧 EN</button>
+      <button class="lang-btn active" data-lang="sk">SK</button>
+      <button class="lang-btn" data-lang="en">EN</button>
     </div>
   </div>
 
@@ -3055,7 +2928,7 @@
 
         <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
           <button class="confirm-booking-btn" id="add-cal-btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;" data-i18n="success_add_cal">
-            📅 Pridať do kalendára (.ics)
+            Pridať do kalendára (.ics)
           </button>
           <button class="confirm-booking-btn" id="finish-booking-btn" data-i18n="success_done">
             Hotovo &bull; Návrat k rozloženému pohľadu
@@ -3127,7 +3000,7 @@
             <!-- Audio / Engine Noise Recorder -->
             <div class="audio-record-box" id="audio-box">
               <div class="record-header">
-                <span class="record-title" data-i18n="step2_audio_title">🎙️ Nahrať zvuk závady</span>
+                <span class="record-title" data-i18n="step2_audio_title">Nahrať zvuk závady</span>
                 <span class="record-timer" id="record-timer">00:00</span>
               </div>
 
@@ -3210,14 +3083,14 @@
               <div class="mechanic-avatar">MV</div>
               <div class="mechanic-info">
                 <h5>Markus Vance</h5>
-                <p data-i18n="mech1_role">Hlavný mechanik pre motory &amp; prevodovky &bull; 4.9★</p>
+                <p data-i18n="mech1_role">Hlavný mechanik pre motory &amp; prevodovky &bull; 4.9 / 5</p>
               </div>
             </div>
             <div class="mechanic-card" data-mech="Elena Rostova">
               <div class="mechanic-avatar">ER</div>
               <div class="mechanic-info">
                 <h5>Elena Rostova</h5>
-                <p data-i18n="mech2_role">Špecialistka na podvozky &amp; diagnostiku &bull; 5.0★</p>
+                <p data-i18n="mech2_role">Špecialistka na podvozky &amp; diagnostiku &bull; 5.0 / 5</p>
               </div>
             </div>
           </div>
@@ -3248,7 +3121,7 @@
             </div>
             <div class="form-group">
               <label class="form-label" for="cust-plate" data-i18n="step4_plate_label">EČV / Model vozidla</label>
-              <input type="text" id="cust-plate" class="input-field" placeholder="EČV / Model (napr. BA-123AB)" />
+              <input type="text" id="cust-plate" class="input-field" placeholder="EČV / Model (napr. BA 123 AB)" />
             </div>
           </div>
         </div>
@@ -3273,19 +3146,7 @@
   </div>
 
   <!-- BOOKINGS DRAWER (LIST OF CONFIRMED RESERVATIONS) -->
-  <div id="bookings-drawer">
-    <div class="drawer-header">
-      <h3 style="font-size: 1.1rem; font-weight: 700;" data-i18n="drawer_title">Naplánované rezervácie</h3>
-      <button class="modal-close-btn" id="close-drawer-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-    </div>
-    <div class="drawer-body" id="drawer-items-list">
-      <!-- Injected dynamically -->
-    </div>
+  
   </div>
 
   <!-- CORE SCRIPT LOGIC -->
@@ -3313,12 +3174,12 @@
           diag_banner_title: "Interaktívny diagnostický režim aktívny",
           diag_banner_desc: "Kliknite na komponent [B, E, I, S, X, W] pre nahlásenie závady a rezerváciu termínu",
           cat_all: "Všetky podsystémy",
-          cat_e: "⚡ [E] Motor",
-          cat_b: "🚗 [B] Karoséria",
-          cat_i: "💺 [I] Interiér",
-          cat_s: "🔧 [S] Podvozok",
-          cat_x: "💨 [X] Výfuk",
-          cat_w: "🔘 [W] Kolesá",
+          cat_e: "[E] Motor",
+          cat_b: "[B] Karoséria",
+          cat_i: "[I] Interiér",
+          cat_s: "[S] Podvozok",
+          cat_x: "[X] Výfuk",
+          cat_w: "[W] Kolesá",
           tooltip_report: "Nahlásiť závadu & rezervovať",
           hotspot_hint: "Kliknite pre nahlásenie závady & rezerváciu",
           hud_frame_prefix: "SNÍMKA",
@@ -3340,18 +3201,18 @@
           step2_title: "Krok 2: Priložte fotografie & Nahrajte zvuk závady",
           step2_photo_title: "Pretiahnite fotografiu dielu / budíkov",
           step2_photo_sub: "PNG, JPG do 15MB",
-          step2_audio_title: "🎙️ Nahrať zvuk závady",
+          step2_audio_title: "Nahrať zvuk závady",
           step2_record_start: "Nahrať zvukový záznam",
           step2_record_stop: "Zastaviť nahrávanie",
           step2_record_again: "Nahrať znova",
           step2_play: "▶ Prehrať",
-          step2_playing: "🔊 Prehrávam...",
+          step2_playing: "Prehrávam...",
           step3_title: "Krok 3: Výber dátumu & Času u mechanika",
           step3_days_label: "Dostupné dni:",
           step3_times_label: "Dostupné časy termínov:",
           step3_specialist_label: "Priradený špecializovaný mechanik:",
-          mech1_role: "Hlavný mechanik pre motory & prevodovky • 4.9★",
-          mech2_role: "Špecialistka na podvozky & diagnostiku • 5.0★",
+          mech1_role: "Hlavný mechanik pre motory & prevodovky • 4.9 / 5",
+          mech2_role: "Špecialistka na podvozky & diagnostiku • 5.0 / 5",
           step4_title: "Krok 4: Kontaktné údaje & Informácie o vozidle",
           step4_name_label: "Meno a priezvisko *",
           step4_phone_label: "Telefón (pre SMS notifikácie) *",
@@ -3371,7 +3232,7 @@
           receipt_media_val: "{photos} fotografií, {audio}",
           receipt_audio_yes: "1 zvuková nahrávka",
           receipt_audio_no: "bez audia",
-          success_add_cal: "📅 Pridať do kalendára (.ics)",
+          success_add_cal: "Pridať do kalendára (.ics)",
           success_done: "Hotovo • Návrat k rozloženému pohľadu",
           drawer_title: "Naplánované rezervácie",
           drawer_empty: "Zatiaľ nemáte žiadne aktívne rezervácie.<br />Kliknite na ktorýkoľvek rozložený diel pre rezerváciu termínu.",
@@ -3393,12 +3254,12 @@
           diag_banner_title: "Interactive Diagnostic Mode Active",
           diag_banner_desc: "Click any component pin [B, E, I, S, X, W] to report issues & book a mechanic",
           cat_all: "All Subsystems",
-          cat_e: "⚡ [E] Engine",
-          cat_b: "🚗 [B] Body & Glass",
-          cat_i: "💺 [I] Interior",
-          cat_s: "🔧 [S] Suspension",
-          cat_x: "💨 [X] Exhaust",
-          cat_w: "🔘 [W] Wheels",
+          cat_e: "[E] Engine",
+          cat_b: "[B] Body & Glass",
+          cat_i: "[I] Interior",
+          cat_s: "[S] Suspension",
+          cat_x: "[X] Exhaust",
+          cat_w: "[W] Wheels",
           tooltip_report: "Report issue & book",
           hotspot_hint: "Click component to report an issue & book",
           hud_frame_prefix: "FRAME",
@@ -3417,27 +3278,27 @@
           step1_desc_label: "Detailed Problem Description:",
           step1_desc_placeholder: "Describe the symptom (e.g. rattling noise at 2,500 RPM, intermittent warning light, vibration while braking...)",
           step1_urgency_label: "Urgency Level:",
-          urg_minor_title: "🟢 Minor / Checkup",
+          urg_minor_title: "Minor / Checkup",
           urg_minor_desc: "Safe to drive, routine issue",
-          urg_mod_title: "🟡 Noticeable Fault",
+          urg_mod_title: "Noticeable Fault",
           urg_mod_desc: "Performance degraded",
-          urg_urg_title: "🔴 Urgent / Unsafe",
+          urg_urg_title: "Urgent / Unsafe",
           urg_urg_desc: "Requires immediate inspection",
           step2_title: "Step 2: Attach Photos & Record Sound / Noise",
           step2_photo_title: "Drop Photo of Part / Dash",
           step2_photo_sub: "PNG, JPG up to 15MB",
-          step2_audio_title: "🎙️ Record Problem Noise",
+          step2_audio_title: "Record Problem Noise",
           step2_record_start: "Record Sound Note",
           step2_record_stop: "Stop Recording",
           step2_record_again: "Re-record Sound",
           step2_play: "▶ Play",
-          step2_playing: "🔊 Playing...",
+          step2_playing: "Playing...",
           step3_title: "Step 3: Select Date & Mechanic Time Slot",
           step3_days_label: "Available Days:",
           step3_times_label: "Available Appointment Times:",
           step3_specialist_label: "Assigned Specialist Mechanic:",
-          mech1_role: "Master Engine & Drivetrain • 4.9★",
-          mech2_role: "Suspension & Electronics • 5.0★",
+          mech1_role: "Master Engine & Drivetrain • 4.9 / 5",
+          mech2_role: "Suspension & Electronics • 5.0 / 5",
           step4_title: "Step 4: Customer & Vehicle Information",
           step4_name_label: "Full Name *",
           step4_phone_label: "Phone (for SMS status updates) *",
@@ -3457,7 +3318,7 @@
           receipt_media_val: "{photos} Photos, {audio}",
           receipt_audio_yes: "1 Audio Recording",
           receipt_audio_no: "None",
-          success_add_cal: "📅 Add to Calendar (.ics)",
+          success_add_cal: "Add to Calendar (.ics)",
           success_done: "Done • Back to Exploded View",
           drawer_title: "Scheduled Reservations",
           drawer_empty: "No active reservations yet.<br />Click any exploded car component to book a slot.",
@@ -3863,11 +3724,6 @@
 
       // Top Nav & Language Switcher
       const langBtns = document.querySelectorAll('.lang-btn');
-      const activeBookingsBadge = document.getElementById('active-bookings-badge');
-      const bookingsCountPill = document.getElementById('bookings-count-pill');
-      const bookingsDrawer = document.getElementById('bookings-drawer');
-      const closeDrawerBtn = document.getElementById('close-drawer-btn');
-      const drawerItemsList = document.getElementById('drawer-items-list');
 
       // Diagnostic & Reservation Layer Elements
       const diagnosticLayer = document.getElementById('diagnostic-layer');
@@ -4901,18 +4757,7 @@
           persistBookings();
           updateActiveBookingsUI();
 
-          // Automatické odoslanie emailového upozornenia na server
-          try {
-            fetch('/api/send-notification', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(newBooking)
-            }).then(r => r.json()).then(data => {
-              console.log('Email notification response:', data);
-            }).catch(err => {
-              console.warn('Email notification fetch failed:', err);
-            });
-          } catch(e) {}
+          
         };
 
         if (recordedAudioBlob) {
@@ -4984,74 +4829,7 @@
       });
 
       function updateActiveBookingsUI() {
-        if (bookingsCountPill) {
-          bookingsCountPill.textContent = activeBookings.length;
-        }
-        const dict = TRANSLATIONS[currentLang];
-        if (!drawerItemsList) return;
-
-        if (activeBookings.length === 0) {
-          drawerItemsList.innerHTML = `
-            <div style="text-align: center; color: var(--text-muted); margin-top: 40px; font-size: 0.9rem;">
-              ${dict.drawer_empty}
-            </div>
-            <a href="admin.html" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:6px; margin-top:24px; width:100%; padding:10px 14px; background:rgba(0,229,255,0.08); border:1px dashed rgba(0,229,255,0.35); color:var(--accent); text-decoration:none; border-radius:8px; font-size:0.8rem; font-weight:600; text-align:center;">
-              ⚙️ Správa všetkých rezervácií (Admin) ↗
-            </a>
-          `;
-          return;
-        }
-
-        drawerItemsList.innerHTML = '';
-        activeBookings.forEach((b) => {
-          const item = document.createElement('div');
-          item.className = 'booked-item-card';
-          item.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <span style="font-family:'Space Mono', monospace; font-size:0.75rem; color:var(--accent); font-weight:700;">#${b.id}</span>
-              <span style="font-size:0.72rem; background:rgba(0,230,118,0.15); color:var(--accent-green); padding:2px 8px; border-radius:100px; font-weight:600;">${dict.status_confirmed}</span>
-            </div>
-            <h4 style="font-size:0.92rem; font-weight:700; margin-bottom:4px;">[${b.partCode}] ${escapeHtml(b.partName)}</h4>
-            <div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:6px;">
-              📅 ${b.date} &bull; ⏰ ${b.time}
-            </div>
-            <div style="font-size:0.74rem; color:var(--text-muted);">
-              ${escapeHtml(b.mechanic)} &bull; ${escapeHtml(b.customer)} (${escapeHtml(maskPhone(b.phone))})
-            </div>
-          `;
-          drawerItemsList.appendChild(item);
-        });
-
-        // Odkaz na administrátorský portál
-        const adminLink = document.createElement('a');
-        adminLink.href = 'admin.html';
-        adminLink.target = '_blank';
-        adminLink.style.cssText = 'display:flex; align-items:center; justify-content:center; gap:6px; margin-top:14px; width:100%; padding:10px 14px; background:rgba(0,229,255,0.08); border:1px dashed rgba(0,229,255,0.35); color:var(--accent); text-decoration:none; border-radius:8px; font-size:0.8rem; font-weight:600; text-align:center; transition:all 0.2s;';
-        adminLink.innerHTML = '⚙️ Správa všetkých rezervácií (Admin) ↗';
-        drawerItemsList.appendChild(adminLink);
-
-        // Tlačidlo na okamžité zmazanie údajov relácie na tomto počítači (ochrana súkromia na zdieľaných zariadeniach)
-        const clearBtn = document.createElement('button');
-        clearBtn.style.cssText = 'margin-top:10px; width:100%; background:rgba(255,82,82,0.1); border:1px solid rgba(255,82,82,0.25); color:#ff8a80; padding:8px 12px; border-radius:8px; font-size:0.78rem; cursor:pointer; font-weight:600;';
-        clearBtn.textContent = '🗑️ Vymazať históriu na tomto zariadení';
-        clearBtn.addEventListener('click', () => {
-          activeBookings = [];
-          localStorage.removeItem('automek_bookings');
-          updateActiveBookingsUI();
-        });
-        drawerItemsList.appendChild(clearBtn);
-      }
-
-      if (activeBookingsBadge && bookingsDrawer) {
-        activeBookingsBadge.addEventListener('click', () => {
-          bookingsDrawer.classList.add('open');
-        });
-      }
-
-      if (closeDrawerBtn && bookingsDrawer) {
-        closeDrawerBtn.addEventListener('click', () => {
-          bookingsDrawer.classList.remove('open');
-        });
+        // Bookings state synced with localStorage
       }
 
       // =========================================================

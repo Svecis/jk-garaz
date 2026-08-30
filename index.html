@@ -855,6 +855,1272 @@
       color: var(--accent);
     }
 
+    /* BOOQME-STYLE CALENDAR & SLOTS */
+    .booqme-booking-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .booqme-cal-card, .booqme-slots-card {
+      background: rgba(8, 10, 15, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .cal-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .cal-month-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: capitalize;
+    }
+
+    .cal-nav-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cal-nav-btn:hover {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .cal-weekdays-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .cal-days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .cal-day-cell {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: #e2e8f0;
+      font-size: 0.82rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .cal-day-cell:hover:not(.disabled):not(.empty) {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(0, 229, 255, 0.3);
+      color: var(--accent);
+    }
+    .cal-day-cell.today {
+      border-color: rgba(0, 229, 255, 0.4);
+      font-weight: 700;
+    }
+    .cal-day-cell.selected {
+      background: var(--accent) !important;
+      border-color: var(--accent) !important;
+      color: #090a0c !important;
+      font-weight: 800 !important;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+    .cal-day-cell.disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+      color: var(--text-muted);
+    }
+    .cal-day-cell.empty {
+      cursor: default;
+    }
+
+    /* Slots Card */
+    .slots-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .slots-header-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .slots-header-date {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .slots-sub-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+    .time-slot-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .time-slot-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 9px 6px;
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .time-slot-btn:hover {
+      background: rgba(0, 229, 255, 0.1);
+      border-color: rgba(0, 229, 255, 0.4);
+      color: var(--accent);
+    }
+    .time-slot-btn.selected {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #090a0c;
+      font-weight: 700;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    @media (max-width: 768px) {
+      .booqme-booking-grid {
+        grid-template-columns: 1fr;
+      }
+      .time-slot-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* Textarea */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .form-textarea {
+      width: 100%;
+      height: 100px;
+      background: rgba(8, 10, 15, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* MEDIA ATTACHMENTS (PHOTO + AUDIO SOUND RECORDER) */
+    .media-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Photo Dropzone */
+    .upload-box {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      padding: 20px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(8, 10, 15, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 130px;
+      position: relative;
+    }
+    .upload-box:hover {
+      border-color: var(--accent);
+      background: rgba(0, 229, 255, 0.03);
+    }
+    .upload-box input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .upload-icon {
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .upload-title {
+      font-size: 0.84rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .upload-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .photo-preview-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .photo-thumb {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+    }
+
+    /* Audio Noise Recorder */
+    .audio-record-box {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 16px;
+      background: rgba(8, 10, 15, 0.5);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 130px;
+    }
+
+    .record-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .record-title {
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .record-timer {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--accent);
+    }
+
+    .waveform-visualizer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      height: 36px;
+      margin: 10px 0;
+    }
+
+    .wave-bar {
+      width: 3px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      transition: height 0.1s ease;
+    }
+
+    .recording .wave-bar {
+      background: var(--accent-warm);
+      animation: waveAnim 0.8s ease-in-out infinite alternate;
+    }
+
+    @keyframes waveAnim {
+      0% { height: 4px; }
+      100% { height: 32px; }
+    }
+
+    .record-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mic-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mic-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .mic-btn.is-recording {
+      background: rgba(255, 107, 53, 0.25);
+      border-color: var(--accent-warm);
+      color: var(--accent-warm);
+    }
+
+    .audio-playback-btn {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    /* MECHANIC SELECTOR */
+    .mechanic-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .mechanic-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mechanic-card:hover {
+      border-color: rgba(0, 229, 255, 0.3);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .mechanic-card.selected {
+      border-color: var(--accent);
+      background: rgba(0, 229, 255, 0.1);
+    }
+
+    .mechanic-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(0, 229, 255, 0.2);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .mechanic-info h5 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .mechanic-info p {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* CUSTOMER CONTACT & VEHICLE DETAILS */meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JK Garáž — Diagnostika, oprava, bezpečnosť</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- GSAP & ScrollTrigger & ScrollToPlugin CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
+  
+  
+
+  <style>
+    :root {
+      --bg-dark: #090a0c;
+      --bg-canvas: #b5b7b9;
+      --accent: #00e5ff;
+      --accent-glow: rgba(0, 229, 255, 0.45);
+      --accent-warm: #ff6b35;
+      --accent-green: #00e676;
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-muted: rgba(255, 255, 255, 0.45);
+      --glass-bg: rgba(14, 17, 23, 0.82);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+      --card-bg: rgba(25, 29, 38, 0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    html, body {
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* TOP RIGHT NAVIGATION BAR (RESERVATIONS + LANGUAGE SWITCHER) */
+    .top-nav-bar {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Language Switcher Box */
+    .lang-switcher-box {
+      background: rgba(15, 18, 26, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 100px;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 100px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+
+    .lang-btn:hover {
+      color: #fff;
+    }
+
+    .lang-btn.active {
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 119, 255, 0.3));
+      border: 1px solid rgba(0, 229, 255, 0.4);
+      color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    /* Active Bookings Floating Badge */
+    #active-bookings-badge {
+      background: rgba(18, 22, 30, 0.85);
+      border: 1px solid rgba(0, 230, 118, 0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 8px 16px;
+      border-radius: 100px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s;
+    }
+    #active-bookings-badge:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-green);
+      box-shadow: 0 10px 30px rgba(0, 230, 118, 0.25);
+    }
+    .booking-count-pill {
+      background: var(--accent-green);
+      color: #08110b;
+      font-weight: 800;
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 100px;
+    }
+    .admin-portal-link {
+      background: rgba(18, 22, 30, 0.85);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 8px 14px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s;
+    }
+    .admin-portal-link:hover {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--accent);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 229, 255, 0.3);
+    }
+
+    /* PRELOADER SCREEN */
+    #preloader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: radial-gradient(circle at center, #15181e 0%, #08090b 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
+    }
+
+    #preloader.loaded {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loader-content {
+      text-align: center;
+      max-width: 440px;
+      width: 90%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .loader-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .loader-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      animation: pulse 1.5s infinite;
+    }
+
+    .loader-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      background: linear-gradient(180deg, #fff 30%, rgba(255,255,255,0.6) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .loader-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 36px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #0077ff, var(--accent));
+      box-shadow: 0 0 15px var(--accent-glow);
+      border-radius: 999px;
+      transition: width 0.15s ease-out;
+    }
+
+    .progress-stats {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .progress-percent {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .skip-btn {
+      margin-top: 24px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      text-decoration: underline;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .skip-btn:hover {
+      opacity: 1;
+      color: #fff;
+    }
+
+    /* HERO SECTION */
+    .hero-section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+      position: relative;
+      background: radial-gradient(circle at 50% 35%, rgba(0, 229, 255, 0.08) 0%, transparent 65%),
+                  linear-gradient(180deg, #090a0c 0%, #090a0c 60%, rgba(9, 10, 12, 0.95) 85%, #090a0c 100%);
+    }
+
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 22px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
+    }
+
+    .hero-title {
+      font-size: clamp(2.3rem, 5.5vw, 4.6rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.15;
+      max-width: 980px;
+      margin-bottom: 24px;
+      background: linear-gradient(180deg, #ffffff 30%, rgba(255, 255, 255, 0.65) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-description {
+      font-size: clamp(1rem, 1.8vw, 1.25rem);
+      color: var(--text-secondary);
+      max-width: 720px;
+      line-height: 1.65;
+      margin-bottom: 40px;
+      font-weight: 400;
+    }
+
+    .hero-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--accent) 0%, #0088ff 100%);
+      color: #06080b;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 14px 34px;
+      border-radius: 100px;
+      text-decoration: none;
+      box-shadow: 0 10px 30px rgba(0, 229, 255, 0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      border: none;
+      margin-bottom: 30px;
+    }
+    .hero-cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(0, 229, 255, 0.5);
+    }
+
+    .scroll-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      position: absolute;
+      bottom: 40px;
+      animation: float 2.5s ease-in-out infinite;
+    }
+
+    .mouse-icon {
+      width: 22px;
+      height: 36px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      position: relative;
+    }
+
+    .mouse-icon::after {
+      content: '';
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 7px;
+      background: var(--accent);
+      border-radius: 2px;
+      animation: mouseScroll 2s infinite;
+    }
+
+    /* SEQUENCE PINNED CONTAINER */
+    #sequence-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-dark);
+      overflow: hidden;
+    }
+
+    #canvas-wrapper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    canvas#sequence-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* SEAMLESS BACKGROUND BLENDS (DARK HERO -> CANVAS -> DARK SPECS) */
+    .sequence-blend-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, transparent 48%, rgba(9, 10, 12, 0.45) 75%, rgba(9, 10, 12, 0.98) 100%);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .sequence-blend-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 160px;
+      background: linear-gradient(180deg, #090a0c 0%, rgba(9, 10, 12, 0.82) 30%, rgba(9, 10, 12, 0) 100%);
+      pointer-events: none;
+      z-index: 11;
+    }
+
+    .sequence-blend-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 180px;
+      background: linear-gradient(0deg, #090a0c 0%, rgba(9, 10, 12, 0.85) 35%, rgba(9, 10, 12, 0) 100%);
+      pointer-events: none;
+      z-index: 11;
+    }
+
+    /* =========================================================
+       DIAGNOSTIC & EXPLODED VIEW INTERACTIVE HOTSPOTS
+       ========================================================= */
+    #diagnostic-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 25;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s;
+    }
+
+    #diagnostic-layer.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    /* Interactive Hotspot Hint Callout on Pin (Statická, dokonale ostrá a stabilná) */
+    .hotspot-hint-callout {
+      position: absolute;
+      top: calc(100% + 14px);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(14, 18, 26, 0.95);
+      border: 1px solid var(--accent);
+      box-shadow: 0 0 22px rgba(0, 229, 255, 0.3), 0 8px 24px rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 6px 15px;
+      border-radius: 100px;
+      white-space: nowrap;
+      pointer-events: auto;
+      cursor: pointer;
+      z-index: 50;
+      transition: opacity 0.25s ease, visibility 0.25s ease, box-shadow 0.2s ease;
+    }
+
+    /* Keď používateľ nabehne myšou na bod, nápoveda plynulo zmizne a zobrazí sa detailný tooltip */
+    .part-hotspot:hover .hotspot-hint-callout {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .hotspot-hint-callout:hover {
+      box-shadow: 0 0 32px rgba(0, 229, 255, 0.55), 0 10px 32px rgba(0, 0, 0, 0.85);
+    }
+
+    .hotspot-hint-callout::after {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: transparent transparent var(--accent) transparent;
+    }
+
+    .hint-pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      flex-shrink: 0;
+    }
+
+    .hint-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+
+    /* Quick Component Category Filter Bar */
+    .part-category-bar {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+      justify-content: center;
+      background: rgba(10, 12, 16, 0.85);
+      padding: 4px 8px;
+      border-radius: 100px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      z-index: 30;
+      pointer-events: auto;
+    }
+
+    .cat-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cat-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .cat-btn.active {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: rgba(0, 229, 255, 0.4);
+      color: var(--accent);
+    }
+
+    /* Car Part Hotspot Pin */
+    .part-hotspot {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      z-index: 35;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .part-hotspot:hover {
+      transform: translate(-50%, -50%) scale(1.15);
+      z-index: 40;
+    }
+
+    .hotspot-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(14, 18, 26, 0.92);
+      border: 2px solid var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: 0.85rem;
+      box-shadow: 0 0 20px var(--accent-glow), 0 8px 24px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .hotspot-badge::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px solid var(--accent);
+      opacity: 0.6;
+      animation: hotspotRadar 2.2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+
+    @keyframes hotspotRadar {
+      0% { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(2.0); opacity: 0; }
+    }
+
+    /* Hotspot Hover Card Tooltip */
+    .hotspot-tooltip {
+      position: absolute;
+      bottom: calc(100% + 14px);
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: rgba(13, 16, 23, 0.96);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      padding: 14px 16px;
+      border-radius: 14px;
+      width: 250px;
+      color: #fff;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(0, 229, 255, 0.15);
+      text-align: center;
+      z-index: 60;
+    }
+
+    .hotspot-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 7px;
+      border-style: solid;
+      border-color: rgba(13, 16, 23, 0.96) transparent transparent transparent;
+    }
+
+    .part-hotspot:hover .hotspot-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .tooltip-category {
+      font-size: 0.68rem;
+      font-family: 'Space Mono', monospace;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: block;
+      text-align: center;
+    }
+
+    .tooltip-title {
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.35;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+      text-align: center;
+    }
+
+    .tooltip-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin-bottom: 10px;
+    }
+
+    .tooltip-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 12px;
+      background: rgba(0, 229, 255, 0.08);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      border-radius: 8px;
+      color: #00e5ff;
+      font-size: 0.76rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .part-hotspot:hover .tooltip-btn {
+      background: rgba(0, 229, 255, 0.18);
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.3);
+      color: #fff;
+      border-color: #00e5ff;
+    }
+
+    .tooltip-btn svg {
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .part-hotspot:hover .tooltip-btn svg {
+      transform: translateX(3px);
+    }
+
+    /* =========================================================
+       BOOKIO-STYLE MECHANIC DIAGNOSTIC & RESERVATION MODAL
+       ========================================================= */
+    #booking-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(6, 8, 11, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+
+    #booking-modal.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-container {
+      background: #11141c;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow), 0 0 50px rgba(0, 229, 255, 0.15);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 820px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: scale(0.95) translateY(20px);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #booking-modal.open .modal-container {
+      transform: scale(1) translateY(0);
+    }
+
+    /* Modal Header */
+    .modal-header {
+      padding: 24px 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(18, 22, 31, 0.6);
+    }
+
+    .modal-part-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .modal-part-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(0, 229, 255, 0.12);
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      font-family: 'Space Mono', monospace;
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .modal-part-title-group h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 2px;
+    }
+
+    .modal-part-title-group span {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .modal-close-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-close-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.08);
+    }
+
+    /* Modal Body & Scrollable Sections */
+    .modal-body {
+      padding: 28px 32px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .form-section {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 18px;
+      padding: 22px;
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+
+    .section-title svg {
+      color: var(--accent);
+    }
+
     /* Common Symptom Pills */
     .symptom-grid {
       display: flex;
@@ -1809,41 +3075,18 @@
       <!-- MODAL BODY -->
       <div class="modal-body">
         
-        <!-- 1. ISSUE DIAGNOSTIC & SYMPTOMS -->
+        <!-- 1. ISSUE DESCRIPTION ONLY -->
         <div class="form-section">
           <div class="section-title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
             </svg>
-            <span data-i18n="step1_title">Krok 1: Kontrolný zoznam príznakov &amp; Popis</span>
+            <span data-i18n="step1_title">Krok 1: Opísanie problému</span>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" data-i18n="step1_symptoms_label">Vyberte časté príznaky (kliknutím označíte):</label>
-            <div class="symptom-grid" id="modal-symptoms-container">
-              <!-- Dynamically populated per part & language -->
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="problem-description" data-i18n="step1_desc_label">Podrobný popis problému:</label>
-            <textarea id="problem-description" class="form-textarea" data-i18n-placeholder="step1_desc_placeholder" placeholder="Popíšte závadu (napr. klepanie pri 2 500 ot/min, občasné rozsvietenie kontrolky, trasenie pri brzdení...)"></textarea>
-          </div>
-
-          <label class="form-label" data-i18n="step1_urgency_label">Závažnosť závady:</label>
-          <div class="severity-selector">
-            <div class="severity-option active" data-severity="minor">
-              <div class="severity-label" data-i18n="urg_minor_title">🟢 Bežná / Kontrola</div>
-              <div class="severity-desc" data-i18n="urg_minor_desc">Bezpečné na jazdu, bežný servis</div>
-            </div>
-            <div class="severity-option" data-severity="moderate">
-              <div class="severity-label" data-i18n="urg_mod_title">🟡 Výrazná porucha</div>
-              <div class="severity-desc" data-i18n="urg_mod_desc">Znížený výkon / komfort</div>
-            </div>
-            <div class="severity-option urgent" data-severity="urgent">
-              <div class="severity-label" data-i18n="urg_urg_title">🔴 Kritická / Nebezpečné</div>
-              <div class="severity-desc" data-i18n="urg_urg_desc">Vyžaduje okamžitú kontrolu</div>
-            </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="problem-description" data-i18n="step1_desc_label">Opíšte závadu alebo požadovaný servis:</label>
+            <textarea id="problem-description" class="form-textarea" rows="4" data-i18n-placeholder="step1_desc_placeholder" placeholder="Podrobne popíšte závadu (napr. klepanie v motore pri 2 500 ot/min, svieti kontrolka motora, trasenie pri brzdení, kontrola podvozku...)"></textarea>
           </div>
         </div>
 
@@ -1904,7 +3147,7 @@
           </div>
         </div>
 
-        <!-- 3. DATE & TIME SELECTION (BOOKIO CALENDAR) -->
+        <!-- 3. DATE & TIME SELECTION (BOOQME-STYLE CALENDAR) -->
         <div class="form-section">
           <div class="section-title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1913,17 +3156,44 @@
               <line x1="8" y1="2" x2="8" y2="6"></line>
               <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
-            <span data-i18n="step3_title">Krok 3: Výber dátumu &amp; Času u mechanika</span>
+            <span data-i18n="step3_title">Krok 3: Výber termínu a času</span>
           </div>
 
-          <label class="form-label" data-i18n="step3_days_label">Dostupné dni:</label>
-          <div class="date-scroll-container" id="date-cards-container">
-            <!-- 14 Days Generated by JS -->
-          </div>
+          <div class="booqme-booking-grid">
+            <!-- Left Column: Interactive Month Calendar -->
+            <div class="booqme-cal-card">
+              <div class="cal-header-row">
+                <button type="button" class="cal-nav-btn" id="modal-cal-prev" title="Predchádzajúci mesiac">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <div class="cal-month-title" id="modal-cal-month-title">August 2026</div>
+                <button type="button" class="cal-nav-btn" id="modal-cal-next" title="Nasledujúci mesiac">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+              </div>
 
-          <label class="form-label" style="margin-top: 14px;" data-i18n="step3_times_label">Dostupné časy termínov:</label>
-          <div class="time-slot-grid" id="time-slots-container">
-            <!-- Slots generated by JS -->
+              <!-- Weekdays Row -->
+              <div class="cal-weekdays-row" id="modal-cal-weekdays">
+                <span>Po</span><span>Ut</span><span>St</span><span>Št</span><span>Pi</span><span>So</span><span>Ne</span>
+              </div>
+
+              <!-- Month Days Grid -->
+              <div class="cal-days-grid" id="modal-cal-days-container">
+                <!-- Injected dynamically by JS -->
+              </div>
+            </div>
+
+            <!-- Right Column: Available Time Slots for Selected Date -->
+            <div class="booqme-slots-card">
+              <div class="slots-header">
+                <span class="slots-header-title" data-i18n="step3_selected_date_label">Vybraný termín:</span>
+                <span class="slots-header-date" id="modal-selected-date-badge">Po, 31. Aug 2026</span>
+              </div>
+              <div class="slots-sub-label" data-i18n="step3_choose_time_label">Dostupné časy:</div>
+              <div class="time-slot-grid" id="time-slots-container">
+                <!-- Slots generated by JS -->
+              </div>
+            </div>
           </div>
 
           <label class="form-label" style="margin-top: 18px;" data-i18n="step3_specialist_label">Priradený špecializovaný mechanik:</label>
@@ -2054,17 +3324,11 @@
           email_title: "Napíšte nám",
           social_title: "Sledujte nás",
           footer_text: "© JK Garáž • Diagnostický a rezervačný systém • Poháňané GSAP ScrollTrigger",
-          step1_title: "Krok 1: Kontrolný zoznam príznakov & Popis",
-          step1_symptoms_label: "Vyberte časté príznaky (kliknutím označíte):",
-          step1_desc_label: "Podrobný popis problému:",
-          step1_desc_placeholder: "Popíšte závadu (napr. klepanie pri 2 500 ot/min, občasné rozsvietenie kontrolky, trasenie pri brzdení...)",
-          step1_urgency_label: "Závažnosť závady:",
-          urg_minor_title: "🟢 Bežná / Kontrola",
-          urg_minor_desc: "Bezpečné na jazdu, bežný servis",
-          urg_mod_title: "🟡 Výrazná porucha",
-          urg_mod_desc: "Znížený výkon / komfort",
-          urg_urg_title: "🔴 Kritická / Nebezpečné",
-          urg_urg_desc: "Vyžaduje okamžitú kontrolu",
+          step1_title: "Krok 1: Opísanie problému",
+          step1_desc_label: "Opíšte závadu alebo požadovaný servis:",
+          step1_desc_placeholder: "Podrobne popíšte závadu (napr. klepanie v motore pri 2 500 ot/min, svieti kontrolka motora, trasenie pri brzdení, kontrola podvozku...)",
+          step3_selected_date_label: "Vybraný termín:",
+          step3_choose_time_label: "Dostupné časy:",
           step2_title: "Krok 2: Priložte fotografie & Nahrajte zvuk závady",
           step2_photo_title: "Pretiahnite fotografiu dielu / budíkov",
           step2_photo_sub: "PNG, JPG do 15MB",
@@ -3122,15 +4386,8 @@
         modalPartName.textContent = loc.name;
         modalPartCategory.innerHTML = loc.subCategory;
         modalPriceEst.innerHTML = `${currentSelectedPart.price} <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">${dict.modal_free_with_repair}</span>`;
-
-        modalSymptomsContainer.innerHTML = '';
-        loc.symptoms.forEach(sym => {
-          const chip = document.createElement('div');
-          chip.className = 'symptom-chip';
-          chip.textContent = sym;
-          chip.addEventListener('click', () => chip.classList.toggle('selected'));
-          modalSymptomsContainer.appendChild(chip);
-        });
+        updateSelectedDateBadge();
+        renderInteractiveCalendar();
       }
 
       function closeModal() {
@@ -3142,14 +4399,6 @@
       modalCloseBtn.addEventListener('click', closeModal);
       bookingModal.addEventListener('click', (e) => {
         if (e.target === bookingModal) closeModal();
-      });
-
-      severityOptions.forEach(opt => {
-        opt.addEventListener('click', () => {
-          severityOptions.forEach(o => o.classList.remove('active'));
-          opt.classList.add('active');
-          selectedSeverity = opt.dataset.severity;
-        });
       });
 
       photoInput.addEventListener('change', (e) => {
@@ -3360,57 +4609,141 @@
         };
       });
 
-      function buildCalendarDates() {
-        dateCardsContainer.innerHTML = '';
-        const today = new Date();
+      // Interactive booqme-style calendar state
+      let currentCalYear = 2026;
+      let currentCalMonth = 7; // 0-indexed: 7 = August 2026
+      let selectedDateObj = new Date(2026, 7, 31); // Default Monday Aug 31, 2026
+      selectedDateStr = 'Po, 31. Aug 2026';
 
+      const modalCalPrev = document.getElementById('modal-cal-prev');
+      const modalCalNext = document.getElementById('modal-cal-next');
+      const modalCalMonthTitle = document.getElementById('modal-cal-month-title');
+      const modalCalDaysContainer = document.getElementById('modal-cal-days-container');
+      const modalSelectedDateBadge = document.getElementById('modal-selected-date-badge');
+      const modalCalWeekdays = document.getElementById('modal-cal-weekdays');
+
+      function updateSelectedDateBadge() {
+        if (!selectedDateObj) return;
         const daysSK = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pia', 'So'];
         const monthsSK = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
-        
         const daysEN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
         const days = currentLang === 'sk' ? daysSK : daysEN;
         const months = currentLang === 'sk' ? monthsSK : monthsEN;
 
-        for (let i = 1; i <= 14; i++) {
-          const d = new Date(today);
-          d.setDate(today.getDate() + i);
+        const dayName = days[selectedDateObj.getDay()];
+        const dayNum = selectedDateObj.getDate();
+        const monthName = months[selectedDateObj.getMonth()];
+        const yearNum = selectedDateObj.getFullYear();
 
-          const dayName = days[d.getDay()];
-          const dayNum = d.getDate();
-          const monthName = months[d.getMonth()];
-          const fullStr = `${dayName}, ${dayNum}. ${monthName}`;
-
-          const card = document.createElement('div');
-          card.className = `date-card ${i === 1 ? 'selected' : ''}`;
-          if (i === 1) selectedDateStr = fullStr;
-
-          card.innerHTML = `
-            <div class="date-day-name">${dayName}</div>
-            <div class="date-day-num">${dayNum}</div>
-            <div class="date-status">${monthName}</div>
-          `;
-
-          card.addEventListener('click', () => {
-            dateCardsContainer.querySelectorAll('.date-card').forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-            selectedDateStr = fullStr;
-          });
-
-          dateCardsContainer.appendChild(card);
+        selectedDateStr = `${dayName}, ${dayNum}. ${monthName} ${yearNum}`;
+        if (modalSelectedDateBadge) {
+          modalSelectedDateBadge.textContent = selectedDateStr;
         }
       }
 
+      function renderInteractiveCalendar() {
+        if (!modalCalMonthTitle || !modalCalDaysContainer) return;
+
+        const monthNamesSK = ['Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún', 'Júl', 'August', 'September', 'Október', 'November', 'December'];
+        const monthNamesEN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const months = currentLang === 'sk' ? monthNamesSK : monthNamesEN;
+
+        modalCalMonthTitle.textContent = `${months[currentCalMonth]} ${currentCalYear}`;
+        modalCalDaysContainer.innerHTML = '';
+
+        if (modalCalWeekdays) {
+          modalCalWeekdays.innerHTML = currentLang === 'sk'
+            ? '<span>Po</span><span>Ut</span><span>St</span><span>Št</span><span>Pi</span><span>So</span><span>Ne</span>'
+            : '<span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>';
+        }
+
+        const firstDay = new Date(currentCalYear, currentCalMonth, 1);
+        const lastDay = new Date(currentCalYear, currentCalMonth + 1, 0);
+        const totalDays = lastDay.getDate();
+
+        // Monday-first index: (0 = Mon ... 6 = Sun)
+        let startDayOfWeek = (firstDay.getDay() + 6) % 7;
+
+        // Empty offset cells
+        for (let i = 0; i < startDayOfWeek; i++) {
+          const emptyCell = document.createElement('div');
+          emptyCell.className = 'cal-day-cell empty';
+          modalCalDaysContainer.appendChild(emptyCell);
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        for (let day = 1; day <= totalDays; day++) {
+          const cellDate = new Date(currentCalYear, currentCalMonth, day);
+          const dayOfWeek = cellDate.getDay(); // 0 = Sun, 6 = Sat
+          const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+          const isPast = (cellDate < today);
+          const isToday = cellDate.getTime() === today.getTime();
+          const isSelected = selectedDateObj && cellDate.toDateString() === selectedDateObj.toDateString();
+
+          const cell = document.createElement('button');
+          cell.type = 'button';
+          cell.className = 'cal-day-cell';
+          cell.textContent = day;
+
+          if (isToday) cell.classList.add('today');
+          if (isSelected) cell.classList.add('selected');
+
+          if (isPast || isWeekend) {
+            cell.classList.add('disabled');
+            if (isWeekend) cell.title = currentLang === 'sk' ? 'Víkend (zatvorené)' : 'Weekend (closed)';
+          } else {
+            cell.addEventListener('click', () => {
+              selectedDateObj = cellDate;
+              updateSelectedDateBadge();
+              renderInteractiveCalendar();
+              buildTimeSlots();
+            });
+          }
+
+          modalCalDaysContainer.appendChild(cell);
+        }
+      }
+
+      if (modalCalPrev) {
+        modalCalPrev.addEventListener('click', () => {
+          currentCalMonth--;
+          if (currentCalMonth < 0) {
+            currentCalMonth = 11;
+            currentCalYear--;
+          }
+          renderInteractiveCalendar();
+        });
+      }
+
+      if (modalCalNext) {
+        modalCalNext.addEventListener('click', () => {
+          currentCalMonth++;
+          if (currentCalMonth > 11) {
+            currentCalMonth = 0;
+            currentCalYear++;
+          }
+          renderInteractiveCalendar();
+        });
+      }
+
       function buildTimeSlots() {
-        const slots = ['08:30', '10:00', '11:30', '13:30', '15:00', '16:30', '17:45'];
+        if (!timeSlotsContainer) return;
+        const slots = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
         timeSlotsContainer.innerHTML = '';
 
         slots.forEach((slot, idx) => {
           const btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = `time-slot-btn ${idx === 1 ? 'selected' : ''}`;
+          btn.className = `time-slot-btn ${slot === selectedTimeSlot || (idx === 1 && !selectedTimeSlot) ? 'selected' : ''}`;
           btn.textContent = slot;
+
+          if (idx === 1 && !selectedTimeSlot) {
+            selectedTimeSlot = slot;
+          }
 
           btn.addEventListener('click', () => {
             timeSlotsContainer.querySelectorAll('.time-slot-btn').forEach(b => b.classList.remove('selected'));
@@ -3479,7 +4812,7 @@
 
         if (hasError) return;
 
-        const selectedSymptoms = Array.from(modalSymptomsContainer.querySelectorAll('.symptom-chip.selected')).map(c => c.textContent);
+        const selectedSymptoms = [];
         const bookingId = `JK-${Math.floor(100000 + Math.random() * 900000)}`;
         const loc = currentSelectedPart[currentLang] || currentSelectedPart.sk;
         const dict = TRANSLATIONS[currentLang];

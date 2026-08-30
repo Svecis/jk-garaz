@@ -445,6 +445,13 @@
       display: flex;
       align-items: center;
       gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .cal-nav-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
 
     .cal-month-title {
@@ -1401,13 +1408,41 @@
 
       .cal-header-bar {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
         gap: 12px;
       }
 
       .cal-title-section {
         width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .cal-nav-title-wrap {
+        width: 100%;
+        display: flex;
+        align-items: center;
         justify-content: space-between;
+      }
+
+      .cal-month-title {
+        font-size: 1.05rem;
+      }
+
+      .cal-search-box {
+        width: 100%;
+        margin-left: 0;
+      }
+
+      .cal-search-input {
+        width: 100% !important;
+        box-sizing: border-box;
+      }
+
+      .cal-search-input:focus {
+        width: 100% !important;
       }
 
       .cal-legend {
@@ -1579,12 +1614,14 @@
       <!-- Calendar Controls & Legend -->
       <div class="cal-header-bar">
         <div class="cal-title-section">
-          <div class="cal-nav-btns">
-            <button type="button" class="cal-nav-btn" id="cal-prev-btn" title="Predchádzajúci mesiac">&lt;</button>
-            <button type="button" class="cal-nav-btn" id="cal-next-btn" title="Nasledujúci mesiac">&gt;</button>
-            <button type="button" class="cal-today-btn" id="cal-today-btn" title="Prejsť na dnešok">Dnes</button>
+          <div class="cal-nav-title-wrap">
+            <div class="cal-nav-btns">
+              <button type="button" class="cal-nav-btn" id="cal-prev-btn" title="Predchádzajúci mesiac">&lt;</button>
+              <button type="button" class="cal-nav-btn" id="cal-next-btn" title="Nasledujúci mesiac">&gt;</button>
+              <button type="button" class="cal-today-btn" id="cal-today-btn" title="Prejsť na dnešok">Dnes</button>
+            </div>
+            <span class="cal-month-title" id="cal-month-title">August 2026</span>
           </div>
-          <span class="cal-month-title" id="cal-month-title">August 2026</span>
 
           <!-- Hľadanie v kalendári podľa mena alebo EČV -->
           <div class="cal-search-box">

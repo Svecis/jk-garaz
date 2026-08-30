@@ -2783,12 +2783,6 @@
         dayBookings.forEach(b => {
           const card = document.createElement('div');
           card.className = `agenda-order-card status-${b.status || 'pending'}`;
-
-          let urgencyLabel = 'Bežná';
-          let dotClass = 'dot-min';
-          if (b.urgency === 'critical') { urgencyLabel = 'Kritická'; dotClass = 'dot-crit'; }
-          else if (b.urgency === 'moderate') { urgencyLabel = 'Výrazná'; dotClass = 'dot-mod'; }
-
           const orderUrl = 'order.html?id=' + encodeURIComponent(b.id);
           const plateClean = formatPlate(b.plate);
 
@@ -2802,10 +2796,6 @@
                 <span class="agenda-cust-name">${escapeHtml(b.customer || 'Zákazník')}</span>
                 ${b.phone ? `<a href="tel:${escapeHtml(b.phone)}" class="agenda-cust-phone">${escapeHtml(b.phone)}</a>` : ''}
               </div>
-              <span class="urgency-pill">
-                <span class="urgency-dot ${dotClass}"></span>
-                <span>${urgencyLabel}</span>
-              </span>
             </div>
 
             <div class="agenda-card-body">

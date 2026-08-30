@@ -60,10 +60,6 @@ function sendViaBrevoApi(apiKey, senderEmail, recipientEmail, booking) {
   return new Promise((resolve, reject) => {
     const plateFormatted = (booking.plate || '-').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
     
-    let urgencyText = 'Bežná';
-    if (booking.urgency === 'critical') urgencyText = 'Kritická';
-    else if (booking.urgency === 'moderate') urgencyText = 'Výrazná';
-
     const orderUrl = 'http://localhost:' + PORT + '/order.html?id=' + encodeURIComponent(booking.id);
 
     const htmlContent = `
@@ -78,7 +74,6 @@ function sendViaBrevoApi(apiKey, senderEmail, recipientEmail, booking) {
           <tr><td style="padding:6px 0; color:#64748b;"><strong>EČV Vozidla:</strong></td><td style="color:#0f172a; font-family:monospace; font-weight:bold;">${plateFormatted}</td></tr>
           <tr><td style="padding:6px 0; color:#64748b;"><strong>Diel:</strong></td><td style="color:#2563eb; font-weight:bold;">[${booking.partCode || 'P'}] ${booking.partName || '-'}</td></tr>
           <tr><td style="padding:6px 0; color:#64748b;"><strong>Termín:</strong></td><td style="color:#0f172a;">${booking.date || '-'} o ${booking.time || '-'}</td></tr>
-          <tr><td style="padding:6px 0; color:#64748b;"><strong>Závažnosť:</strong></td><td style="color:#0f172a;">${urgencyText}</td></tr>
           <tr><td style="padding:6px 0; color:#64748b;"><strong>Odhadovaná cena:</strong></td><td style="color:#10b981; font-weight:bold;">${booking.price || '-'}</td></tr>
           <tr><td style="padding:6px 0; color:#64748b;"><strong>Popis závady:</strong></td><td style="color:#334155; font-style:italic;">„${booking.problemDesc || 'Bez dodatočného popisu'}“</td></tr>
         </table>

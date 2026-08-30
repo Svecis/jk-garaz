@@ -235,21 +235,6 @@
       text-decoration: underline;
     }
 
-    /* Severity Pill */
-    .urgency-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.82rem;
-      font-weight: 600;
-    }
-
-    .urg-crit { background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
-    .urg-mod { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
-    .urg-min { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
-
     /* Symptoms & Description */
     .symptom-tag-list {
       display: flex;
@@ -672,11 +657,6 @@
       renderOrderPage(booking);
 
       function renderOrderPage(b) {
-        let urgClass = 'urg-min';
-        let urgLabel = 'Bežná závažnosť';
-        if (b.urgency === 'critical') { urgClass = 'urg-crit'; urgLabel = 'Kritická závažnosť'; }
-        else if (b.urgency === 'moderate') { urgClass = 'urg-mod'; urgLabel = 'Výrazná závažnosť'; }
-
         const symptomsHtml = (b.symptoms && b.symptoms.length > 0)
           ? b.symptoms.map(s => '<span class="symptom-tag">' + escapeHtml(s) + '</span>').join('')
           : '<span style="color:var(--text-muted);">Bez špecifikácie</span>';

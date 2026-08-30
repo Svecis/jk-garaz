@@ -2743,17 +2743,8 @@
 </head>
 <body>
 
-  <!-- TOP NAVIGATION: ADMIN PORTAL + LANGUAGE SWITCHER -->
+  <!-- TOP NAVIGATION: LANGUAGE SWITCHER -->
   <div class="top-nav-bar">
-    <!-- Admin Portal Button -->
-    <a href="admin.html" class="admin-portal-link" title="Administrátorský portál" target="_blank">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-      </svg>
-      <span>Admin</span>
-    </a>
-
     <!-- Language Switcher Box -->
     <div class="lang-switcher-box" id="lang-switcher">
       <button class="lang-btn active" data-lang="sk">SK</button>
@@ -4852,6 +4843,13 @@
           return;
         }
 
+        // Tajná skratka pre mechanika / administrátora (Ctrl + Shift + A)
+        if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+          e.preventDefault();
+          window.open('admin.html', '_blank');
+          return;
+        }
+
         // Ak je otvorené modálne okno rezervácie, klávesové skratky podsystémov nepoužívame
         if (bookingModal.classList.contains('open')) return;
 
@@ -4869,6 +4867,22 @@
           applyCategoryFilter('all');
         }
       });
+
+      // Skryté trojité kliknutie na pätu pre otvorenie administrácie
+      const footerSecret = document.querySelector('footer span');
+      if (footerSecret) {
+        let footerClicks = 0;
+        let footerClickTimer = null;
+        footerSecret.addEventListener('click', () => {
+          footerClicks++;
+          clearTimeout(footerClickTimer);
+          footerClickTimer = setTimeout(() => { footerClicks = 0; }, 800);
+          if (footerClicks >= 3) {
+            footerClicks = 0;
+            window.open('admin.html', '_blank');
+          }
+        });
+      }
 
       preloadFrames();
       resizeCanvas();

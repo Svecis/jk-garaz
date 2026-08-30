@@ -1596,7 +1596,15 @@
         <button type="button" class="modal-close" id="time-modal-close">&times;</button>
       </div>
 
-      <div class="form-group">
+      <div class="form-group" style="margin-bottom: 4px;">
+        <label class="form-label">Dátum termínu (presunúť na iný deň / mesiac):</label>
+        <div style="display:flex; gap:8px;">
+          <input type="date" id="reschedule-date-picker" class="form-input" style="flex:1;">
+          <button type="button" class="btn-save" id="btn-save-custom-date" style="padding:8px 16px;">Zmeniť dátum</button>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: 8px;">
         <label class="form-label">Vyberte nový čas príchodu do servisu:</label>
         <div class="time-grid-slots" id="time-slots-container">
           <!-- Populated by JS -->
@@ -1647,6 +1655,8 @@
       const timeSlotsContainer = document.getElementById('time-slots-container');
       const customTimeInput = document.getElementById('custom-time-input');
       const btnSaveCustomTime = document.getElementById('btn-save-custom-time');
+      const rescheduleDatePicker = document.getElementById('reschedule-date-picker');
+      const btnSaveCustomDate = document.getElementById('btn-save-custom-date');
       const rescheduleToast = document.getElementById('reschedule-toast');
       let toastTimer = null;
       let activeTimeBooking = null;
@@ -2340,8 +2350,9 @@
       }
 
       // =========================================================
-      // CALENDAR RENDER ENGINE WITH DRAG & DROP & MOBILE AGENDA
+      // CALENDAR RENDER ENGINE WITH CROSS-MONTH DRAG & DROP
       // =========================================================
+      let dragNavTimer = null;
       const agendaDateTitle = document.getElementById('agenda-date-title');
       const agendaCountBadge = document.getElementById('agenda-count-badge');
       const agendaItemsList = document.getElementById('agenda-items-list');
@@ -2390,7 +2401,7 @@
           card.innerHTML = `
             <div class="agenda-card-top">
               <div class="agenda-cust-info">
-                <button type="button" class="agenda-time-pill" title="Kliknite pre zmenu času">
+                <button type="button" class="agenda-time-pill" title="Kliknite pre zmenu času a dátumu">
                   <span>${escapeHtml(b.time || '10:00')}</span>
                   <span style="font-size:0.65rem;">&#9662;</span>
                 </button>
@@ -2441,232 +2452,242 @@
         });
       }
 
+      function createCalendarCell(cellYear, cellMonth, cellDay, isFiller) {
+        const cell = document.createElement('div');
+        cell.className = 'cal-day-cell' + (isFiller ? ' other-month' : '');
+        cell.dataset.day = cellDay;
+        cell.dataset.month = cellMonth;
+        cell.dataset.year = cellYear;
+
+        const todayObj = new Date();
+        const isToday = todayObj.getFullYear() === cellYear && todayObj.getMonth() === cellMonth && todayObj.getDate() === cellDay;
+        const isSelectedDay = selectedAgendaDate &&
+                              selectedAgendaDate.getFullYear() === cellYear &&
+                              selectedAgendaDate.getMonth() === cellMonth &&
+                              selectedAgendaDate.getDate() === cellDay;
+
+        if (isToday) cell.classList.add('today');
+        if (isSelectedDay) cell.classList.add('selected');
+
+        const cellDateObj = new Date(cellYear, cellMonth, cellDay);
+        const cellWeekdayFull = WEEKDAYS_FULL_SK[cellDateObj.getDay()];
+
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'cal-day-header';
+        dayHeader.innerHTML = `
+          <div class="cal-day-title-group">
+            <span class="cal-day-num">${cellDay}</span>
+            <span class="cal-day-weekday-tag">${cellWeekdayFull}</span>
+          </div>
+        `;
+        cell.appendChild(dayHeader);
+
+        // Matching bookings for this day
+        const matchingBookings = bookings.filter(b => isBookingOnDate(b, cellYear, cellMonth, cellDay));
+
+        // Bookings container (chips)
+        const dayBookingsContainer = document.createElement('div');
+        dayBookingsContainer.className = 'cal-day-bookings';
+
+        matchingBookings.sort((a, b) => {
+          const timeToMin = (t) => {
+            if (!t) return 0;
+            const p = String(t).trim().split(':');
+            return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
+          };
+          return timeToMin(a.time) - timeToMin(b.time);
+        });
+
+        matchingBookings.forEach(b => {
+          const chip = document.createElement('div');
+          chip.className = `cal-booking-chip chip-${b.status || 'pending'}`;
+          chip.setAttribute('draggable', 'true');
+          chip.dataset.id = b.id;
+          
+          const plateClean = formatPlate(b.plate);
+
+          chip.innerHTML = `
+            <div class="chip-time-cust">
+              <button type="button" class="chip-time-btn" title="Kliknite pre zmenu času a dátumu">
+                <span>${escapeHtml(b.time || '10:00')}</span>
+                <span class="chip-time-arrow">&#9662;</span>
+              </button>
+              <span class="chip-cust">${escapeHtml(b.customer || 'Zákazník')}</span>
+            </div>
+            <div class="chip-detail-sub">${escapeHtml(plateClean)} &bull; [${escapeHtml(b.partCode || 'P')}]</div>
+          `;
+
+          chip.title = `Uchopením presuniete na iný deň / mesiac. Kliknutím na čas zmeníte termín.`;
+
+          const timeBtn = chip.querySelector('.chip-time-btn');
+          timeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            openTimePicker(b);
+          });
+
+          chip.addEventListener('click', (e) => {
+            if (e.target.closest('.chip-time-btn')) return;
+            window.open('order.html?id=' + encodeURIComponent(b.id), '_blank');
+          });
+
+          chip.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', b.id);
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => chip.classList.add('dragging'), 0);
+          });
+
+          chip.addEventListener('dragend', () => {
+            chip.classList.remove('dragging');
+            chip.classList.add('dragged-recently');
+            setTimeout(() => chip.classList.remove('dragged-recently'), 300);
+          });
+
+          dayBookingsContainer.appendChild(chip);
+        });
+
+        cell.appendChild(dayBookingsContainer);
+
+        // Click on day cell
+        cell.addEventListener('click', (e) => {
+          if (e.target.closest('.chip-time-btn') || e.target.closest('.cal-booking-chip')) return;
+          selectedAgendaDate = new Date(cellYear, cellMonth, cellDay);
+          if (isFiller) {
+            calendarDate = new Date(cellYear, cellMonth, 1);
+            renderCalendar();
+          } else {
+            document.querySelectorAll('.cal-day-cell').forEach(c => c.classList.remove('selected'));
+            cell.classList.add('selected');
+            renderAgendaForDate(selectedAgendaDate);
+          }
+        });
+
+        // DRAG & DROP FOR ALL CELLS (NORMAL & CROSS-MONTH FILLERS)
+        cell.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          cell.classList.add('drag-over');
+        });
+
+        cell.addEventListener('dragleave', (e) => {
+          if (!cell.contains(e.relatedTarget)) {
+            cell.classList.remove('drag-over');
+          }
+        });
+
+        cell.addEventListener('drop', (e) => {
+          e.preventDefault();
+          cell.classList.remove('drag-over');
+
+          const draggedId = e.dataTransfer.getData('text/plain');
+          if (!draggedId) return;
+
+          const targetBooking = bookings.find(x => x.id === draggedId);
+          if (!targetBooking) return;
+
+          const targetDateObj = new Date(cellYear, cellMonth, cellDay);
+          const newDateString = formatDateForBooking(targetDateObj);
+
+          if (targetBooking.date === newDateString) return;
+
+          targetBooking.date = newDateString;
+          
+          if (isFiller) {
+            calendarDate = new Date(cellYear, cellMonth, 1);
+            selectedAgendaDate = new Date(cellYear, cellMonth, cellDay);
+          }
+
+          saveData();
+          renderCalendar();
+          renderTable();
+
+          showRescheduleToast(`Zákazka #${targetBooking.id} (${targetBooking.customer}) bola úspešne presunutá na ${newDateString}!`);
+        });
+
+        return cell;
+      }
+
       function renderCalendar() {
         const year = calendarDate.getFullYear();
         const month = calendarDate.getMonth();
-        const curMonthShort = MONTHS_SHORT_SK[month];
 
         calMonthTitle.textContent = `${MONTH_NAMES_SK[month]} ${year}`;
 
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
+        const prevMonthLastDay = new Date(year, month, 0).getDate();
         const totalDays = lastDay.getDate();
 
-        let startDayOfWeek = firstDay.getDay() - 1;
-        if (startDayOfWeek === -1) startDayOfWeek = 6;
-
-        const prevMonthLastDay = new Date(year, month, 0).getDate();
+        // Monday-first index: (0 = Mon, ..., 6 = Sun)
+        let startDayOfWeek = (firstDay.getDay() + 6) % 7;
 
         calDaysGrid.innerHTML = '';
 
         // Previous month filler days
         for (let i = startDayOfWeek - 1; i >= 0; i--) {
           const dayNum = prevMonthLastDay - i;
-          const prevCellDate = new Date(year, month - 1, dayNum);
-          const prevWeekdayFull = WEEKDAYS_FULL_SK[prevCellDate.getDay()];
-          const cell = document.createElement('div');
-          cell.className = 'cal-day-cell other-month';
-          cell.innerHTML = `
-            <div class="cal-day-header">
-              <div class="cal-day-title-group">
-                <span class="cal-day-num">${dayNum}</span>
-                <span class="cal-day-weekday-tag">${prevWeekdayFull}</span>
-              </div>
-            </div>
-          `;
-          calDaysGrid.appendChild(cell);
+          const prevMonth = month === 0 ? 11 : month - 1;
+          const prevYear = month === 0 ? year - 1 : year;
+          const fillerCell = createCalendarCell(prevYear, prevMonth, dayNum, true);
+          calDaysGrid.appendChild(fillerCell);
         }
-
-        const todayObj = new Date();
-        const isCurrentMonth = todayObj.getFullYear() === year && todayObj.getMonth() === month;
-        const todayDateNum = todayObj.getDate();
 
         // Current month days
         for (let day = 1; day <= totalDays; day++) {
-          const cell = document.createElement('div');
-          cell.className = 'cal-day-cell';
-          cell.dataset.day = day;
-          cell.dataset.month = month;
-          cell.dataset.year = year;
-
-          const isSelectedDay = selectedAgendaDate &&
-                                selectedAgendaDate.getFullYear() === year &&
-                                selectedAgendaDate.getMonth() === month &&
-                                selectedAgendaDate.getDate() === day;
-
-          if (isCurrentMonth && day === todayDateNum) {
-            cell.classList.add('today');
-          }
-          if (isSelectedDay) {
-            cell.classList.add('selected');
-          }
-
-          // Header with Day number and Day of the week (Pondelok, Utorok...)
-          const cellDateObj = new Date(year, month, day);
-          const cellWeekdayFull = WEEKDAYS_FULL_SK[cellDateObj.getDay()];
-
-          const dayHeader = document.createElement('div');
-          dayHeader.className = 'cal-day-header';
-          dayHeader.innerHTML = `
-            <div class="cal-day-title-group">
-              <span class="cal-day-num">${day}</span>
-              <span class="cal-day-weekday-tag">${cellWeekdayFull}</span>
-            </div>
-          `;
-          cell.appendChild(dayHeader);
-
-          // Match bookings strictly by EXACT Day, Month, and Year!
-          const matchingBookings = bookings.filter(b => isBookingOnDate(b, year, month, day));
-
-          // Bookings container (chips)
-          const dayBookingsContainer = document.createElement('div');
-          dayBookingsContainer.className = 'cal-day-bookings';
-
-          // Chronological sort by time (08:00 before 09:30 before 14:00, etc.)
-          matchingBookings.sort((a, b) => {
-            const timeToMin = (t) => {
-              if (!t) return 0;
-              const p = String(t).trim().split(':');
-              return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
-            };
-            return timeToMin(a.time) - timeToMin(b.time);
-          });
-
-          matchingBookings.forEach(b => {
-            const chip = document.createElement('div');
-            chip.className = `cal-booking-chip chip-${b.status || 'pending'}`;
-            chip.setAttribute('draggable', 'true');
-            chip.dataset.id = b.id;
-            
-            const plateClean = formatPlate(b.plate);
-
-            chip.innerHTML = `
-              <div class="chip-time-cust">
-                <button type="button" class="chip-time-btn" title="Kliknite pre zmenu času">
-                  <span>${escapeHtml(b.time || '10:00')}</span>
-                  <span class="chip-time-arrow">&#9662;</span>
-                </button>
-                <span class="chip-cust">${escapeHtml(b.customer || 'Zákazník')}</span>
-              </div>
-              <div class="chip-detail-sub">${escapeHtml(plateClean)} &bull; [${escapeHtml(b.partCode || 'P')}]</div>
-            `;
-
-            chip.title = `Uchopením presuniete na iný deň. Kliknutím na čas zmeníte hodinu. Kliknutím mimo času otvoríte kartu.`;
-
-            // Time button click event
-            const timeBtn = chip.querySelector('.chip-time-btn');
-            timeBtn.addEventListener('click', (e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              openTimePicker(b);
-            });
-
-            // Click to open order (if not clicking time button)
-            chip.addEventListener('click', (e) => {
-              if (e.target.closest('.chip-time-btn')) return;
-              if (chip.classList.contains('dragged-recently')) return;
-              window.open('order.html?id=' + encodeURIComponent(b.id), '_blank');
-            });
-
-            // DRAG EVENTS FOR CHIP
-            chip.addEventListener('dragstart', (e) => {
-              e.dataTransfer.setData('text/plain', b.id);
-              e.dataTransfer.effectAllowed = 'move';
-              chip.classList.add('dragging');
-            });
-
-            chip.addEventListener('dragend', () => {
-              chip.classList.remove('dragging');
-              chip.classList.add('dragged-recently');
-              setTimeout(() => chip.classList.remove('dragged-recently'), 300);
-            });
-
-            dayBookingsContainer.appendChild(chip);
-          });
-
-          cell.appendChild(dayBookingsContainer);
-
-          // Click on day cell to select date & show agenda on mobile
-          cell.addEventListener('click', (e) => {
-            if (e.target.closest('.chip-time-btn') || e.target.closest('.cal-booking-chip')) return;
-            selectedAgendaDate = new Date(year, month, day);
-            document.querySelectorAll('.cal-day-cell').forEach(c => c.classList.remove('selected'));
-            cell.classList.add('selected');
-            renderAgendaForDate(selectedAgendaDate);
-          });
-
-          // DROP ZONE EVENTS FOR DAY CELL
-          cell.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            cell.classList.add('drag-over');
-          });
-
-          cell.addEventListener('dragleave', (e) => {
-            if (!cell.contains(e.relatedTarget)) {
-              cell.classList.remove('drag-over');
-            }
-          });
-
-          cell.addEventListener('drop', (e) => {
-            e.preventDefault();
-            cell.classList.remove('drag-over');
-
-            const draggedId = e.dataTransfer.getData('text/plain');
-            if (!draggedId) return;
-
-            const targetBooking = bookings.find(x => x.id === draggedId);
-            if (!targetBooking) return;
-
-            const targetDateObj = new Date(year, month, day);
-            const newDateString = formatDateForBooking(targetDateObj);
-
-            if (targetBooking.date === newDateString) return;
-
-            targetBooking.date = newDateString;
-            saveData();
-            renderCalendar();
-            renderTable();
-
-            showRescheduleToast(`Zákazka #${targetBooking.id} (${targetBooking.customer}) bola presunutá na ${newDateString}!`);
-          });
-
-          calDaysGrid.appendChild(cell);
+          const normalCell = createCalendarCell(year, month, day, false);
+          calDaysGrid.appendChild(normalCell);
         }
 
-        // Next month filler days
+        // Next month filler days (e.g. September while viewing August)
         const totalRendered = startDayOfWeek + totalDays;
         const remainingCells = (totalRendered % 7 === 0) ? 0 : (7 - (totalRendered % 7));
         for (let j = 1; j <= remainingCells; j++) {
-          const nextCellDate = new Date(year, month + 1, j);
-          const nextWeekdayFull = WEEKDAYS_FULL_SK[nextCellDate.getDay()];
-          const cell = document.createElement('div');
-          cell.className = 'cal-day-cell other-month';
-          cell.innerHTML = `
-            <div class="cal-day-header">
-              <div class="cal-day-title-group">
-                <span class="cal-day-num">${j}</span>
-                <span class="cal-day-weekday-tag">${nextWeekdayFull}</span>
-              </div>
-            </div>
-          `;
-          calDaysGrid.appendChild(cell);
+          const nextMonth = month === 11 ? 0 : month + 1;
+          const nextYear = month === 11 ? year + 1 : year;
+          const fillerCell = createCalendarCell(nextYear, nextMonth, j, true);
+          calDaysGrid.appendChild(fillerCell);
         }
 
+        // Render agenda for mobile
+        renderAgendaForDate(selectedAgendaDate);
       }
 
-      // CALENDAR NAVIGATION (PREV / NEXT / TODAY)
-      calPrevBtn.addEventListener('click', () => {
-        calendarDate.setMonth(calendarDate.getMonth() - 1);
-        renderCalendar();
+      // AUTO-SWITCH MONTH ON DRAG HOVER OVER NAVIGATION ARROWS
+      [calPrevBtn, calNextBtn].forEach(btn => {
+        btn.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          btn.style.borderColor = 'var(--accent)';
+          btn.style.boxShadow = '0 0 10px var(--accent-glow)';
+          if (!dragNavTimer) {
+            dragNavTimer = setTimeout(() => {
+              if (btn === calPrevBtn) {
+                calendarDate.setMonth(calendarDate.getMonth() - 1);
+              } else {
+                calendarDate.setMonth(calendarDate.getMonth() + 1);
+              }
+              renderCalendar();
+            }, 450);
+          }
+        });
+
+        btn.addEventListener('dragleave', () => {
+          btn.style.borderColor = '';
+          btn.style.boxShadow = '';
+          clearTimeout(dragNavTimer);
+          dragNavTimer = null;
+        });
+
+        btn.addEventListener('drop', (e) => {
+          e.preventDefault();
+          btn.style.borderColor = '';
+          btn.style.boxShadow = '';
+          clearTimeout(dragNavTimer);
+          dragNavTimer = null;
+        });
       });
 
-      calNextBtn.addEventListener('click', () => {
-        calendarDate.setMonth(calendarDate.getMonth() + 1);
-        renderCalendar();
-      });
-
-      calTodayBtn.addEventListener('click', () => {
+            calTodayBtn.addEventListener('click', () => {
         calendarDate = new Date();
         selectedAgendaDate = new Date();
         renderCalendar();

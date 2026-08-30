@@ -1885,7 +1885,7 @@
 
       // Brevo Modal Elements
       const brevoModal = document.getElementById('brevo-modal');
-      const openBrevoBtn = document.getElementById('open-brevo-modal-btn');
+      
       const closeBrevoBtn = document.getElementById('brevo-close-btn');
       const cfgRecipient = document.getElementById('cfg-recipient');
       const cfgSender = document.getElementById('cfg-brevo-sender');
@@ -3192,21 +3192,44 @@
         showRescheduleToast(`Zákazka #${id} (${name}) bola úspešne pridaná! Celkovo: ${bookings.length} zákaziek.`);
       });
 
-      // Brevo Modal Events
-      openBrevoBtn.addEventListener('click', () => {
-        modalStatus.style.display = 'none';
+      // Brevo Modal & Settings Dropdown Events
+      const settingsMenuToggle = document.getElementById('settings-menu-toggle');
+      const settingsDropdownMenu = document.getElementById('settings-dropdown-menu');
+      const dropdownItemBrevo = document.getElementById('dropdown-item-brevo');
+
+      function openBrevoModal() {
+        if (settingsDropdownMenu) settingsDropdownMenu.style.display = 'none';
+        if (modalStatus) modalStatus.style.display = 'none';
         fetch('/api/get-settings')
           .then(r => r.json())
           .then(cfg => {
             if (cfg.recipientEmail && cfg.recipientEmail !== 'servis@automek.sk') cfgRecipient.value = cfg.recipientEmail;
             if (cfg.brevoSender) cfgSender.value = cfg.brevoSender;
             if (cfg.brevoKey) cfgKey.value = cfg.brevoKey;
-            brevoModal.classList.add('open');
+            if (brevoModal) brevoModal.classList.add('open');
           })
           .catch(() => {
-            brevoModal.classList.add('open');
+            if (brevoModal) brevoModal.classList.add('open');
           });
-      });
+      }
+
+      if (settingsMenuToggle && settingsDropdownMenu) {
+        settingsMenuToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isOpen = settingsDropdownMenu.style.display === 'block';
+          settingsDropdownMenu.style.display = isOpen ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!settingsDropdownMenu.contains(e.target) && e.target !== settingsMenuToggle) {
+            settingsDropdownMenu.style.display = 'none';
+          }
+        });
+      }
+
+      if (dropdownItemBrevo) {
+        dropdownItemBrevo.addEventListener('click', openBrevoModal);
+      }
 
       closeBrevoBtn.addEventListener('click', () => {
         brevoModal.classList.remove('open');

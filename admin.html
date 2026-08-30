@@ -497,6 +497,45 @@
       border-color: rgba(255, 255, 255, 0.25);
     }
 
+    .cal-search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-left: 6px;
+    }
+
+    .cal-search-input {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 6px 12px 6px 32px;
+      color: #fff;
+      font-size: 0.82rem;
+      width: 200px;
+      outline: none;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .cal-search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+      background: rgba(0, 0, 0, 0.6);
+      width: 240px;
+    }
+
+    .cal-search-input::placeholder {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+
+    .cal-search-box .search-icon {
+      position: absolute;
+      left: 10px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
     .cal-legend {
       display: flex;
       align-items: center;
@@ -1541,11 +1580,20 @@
       <div class="cal-header-bar">
         <div class="cal-title-section">
           <div class="cal-nav-btns">
-            <button type="button" class="cal-nav-btn" id="cal-prev-btn">&lt;</button>
-            <button type="button" class="cal-nav-btn" id="cal-next-btn">&gt;</button>
-            <button type="button" class="cal-today-btn" id="cal-today-btn">Dnes</button>
+            <button type="button" class="cal-nav-btn" id="cal-prev-btn" title="Predchádzajúci mesiac">&lt;</button>
+            <button type="button" class="cal-nav-btn" id="cal-next-btn" title="Nasledujúci mesiac">&gt;</button>
+            <button type="button" class="cal-today-btn" id="cal-today-btn" title="Prejsť na dnešok">Dnes</button>
           </div>
           <span class="cal-month-title" id="cal-month-title">August 2026</span>
+
+          <!-- Hľadanie v kalendári podľa mena alebo EČV -->
+          <div class="cal-search-box">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="cal-search-input" class="cal-search-input" placeholder="Hľadať meno alebo EČV...">
+          </div>
         </div>
 
         <div class="cal-legend">
@@ -1662,6 +1710,7 @@
       const calPrevBtn = document.getElementById('cal-prev-btn');
       const calNextBtn = document.getElementById('cal-next-btn');
       const calTodayBtn = document.getElementById('cal-today-btn');
+      const calSearchInput = document.getElementById('cal-search-input');
 
       // Time Picker Modal Elements
       const timePickerModal = document.getElementById('time-picker-modal');
@@ -2498,8 +2547,18 @@
         `;
         cell.appendChild(dayHeader);
 
-        // Matching bookings for this day
-        const matchingBookings = bookings.filter(b => isBookingOnDate(b, cellYear, cellMonth, cellDay));
+        // Matching bookings for this day (with live name / plate search filter)
+        const calQuery = calSearchInput ? calSearchInput.value.trim().toLowerCase() : '';
+        let matchingBookings = bookings.filter(b => isBookingOnDate(b, cellYear, cellMonth, cellDay));
+        if (calQuery) {
+          matchingBookings = matchingBookings.filter(b => {
+            const nameMatch = b.customer && b.customer.toLowerCase().includes(calQuery);
+            const plateMatch = b.plate && b.plate.toLowerCase().replace(/\s+/g, '').includes(calQuery.replace(/\s+/g, ''));
+            const idMatch = b.id && b.id.toLowerCase().includes(calQuery);
+            const partMatch = b.partName && b.partName.toLowerCase().includes(calQuery);
+            return nameMatch || plateMatch || idMatch || partMatch;
+          });
+        }
 
         // Bookings container (chips)
         const dayBookingsContainer = document.createElement('div');
@@ -2719,6 +2778,32 @@
         selectedAgendaDate = new Date();
         renderCalendar();
       });
+
+      if (calSearchInput) {
+        calSearchInput.addEventListener('input', renderCalendar);
+        calSearchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            const q = calSearchInput.value.trim().toLowerCase();
+            if (!q) return;
+            // Find first matching booking across all months and jump to that month!
+            const match = bookings.find(b => {
+              const nameMatch = b.customer && b.customer.toLowerCase().includes(q);
+              const plateMatch = b.plate && b.plate.toLowerCase().replace(/\s+/g, '').includes(q.replace(/\s+/g, ''));
+              return nameMatch || plateMatch;
+            });
+            if (match) {
+              const iso = parseBookingToIso(match);
+              if (iso) {
+                const [y, m, d] = iso.split('-').map(Number);
+                calendarDate = new Date(y, m - 1, 1);
+                selectedAgendaDate = new Date(y, m - 1, d);
+                renderCalendar();
+                showRescheduleToast(`Zákazka pre ${match.customer} nájdená v mesiaci ${MONTH_NAMES_SK[m - 1]} ${y}!`);
+              }
+            }
+          }
+        });
+      }
 
       searchInput.addEventListener('input', renderTable);
 

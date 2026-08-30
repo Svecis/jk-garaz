@@ -1226,10 +1226,17 @@
         <span class="live-dot"></span>
         <span>Živá synchronizácia</span>
       </div>
-      <button type="button" class="top-btn" id="btn-reset-demo-data" style="color:var(--accent); border-color:rgba(56,189,248,0.3); font-weight:600;">Obnoviť demo zákazky (18 zákaziek)</button>
       <button type="button" class="top-btn" id="add-test-booking-btn">+ Pridať zákazku</button>
       <button type="button" class="top-btn top-btn-accent" id="open-brevo-modal-btn">Nastavenia Brevo SMTP</button>
       <a href="index.html" class="top-btn" target="_blank">Web pre zákazníkov</a>
+      <button type="button" class="top-btn" id="admin-logout-btn" title="Odhlásiť sa z portálu" style="border-color: rgba(248, 113, 113, 0.35); color: #f87171; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Odhlásiť sa</span>
+      </button>
     </div>
   </header>
 
@@ -1395,7 +1402,6 @@
       const tableBody = document.getElementById('table-body');
       const resultsCount = document.getElementById('results-count');
       const addTestBtn = document.getElementById('add-test-booking-btn');
-      const btnResetDemo = document.getElementById('btn-reset-demo-data');
 
       // Calendar View Elements
       const calMonthTitle = document.getElementById('cal-month-title');
@@ -2290,15 +2296,6 @@
       });
 
       searchInput.addEventListener('input', renderTable);
-
-      // RESET DEMO DATA BUTTON
-      btnResetDemo.addEventListener('click', () => {
-        bookings = getDefaultDemoBookings();
-        saveData();
-        renderTable();
-        renderCalendar();
-        showRescheduleToast('Úspešne načítaných 18 demo zákaziek!');
-      });
 
       // ADD TEST BOOKING (Endless random bookings)
       const TEST_NAMES = ['Jozef Valko', 'Patrik Hric', 'Lucia Vrbovská', 'Matej Slanina', 'Boris Kysel', 'Adriana Tóthová', 'Gabriel Varga', 'Daniela Mečiarová'];

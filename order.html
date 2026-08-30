@@ -835,6 +835,15 @@
           <!-- FOOTER ACTIONS -->
           <div class="footer-actions">
             <button type="button" class="btn-delete" id="delete-order-btn">Zmazať túto zákazku</button>
+            <button type="button" class="btn-print" id="export-single-ics-btn" style="background:#1e293b; border:1px solid rgba(56,189,248,0.4); color:var(--accent); display:inline-flex; align-items:center; gap:6px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <span>Pridať termín do kalendára (.ICS)</span>
+            </button>
             <button type="button" class="btn-print" onclick="window.print()">Vytlačiť zákazkový list</button>
           </div>
         `;
@@ -910,6 +919,60 @@
             const newDateObj = new Date(y, m - 1, d);
             b.date = formatDateForBooking(newDateObj);
             saveAllBookings(bookings);
+          });
+        }
+
+        // Pridať termín do kalendára (ICS)
+        const exportSingleIcsBtn = document.getElementById('export-single-ics-btn');
+        if (exportSingleIcsBtn) {
+          exportSingleIcsBtn.addEventListener('click', () => {
+            const dateObj = parseBookingToDateObj(b);
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            let hh = '10', mm = '00';
+            if (b.time && b.time.includes(':')) {
+              const p = b.time.split(':');
+              hh = String(p[0]).padStart(2, '0');
+              mm = String(p[1]).padStart(2, '0');
+            }
+            const startIso = `${y}${m}${d}T${hh}${mm}00`;
+            const endD = new Date(y, dateObj.getMonth(), parseInt(d, 10), parseInt(hh, 10) + 1, parseInt(mm, 10));
+            const endIso = `${endD.getFullYear()}${String(endD.getMonth()+1).padStart(2,'0')}${String(endD.getDate()).padStart(2,'0')}T${String(endD.getHours()).padStart(2,'0')}${String(endD.getMinutes()).padStart(2,'0')}00`;
+
+            const stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            const plateClean = formatPlate(b.plate);
+            const summary = `Servis JK Garáž: ${b.customer || 'Zákazník'} (${plateClean})`;
+            const desc = `Zákazka: #${b.id}\nZákazník: ${b.customer || '-'}\nTelefón: ${b.phone || '-'}\nEČV: ${plateClean}\nDiel: ${b.partName || '-'}\nCena: ${b.price || '-'}\nPopis: ${b.problemDesc || '-'}`;
+
+            const icsText = [
+              'BEGIN:VCALENDAR',
+              'VERSION:2.0',
+              'PRODID:-//AutoMek JK Garaz//Servisny Kalendar//SK',
+              'CALSCALE:GREGORIAN',
+              'METHOD:PUBLISH',
+              'BEGIN:VEVENT',
+              `UID:${b.id}@jk-garaz.sk`,
+              `DTSTAMP:${stamp}`,
+              `DTSTART:${startIso}`,
+              `DTEND:${endIso}`,
+              `SUMMARY:${summary.replace(/,/g, '\\,')}`,
+              `DESCRIPTION:${desc.replace(/\n/g, '\\n').replace(/,/g, '\\,')}`,
+              'LOCATION:JK Garáž Servis',
+              'STATUS:CONFIRMED',
+              'END:VEVENT',
+              'END:VCALENDAR'
+            ].join('\r\n');
+
+            const blob = new Blob([icsText], { type: 'text/calendar;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `servis_${b.id}_${b.customer.replace(/\s+/g, '_')}.ics`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
           });
         }
 

@@ -1001,10 +1001,17 @@
       transition: all 0.2s ease;
       text-align: center;
     }
-    .time-slot-btn:hover {
+    .time-slot-btn:hover:not(.booked) {
       background: rgba(0, 229, 255, 0.1);
       border-color: rgba(0, 229, 255, 0.4);
       color: var(--accent);
+    }
+    .time-slot-btn.booked {
+      opacity: 0.38;
+      cursor: not-allowed;
+      border-color: rgba(255, 82, 82, 0.25);
+      background: rgba(255, 82, 82, 0.05);
+      pointer-events: none;
     }
     .time-slot-btn.selected {
       background: var(--accent);
@@ -4730,29 +4737,73 @@
         });
       }
 
+      function isSlotBooked(cellDate, slotTime) {
+        if (!activeBookings || activeBookings.length === 0 || !cellDate) return false;
+        
+        const y = cellDate.getFullYear();
+        const m = String(cellDate.getMonth() + 1).padStart(2, '0');
+        const d = String(cellDate.getDate()).padStart(2, '0');
+        const isoDate = `${y}-${m}-${d}`;
+        const dayNum = cellDate.getDate();
+
+        return activeBookings.some(b => {
+          if (!b.time) return false;
+          const bTime = b.time.trim();
+          if (bTime !== slotTime.trim()) return false;
+
+          // Porovnanie podľa ISO dátumu alebo formátovaného reťazca
+          if (b.date === isoDate) return true;
+          if (b.date === selectedDateStr) return true;
+          if (b.date && b.date.includes(`${dayNum}.`) && b.date.includes(y.toString())) return true;
+
+          return false;
+        });
+      }
+
       function buildTimeSlots() {
-        if (!timeSlotsContainer) return;
-        const slots = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+        if (!timeSlotsContainer || !selectedDateObj) return;
+        const allSlots = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
         timeSlotsContainer.innerHTML = '';
 
-        slots.forEach((slot, idx) => {
+        let firstAvailable = null;
+        const bookedLabel = currentLang === 'sk' ? 'Obsadené' : 'Booked';
+
+        allSlots.forEach((slot) => {
+          const isBooked = isSlotBooked(selectedDateObj, slot);
           const btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = `time-slot-btn ${slot === selectedTimeSlot || (idx === 1 && !selectedTimeSlot) ? 'selected' : ''}`;
-          btn.textContent = slot;
+          btn.className = 'time-slot-btn';
 
-          if (idx === 1 && !selectedTimeSlot) {
-            selectedTimeSlot = slot;
+          if (isBooked) {
+            btn.classList.add('booked');
+            btn.disabled = true;
+            btn.title = bookedLabel;
+            btn.innerHTML = `${slot}<span style="display:block; font-size:0.62rem; color:#ff5252; opacity:0.85; margin-top:2px;">${bookedLabel}</span>`;
+          } else {
+            if (!firstAvailable) firstAvailable = slot;
+            btn.textContent = slot;
+
+            btn.addEventListener('click', () => {
+              timeSlotsContainer.querySelectorAll('.time-slot-btn').forEach(b => b.classList.remove('selected'));
+              btn.classList.add('selected');
+              selectedTimeSlot = slot;
+            });
           }
-
-          btn.addEventListener('click', () => {
-            timeSlotsContainer.querySelectorAll('.time-slot-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            selectedTimeSlot = slot;
-          });
 
           timeSlotsContainer.appendChild(btn);
         });
+
+        // Automatický výber prvého voľného času, ak je pôvodný obsadený
+        if (selectedTimeSlot && !isSlotBooked(selectedDateObj, selectedTimeSlot)) {
+          const match = Array.from(timeSlotsContainer.children).find(b => b.textContent.trim().startsWith(selectedTimeSlot) && !b.classList.contains('booked'));
+          if (match) match.classList.add('selected');
+        } else if (firstAvailable) {
+          selectedTimeSlot = firstAvailable;
+          const match = Array.from(timeSlotsContainer.children).find(b => b.textContent.trim().startsWith(firstAvailable) && !b.classList.contains('booked'));
+          if (match) match.classList.add('selected');
+        } else {
+          selectedTimeSlot = '';
+        }
       }
 
       mechanicCards.forEach(card => {
@@ -4760,6 +4811,7 @@
           mechanicCards.forEach(c => c.classList.remove('selected'));
           card.classList.add('selected');
           selectedMechanic = card.dataset.mech;
+          buildTimeSlots();
         });
       });
 
@@ -4895,7 +4947,37 @@
       finishBookingBtn.addEventListener('click', closeModal);
 
       addCalBtn.addEventListener('click', () => {
-        alert(TRANSLATIONS[currentLang].cal_sync_msg);
+        try {
+          const dict = TRANSLATIONS[currentLang];
+          const bookingTitle = `Servis vozidla - JK Garáž (${selectedDateStr} o ${selectedTimeSlot})`;
+          const description = `Rezervácia servisu v JK Garáž pre diel ${currentSelectedPart.code} u mechanika ${selectedMechanic}. Adresa: Velehradská 11, Bratislava.`;
+          
+          // Formátovanie .ics súboru
+          const icsData = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//JK Garaz//SK',
+            'BEGIN:VEVENT',
+            `SUMMARY:${bookingTitle}`,
+            `DESCRIPTION:${description}`,
+            'LOCATION:Velehradská 11, 821 08 Bratislava, Slovensko',
+            `STATUS:CONFIRMED`,
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n');
+
+          const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8' });
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = 'rezervacia-jk-garaz.ics';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          alert(dict.cal_sync_msg);
+        } catch(e) {
+          alert(TRANSLATIONS[currentLang].cal_sync_msg);
+        }
       });
 
       function updateActiveBookingsUI() {

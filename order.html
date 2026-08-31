@@ -780,15 +780,19 @@
       targetId = targetId.trim().replace(/^#/, '');
 
       let bookings = [];
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        bookings = raw ? JSON.parse(raw) : [];
-      } catch (e) {
-        bookings = [];
-      }
 
-      if (!bookings || !Array.isArray(bookings)) {
-        bookings = [];
+      function showAuthRequired() {
+        document.title = 'Vyžaduje sa prihlásenie — JK Garáž';
+        mainContent.innerHTML = `
+          <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:48px 24px; text-align:center; max-width:600px; margin:40px auto;">
+            <div style="font-size:2.5rem; margin-bottom:16px;">🔒</div>
+            <h2 style="color:#fff; font-size:1.4rem; font-weight:700; margin-bottom:8px;">Vyžaduje sa prihlásenie</h2>
+            <p style="color:var(--text-muted); font-size:0.92rem; line-height:1.6; margin-bottom:24px;">Kartu zákazky môže zobraziť len prihlásený administrátor.</p>
+            <a href="admin.html" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; background:#2563eb; color:#fff; padding:9px 18px; border-radius:8px; font-weight:600;">
+              <span>Prihlásiť sa</span>
+            </a>
+          </div>
+        `;
       }
 
       const MONTH_NAMES_SK = [
@@ -839,20 +843,7 @@
         return `${y}-${m}-${day}`;
       }
 
-      let booking = null;
-      if (targetId) {
-        booking = bookings.find(b => {
-          const bClean = String(b.id || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-          const tClean = targetId.toUpperCase().replace(/[^A-Z0-9]/g, '');
-          return bClean === tClean || bClean.includes(tClean) || tClean.includes(bClean);
-        });
-      }
-
-      if (!booking && bookings.length > 0) {
-        booking = bookings[0];
-      }
-
-      if (!booking) {
+      function showNotFound() {
         document.title = 'Zákazka nenájdená — JK Garáž';
         mainContent.innerHTML = `
           <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:48px 24px; text-align:center; max-width:600px; margin:40px auto;">
@@ -864,12 +855,61 @@
             </a>
           </div>
         `;
-        return;
       }
 
-      document.title = 'Zákazka #' + booking.id + ' — ' + (booking.customer || '');
-      renderOrderPage(booking);
-      renderPrintSheet(booking);
+      function proceedWithBookings() {
+        let booking = null;
+        if (targetId) {
+          booking = bookings.find(b => {
+            const bClean = String(b.id || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+            const tClean = targetId.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            return bClean === tClean || bClean.includes(tClean) || tClean.includes(bClean);
+          });
+        }
+
+        if (!booking) {
+          showNotFound();
+          return;
+        }
+
+        document.title = 'Zákazka #' + booking.id + ' — ' + (booking.customer || '');
+        renderOrderPage(booking);
+        renderPrintSheet(booking);
+      }
+
+      // Vyžaduje platnú admin session — kartu zákazky nemôže otvoriť nikto bez prihlásenia,
+      // aj keby uhádol/získal odkaz z notifikačného mailu.
+      const authToken = sessionStorage.getItem('jk_admin_jwt');
+      if (!authToken) {
+        showAuthRequired();
+      } else {
+        fetch('/api/bookings', { headers: { 'Authorization': `Bearer ${authToken}` } })
+          .then(res => {
+            if (!res.ok) {
+              sessionStorage.removeItem('jk_admin_jwt');
+              showAuthRequired();
+              return null;
+            }
+            return res.json();
+          })
+          .then(data => {
+            if (data === null) return;
+            bookings = Array.isArray(data) ? data : [];
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings)); } catch (e) {}
+            proceedWithBookings();
+          })
+          .catch(() => {
+            // Backend nedostupný — použi poslednú synchronizovanú kópiu z prihlásenej session
+            try {
+              const raw = localStorage.getItem(STORAGE_KEY);
+              bookings = raw ? JSON.parse(raw) : [];
+            } catch (e) {
+              bookings = [];
+            }
+            if (!Array.isArray(bookings)) bookings = [];
+            proceedWithBookings();
+          });
+      }
 
       function renderOrderPage(b) {
         const symptomsHtml = (b.symptoms && b.symptoms.length > 0)

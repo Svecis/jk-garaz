@@ -494,10 +494,7 @@ function buildCustomerConfirmationEmailHtml(booking) {
           <tr><td style="padding:6px 0; color:#64748b;"><strong>EČV Vozidla:</strong></td><td style="color:#0f172a; font-family:monospace; font-weight:bold;">${plateFormatted}</td></tr>
           <tr><td style="padding:6px 0; color:#64748b;"><strong>Odhadovaná cena:</strong></td><td style="color:#10b981; font-weight:bold;">${booking.price || '-'}</td></tr>
         </table>
-        <div style="margin-top:24px; text-align:center;">
-          <a href="${manageUrl}" style="background:#2563eb; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:6px; font-weight:bold; font-size:14px; display:inline-block;">Spravovať moju rezerváciu</a>
-        </div>
-        <p style="color:#64748b; font-size:13px; margin-top:20px;">Cez odkaz vyššie si viete termín zrušiť alebo presunúť na iný voľný dátum a čas. V prípade otázok nás môžete aj priamo kontaktovať. Tešíme sa na vás!</p>
+        <p style="color:#64748b; font-size:13px; margin-top:20px;">Termín si viete zrušiť alebo presunúť na iný voľný dátum a čas tu: <a href="${manageUrl}" style="color:#2563eb;">Spravovať moju rezerváciu</a>. V prípade otázok nás môžete aj priamo kontaktovať. Tešíme sa na vás!</p>
       </div>
     `;
 }
@@ -523,9 +520,7 @@ function buildCustomerRescheduleEmailHtml(booking) {
           <tr><td style="padding:6px 0; color:#64748b;"><strong>Nový termín:</strong></td><td style="color:#0f172a; font-weight:bold;">${booking.date || '-'} o ${booking.time || '-'}</td></tr>
           <tr><td style="padding:6px 0; color:#64748b;"><strong>EČV Vozidla:</strong></td><td style="color:#0f172a; font-family:monospace; font-weight:bold;">${plateFormatted}</td></tr>
         </table>
-        <div style="margin-top:24px; text-align:center;">
-          <a href="${manageUrl}" style="background:#2563eb; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:6px; font-weight:bold; font-size:14px; display:inline-block;">Spravovať moju rezerváciu</a>
-        </div>
+        <p style="color:#64748b; font-size:13px; margin-top:20px;">Termín si viete zrušiť alebo znova zmeniť tu: <a href="${manageUrl}" style="color:#2563eb;">Spravovať moju rezerváciu</a>.</p>
       </div>
     `;
 }

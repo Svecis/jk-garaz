@@ -2834,12 +2834,24 @@
     (function() {
       const STORAGE_KEY = 'automek_bookings';
 
+      function getAuthHeaders() {
+        const token = sessionStorage.getItem('jk_admin_jwt');
+        return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+      }
+
       // ==========================================
-      // BACKEND REST API SYNCHRONIZATION
+      // BACKEND REST API SYNCHRONIZATION (SECURE)
       // ==========================================
       async function syncFromBackend() {
         try {
-          const res = await fetch('/api/bookings');
+          const res = await fetch('/api/bookings', {
+            headers: getAuthHeaders()
+          });
+          if (res.status === 401) {
+            sessionStorage.removeItem('jk_admin_jwt');
+            if (window.checkAdminSession) window.checkAdminSession();
+            return;
+          }
           if (res.ok) {
             const data = await res.json();
             if (Array.isArray(data)) {
@@ -2848,7 +2860,7 @@
               renderTable();
               renderCalendar();
               updateStats();
-              console.log('✅ Loaded', bookings.length, 'bookings from backend database.');
+              console.log('✅ Loaded', bookings.length, 'bookings from secure encrypted backend.');
             }
           }
         } catch (err) {
@@ -2860,7 +2872,7 @@
         try {
           const res = await fetch('/api/bookings', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify(booking)
           });
           if (res.ok) {
@@ -2877,7 +2889,7 @@
         try {
           await fetch('/api/bookings/' + encodeURIComponent(id), {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify(updates)
           });
         } catch (e) {
@@ -2888,7 +2900,8 @@
       async function apiDeleteBooking(id) {
         try {
           await fetch('/api/bookings/' + encodeURIComponent(id), {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: getAuthHeaders()
           });
         } catch (e) {
           console.warn('Error deleting booking on API:', e);
@@ -4929,13 +4942,13 @@
 
         fetch('/api/save-settings', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload)
         })
         .then(r => r.json())
         .then(res => {
           if (res.success) {
-            showStatus('Brevo nastavenia boli úspešne uložené!');
+            showStatus('Brevo nastavenia boli úspešne uložené do šifrovaného úložiska!');
           } else {
             showStatus('Chyba: ' + (res.error || 'Neznáma chyba'), true);
           }
@@ -4959,7 +4972,7 @@
 
         fetch('/api/test-email', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload)
         })
         .then(r => r.json())
@@ -5007,12 +5020,10 @@
   
   
   // =========================================================
-  // PASSWORD + 2FA TWO-FACTOR AUTHENTICATION CONTROLLER
+  // SECURE SERVER-SIDE PASSWORD + 2FA AUTHENTICATION CONTROLLER
   // =========================================================
   (function() {
-    // Predvolené heslá a 2FA kódy
-    const VALID_PASSWORDS = ['JkGaraz2026!', 'jkgaraz', 'admin123'];
-    const VALID_2FA_CODES = ['123456', '000000', '202600'];
+    let tempEnteredPassword = '';
 
     const authOverlay = document.getElementById('admin-auth-overlay');
     const authCard = document.getElementById('auth-card');
@@ -5030,14 +5041,26 @@
     const twofaBackBtn = document.getElementById('twofa-back-btn');
     const logoutBtn = document.getElementById('admin-logout-btn');
 
-    function checkSession() {
-      if (sessionStorage.getItem('jk_admin_2fa_auth') === '1') {
-        authOverlay.classList.add('unlocked');
-      } else {
-        authOverlay.classList.remove('unlocked');
-        showStep(1);
+    async function checkSession() {
+      const token = sessionStorage.getItem('jk_admin_jwt');
+      if (token) {
+        try {
+          const res = await fetch('/api/auth/verify', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            authOverlay.classList.add('unlocked');
+            if (typeof syncFromBackend === 'function') syncFromBackend();
+            return;
+          }
+        } catch (e) {}
       }
+
+      sessionStorage.removeItem('jk_admin_jwt');
+      authOverlay.classList.remove('unlocked');
+      showStep(1);
     }
+    window.checkAdminSession = checkSession;
 
     function showStep(stepNum) {
       if (stepNum === 1) {
@@ -5065,33 +5088,86 @@
       });
     }
 
-    // Step 1: Verify Password
-    function verifyPassword() {
+    // Step 1: Verify Password on Server
+    async function verifyPassword() {
       const entered = passInput.value.trim();
-      if (VALID_PASSWORDS.includes(entered)) {
-        passErrorMsg.textContent = '';
-        showStep(2);
-      } else {
-        passErrorMsg.textContent = 'Nesprávne administrátorské heslo';
+      if (!entered) {
+        passErrorMsg.textContent = 'Zadajte administrátorské heslo';
         triggerShake();
         passInput.focus();
+        return;
+      }
+
+      passSubmitBtn.disabled = true;
+      passErrorMsg.textContent = 'Overujem...';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: entered })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          tempEnteredPassword = entered;
+          passErrorMsg.textContent = '';
+          showStep(2);
+        } else {
+          passErrorMsg.textContent = data.error || 'Nesprávne administrátorské heslo';
+          triggerShake();
+          passInput.focus();
+        }
+      } catch (err) {
+        passErrorMsg.textContent = 'Chyba servera pri overovaní';
+        triggerShake();
+      } finally {
+        passSubmitBtn.disabled = false;
       }
     }
 
-    // Step 2: Verify 2FA
-    function verify2FA() {
+    // Step 2: Verify 2FA on Server
+    async function verify2FA() {
       let code = '';
       twofaDigits.forEach(d => code += d.value.trim());
 
-      if (VALID_2FA_CODES.includes(code) || code.length === 6 && (code === '123456' || code === '202600')) {
-        sessionStorage.setItem('jk_admin_2fa_auth', '1');
-        twofaErrorMsg.textContent = '';
-        authOverlay.classList.add('unlocked');
-      } else {
-        twofaErrorMsg.textContent = 'Neplatný 2FA overovací kód';
+      if (code.length !== 6) {
+        twofaErrorMsg.textContent = 'Zadajte 6-miestny overovací kód';
         triggerShake();
-        twofaDigits.forEach(d => d.value = '');
-        if (twofaDigits[0]) twofaDigits[0].focus();
+        return;
+      }
+
+      twofaSubmitBtn.disabled = true;
+      twofaErrorMsg.textContent = 'Overujem 2FA...';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            password: tempEnteredPassword,
+            code2fa: code
+          })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success && data.token) {
+          sessionStorage.setItem('jk_admin_jwt', data.token);
+          twofaErrorMsg.textContent = '';
+          authOverlay.classList.add('unlocked');
+          tempEnteredPassword = '';
+          if (typeof syncFromBackend === 'function') syncFromBackend();
+        } else {
+          twofaErrorMsg.textContent = data.error || 'Neplatný 2FA overovací kód';
+          triggerShake();
+          twofaDigits.forEach(d => d.value = '');
+          if (twofaDigits[0]) twofaDigits[0].focus();
+        }
+      } catch (err) {
+        twofaErrorMsg.textContent = 'Chyba spojenia so serverom';
+        triggerShake();
+      } finally {
+        twofaSubmitBtn.disabled = false;
       }
     }
 
@@ -5151,7 +5227,7 @@
 
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
-        sessionStorage.removeItem('jk_admin_2fa_auth');
+        sessionStorage.removeItem('jk_admin_jwt');
         checkSession();
       });
     }

@@ -1915,6 +1915,22 @@
       text-align: center;
     }
 
+    .auth-forgot-link {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      text-decoration: none;
+      transition: color 0.15s;
+      align-self: flex-start;
+      margin-top: -6px;
+      margin-bottom: 2px;
+      cursor: pointer;
+    }
+
+    .auth-forgot-link:hover {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
     .auth-back-btn {
       background: transparent;
       border: none;
@@ -2267,6 +2283,8 @@
           </button>
         </div>
 
+        <a href="javascript:void(0)" class="auth-forgot-link" id="forgot-pass-btn">Zabudli ste heslo? Obnoviť cez e-mail</a>
+
         <div class="auth-error-msg" id="pass-error-msg"></div>
 
         <button type="button" class="auth-submit-btn" id="pass-submit-btn">
@@ -2309,6 +2327,77 @@
         </button>
 
         <button type="button" class="auth-back-btn" id="twofa-back-btn">← Späť na zadanie hesla</button>
+      </div>
+
+      <!-- STEP 3: INITIAL RECOVERY EMAIL SETUP (PROMPT UPON FIRST LOGIN) -->
+      <div id="auth-step-recovery-setup" class="auth-form-step" style="display: none;">
+        <span class="auth-step-badge" style="color:#10b981; border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.1);">Zabezpečenie účtu</span>
+        <h2 class="auth-title">Záchranný e-mail pre reset hesla</h2>
+        <p class="auth-sub">Pre prípad, že zabudnete heslo, zadajte svoj e-mail, na ktorý vám pošleme jednorazový overovací kód:</p>
+
+        <div class="auth-input-group">
+          <label class="auth-input-label" for="recovery-email-input">Váš záchranný e-mail</label>
+          <input type="email" id="recovery-email-input" class="auth-text-input" placeholder="napriklad@gmail.com" />
+        </div>
+
+        <div class="auth-error-msg" id="recovery-setup-error-msg"></div>
+
+        <button type="button" class="auth-submit-btn" id="recovery-setup-submit-btn">
+          <span>Uložiť e-mail a vstúpiť</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <!-- STEP 4: FORGOT PASSWORD RECOVERY (SEND OTP & SET NEW PASSWORD) -->
+      <div id="auth-step-forgot" class="auth-form-step" style="display: none;">
+        <span class="auth-step-badge" style="color:#f59e0b; border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.1);">Obnova prístupu</span>
+        <h2 class="auth-title">Zabudnuté heslo</h2>
+        <p class="auth-sub" id="forgot-step-desc">Pošleme vám 6-miestny overovací kód na váš záchranný e-mail</p>
+
+        <!-- Sub-stage 1: Send OTP code button -->
+        <div id="forgot-stage-send" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+          <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); padding: 12px; border-radius: 10px; font-size: 0.85rem; color: #fff; text-align: center;" id="forgot-target-email-box">
+            Kód bude odoslaný na záchranný e-mail
+          </div>
+          <button type="button" class="auth-submit-btn" id="forgot-send-btn">
+            <span>Odoslať resetovací kód na e-mail</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Sub-stage 2: Enter OTP & New Password -->
+        <div id="forgot-stage-verify" style="display: none; flex-direction: column; gap: 12px; width: 100%;">
+          <div class="auth-input-group">
+            <label class="auth-input-label" for="reset-otp-input">6-miestny kód z e-mailu</label>
+            <input type="text" id="reset-otp-input" class="auth-text-input" placeholder="napr. 489201" maxlength="6" style="font-family:'Space Mono',monospace; letter-spacing:0.15em; font-size:1.1rem; text-align:center;" />
+          </div>
+
+          <div class="auth-input-group">
+            <label class="auth-input-label" for="reset-new-pass">Nové administrátorské heslo</label>
+            <input type="password" id="reset-new-pass" class="auth-text-input" placeholder="Zadajte nové heslo..." />
+          </div>
+
+          <div class="auth-input-group">
+            <label class="auth-input-label" for="reset-confirm-pass">Potvrdenie nového hesla</label>
+            <input type="password" id="reset-confirm-pass" class="auth-text-input" placeholder="Zopakujte nové heslo..." />
+          </div>
+
+          <button type="button" class="auth-submit-btn" id="forgot-confirm-btn">
+            <span>Zmeniť heslo a prihlásiť sa</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <div class="auth-error-msg" id="forgot-error-msg"></div>
+
+        <button type="button" class="auth-back-btn" id="forgot-back-btn">← Späť na prihlásenie</button>
       </div>
 
     </div>
@@ -5068,7 +5157,7 @@
   
   
   // =========================================================
-  // SECURE REAL TOTP 2FA AUTHENTICATION CONTROLLER
+  // SECURE REAL TOTP 2FA & PASSWORD RECOVERY CONTROLLER
   // =========================================================
   (function() {
     let tempEnteredPassword = '';
@@ -5078,11 +5167,14 @@
     const authCard = document.getElementById('auth-card');
     const stepPassword = document.getElementById('auth-step-password');
     const step2FA = document.getElementById('auth-step-2fa');
+    const stepRecoverySetup = document.getElementById('auth-step-recovery-setup');
+    const stepForgot = document.getElementById('auth-step-forgot');
 
     const passInput = document.getElementById('admin-pass-input');
     const passSubmitBtn = document.getElementById('pass-submit-btn');
     const passErrorMsg = document.getElementById('pass-error-msg');
     const togglePassBtn = document.getElementById('toggle-pass-visibility');
+    const forgotPassBtn = document.getElementById('forgot-pass-btn');
 
     const twofaBadgeTitle = document.getElementById('twofa-badge-title');
     const twofaStepHeading = document.getElementById('twofa-step-heading');
@@ -5097,6 +5189,23 @@
     const twofaErrorMsg = document.getElementById('twofa-error-msg');
     const twofaBackBtn = document.getElementById('twofa-back-btn');
     const logoutBtn = document.getElementById('admin-logout-btn');
+
+    // Recovery Setup Elements
+    const recoveryEmailInput = document.getElementById('recovery-email-input');
+    const recoverySetupSubmitBtn = document.getElementById('recovery-setup-submit-btn');
+    const recoverySetupErrorMsg = document.getElementById('recovery-setup-error-msg');
+
+    // Forgot Password Elements
+    const forgotStageSend = document.getElementById('forgot-stage-send');
+    const forgotStageVerify = document.getElementById('forgot-stage-verify');
+    const forgotTargetEmailBox = document.getElementById('forgot-target-email-box');
+    const forgotSendBtn = document.getElementById('forgot-send-btn');
+    const forgotConfirmBtn = document.getElementById('forgot-confirm-btn');
+    const forgotErrorMsg = document.getElementById('forgot-error-msg');
+    const forgotBackBtn = document.getElementById('forgot-back-btn');
+    const resetOtpInput = document.getElementById('reset-otp-input');
+    const resetNewPass = document.getElementById('reset-new-pass');
+    const resetConfirmPass = document.getElementById('reset-confirm-pass');
 
     async function checkSession() {
       const token = sessionStorage.getItem('jk_admin_jwt');
@@ -5119,36 +5228,37 @@
     }
     window.checkAdminSession = checkSession;
 
-    function showStep(stepNum, setupData = null) {
+    function showStep(stepNum, data = null) {
+      stepPassword.style.display = 'none';
+      step2FA.style.display = 'none';
+      if (stepRecoverySetup) stepRecoverySetup.style.display = 'none';
+      if (stepForgot) stepForgot.style.display = 'none';
+
       if (stepNum === 1) {
         stepPassword.style.display = 'flex';
-        step2FA.style.display = 'none';
         passErrorMsg.textContent = '';
         currentSetupSecret = '';
         if (passInput) {
           passInput.value = '';
           passInput.focus();
         }
-      } else {
-        stepPassword.style.display = 'none';
+      } else if (stepNum === 2) {
         step2FA.style.display = 'flex';
         twofaErrorMsg.textContent = '';
         twofaDigits.forEach(d => d.value = '');
 
-        if (setupData && setupData.needsSetup) {
-          // First-time 2FA Setup
-          currentSetupSecret = setupData.setupSecret;
+        if (data && data.needsSetup) {
+          currentSetupSecret = data.setupSecret;
           if (twofaSetupBox) twofaSetupBox.style.display = 'flex';
-          if (twofaQrImage && setupData.qrDataUrl) twofaQrImage.src = setupData.qrDataUrl;
-          if (twofaManualSecret && setupData.setupSecret) {
-            twofaManualSecret.textContent = 'Kľúč: ' + setupData.setupSecret;
+          if (twofaQrImage && data.qrDataUrl) twofaQrImage.src = data.qrDataUrl;
+          if (twofaManualSecret && data.setupSecret) {
+            twofaManualSecret.textContent = 'Kľúč: ' + data.setupSecret;
           }
           if (twofaBadgeTitle) twofaBadgeTitle.textContent = '2. Krok • Aktivácia 2FA';
           if (twofaStepHeading) twofaStepHeading.textContent = 'Naskenujte QR kód do aplikácie';
           if (twofaStepDesc) twofaStepDesc.textContent = 'Otvorte Google Authenticator alebo Apple Passwords, naskenujte QR kód a zadajte 6-miestny kód:';
           if (twofaSubmitText) twofaSubmitText.textContent = 'Aktivovať 2FA & Vstúpiť do portálu';
         } else {
-          // Normal 2FA Verification
           currentSetupSecret = '';
           if (twofaSetupBox) twofaSetupBox.style.display = 'none';
           if (twofaBadgeTitle) twofaBadgeTitle.textContent = '2. Krok • 2FA Overenie';
@@ -5158,6 +5268,36 @@
         }
 
         if (twofaDigits[0]) twofaDigits[0].focus();
+      } else if (stepNum === 3) {
+        // Recovery Setup Screen
+        if (stepRecoverySetup) {
+          stepRecoverySetup.style.display = 'flex';
+          if (recoverySetupErrorMsg) recoverySetupErrorMsg.textContent = '';
+          if (recoveryEmailInput) {
+            recoveryEmailInput.value = '';
+            recoveryEmailInput.focus();
+          }
+        }
+      } else if (stepNum === 4) {
+        // Forgot Password Screen
+        if (stepForgot) {
+          stepForgot.style.display = 'flex';
+          if (forgotStageSend) forgotStageSend.style.display = 'flex';
+          if (forgotStageVerify) forgotStageVerify.style.display = 'none';
+          if (forgotErrorMsg) forgotErrorMsg.textContent = '';
+
+          // Fetch masked recovery email info
+          fetch('/api/auth/recovery-info')
+            .then(r => r.json())
+            .then(info => {
+              if (info.hasRecoveryEmail && info.maskedEmail) {
+                forgotTargetEmailBox.textContent = 'Resetovací kód bude odoslaný na: ' + info.maskedEmail;
+              } else {
+                forgotTargetEmailBox.textContent = 'Kód bude odoslaný na nastavený záchranný email dispečingu.';
+              }
+            })
+            .catch(() => {});
+        }
       }
     }
 
@@ -5167,6 +5307,111 @@
         const isPass = passInput.type === 'password';
         passInput.type = isPass ? 'text' : 'password';
       });
+    }
+
+    // Forgot Password Link Click
+    if (forgotPassBtn) {
+      forgotPassBtn.addEventListener('click', () => {
+        showStep(4);
+      });
+    }
+
+    // Send Reset Code
+    if (forgotSendBtn) {
+      forgotSendBtn.addEventListener('click', async () => {
+        forgotSendBtn.disabled = true;
+        forgotErrorMsg.textContent = 'Odosielam overovací kód...';
+        forgotErrorMsg.style.color = 'var(--accent)';
+
+        try {
+          const res = await fetch('/api/auth/request-reset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          const data = await res.json();
+
+          if (res.ok && data.success) {
+            forgotErrorMsg.textContent = '';
+            forgotStageSend.style.display = 'none';
+            forgotStageVerify.style.display = 'flex';
+            if (resetOtpInput) resetOtpInput.focus();
+          } else {
+            forgotErrorMsg.style.color = '#ff5252';
+            forgotErrorMsg.textContent = data.error || 'Zlyhalo odoslanie kódu.';
+            triggerShake();
+          }
+        } catch (err) {
+          forgotErrorMsg.style.color = '#ff5252';
+          forgotErrorMsg.textContent = 'Chyba spojenia so serverom.';
+          triggerShake();
+        } finally {
+          forgotSendBtn.disabled = false;
+        }
+      });
+    }
+
+    // Confirm Password Reset
+    if (forgotConfirmBtn) {
+      forgotConfirmBtn.addEventListener('click', async () => {
+        const code = resetOtpInput ? resetOtpInput.value.trim() : '';
+        const newPass = resetNewPass ? resetNewPass.value.trim() : '';
+        const confirmPass = resetConfirmPass ? resetConfirmPass.value.trim() : '';
+
+        if (!code || code.length !== 6) {
+          forgotErrorMsg.style.color = '#ff5252';
+          forgotErrorMsg.textContent = 'Zadajte platný 6-miestny kód z emailu';
+          triggerShake();
+          return;
+        }
+
+        if (!newPass || newPass.length < 6) {
+          forgotErrorMsg.style.color = '#ff5252';
+          forgotErrorMsg.textContent = 'Nové heslo musí mať aspoň 6 znakov';
+          triggerShake();
+          return;
+        }
+
+        if (newPass !== confirmPass) {
+          forgotErrorMsg.style.color = '#ff5252';
+          forgotErrorMsg.textContent = 'Zadané heslá sa nezhodujú';
+          triggerShake();
+          return;
+        }
+
+        forgotConfirmBtn.disabled = true;
+        forgotErrorMsg.textContent = 'Ukladám nové heslo...';
+
+        try {
+          const res = await fetch('/api/auth/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              resetCode: code,
+              newPassword: newPass
+            })
+          });
+          const data = await res.json();
+
+          if (res.ok && data.success) {
+            alert('✅ Vaše heslo bolo úspešne obnovené! Teraz sa môžete prihlásiť.');
+            showStep(1);
+          } else {
+            forgotErrorMsg.style.color = '#ff5252';
+            forgotErrorMsg.textContent = data.error || 'Nesprávny alebo expirovaný kód.';
+            triggerShake();
+          }
+        } catch (e) {
+          forgotErrorMsg.style.color = '#ff5252';
+          forgotErrorMsg.textContent = 'Chyba servera pri zmene hesla.';
+          triggerShake();
+        } finally {
+          forgotConfirmBtn.disabled = false;
+        }
+      });
+    }
+
+    if (forgotBackBtn) {
+      forgotBackBtn.addEventListener('click', () => showStep(1));
     }
 
     // Step 1: Verify Password on Server
@@ -5240,10 +5485,16 @@
         if (res.ok && data.success && data.token) {
           sessionStorage.setItem('jk_admin_jwt', data.token);
           twofaErrorMsg.textContent = '';
-          authOverlay.classList.add('unlocked');
           tempEnteredPassword = '';
           currentSetupSecret = '';
-          if (typeof syncFromBackend === 'function') syncFromBackend();
+
+          // If recovery email is not yet set, prompt user
+          if (data.needsRecoverySetup) {
+            showStep(3);
+          } else {
+            authOverlay.classList.add('unlocked');
+            if (typeof syncFromBackend === 'function') syncFromBackend();
+          }
         } else {
           twofaErrorMsg.textContent = data.error || 'Neplatný 2FA overovací kód';
           triggerShake();
@@ -5256,6 +5507,42 @@
       } finally {
         twofaSubmitBtn.disabled = false;
       }
+    }
+
+    // Recovery Setup Submit Handler
+    if (recoverySetupSubmitBtn) {
+      recoverySetupSubmitBtn.addEventListener('click', async () => {
+        const recEmail = recoveryEmailInput ? recoveryEmailInput.value.trim() : '';
+        if (!recEmail || !recEmail.includes('@')) {
+          recoverySetupErrorMsg.textContent = 'Zadajte platnú e-mailovú adresu';
+          triggerShake();
+          return;
+        }
+
+        recoverySetupSubmitBtn.disabled = true;
+        try {
+          const res = await fetch('/api/auth/set-recovery-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + (sessionStorage.getItem('jk_admin_jwt') || '')
+            },
+            body: JSON.stringify({ email: recEmail })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            authOverlay.classList.add('unlocked');
+            if (typeof syncFromBackend === 'function') syncFromBackend();
+          } else {
+            recoverySetupErrorMsg.textContent = data.error || 'Chyba pri ukladaní';
+          }
+        } catch (e) {
+          authOverlay.classList.add('unlocked');
+          if (typeof syncFromBackend === 'function') syncFromBackend();
+        } finally {
+          recoverySetupSubmitBtn.disabled = false;
+        }
+      });
     }
 
     function triggerShake() {
@@ -5271,7 +5558,6 @@
       });
     }
 
-    // 2FA digit auto-navigation & paste support
     twofaDigits.forEach((digit, idx) => {
       digit.addEventListener('input', (e) => {
         const val = digit.value.replace(/[^0-9]/g, '');

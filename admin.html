@@ -2834,6 +2834,68 @@
     (function() {
       const STORAGE_KEY = 'automek_bookings';
 
+      // ==========================================
+      // BACKEND REST API SYNCHRONIZATION
+      // ==========================================
+      async function syncFromBackend() {
+        try {
+          const res = await fetch('/api/bookings');
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) {
+              bookings = data;
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+              renderTable();
+              renderCalendar();
+              updateStats();
+              console.log('✅ Loaded', bookings.length, 'bookings from backend database.');
+            }
+          }
+        } catch (err) {
+          console.warn('⚠️ Backend offline, using local data fallback.');
+        }
+      }
+
+      async function apiSaveBooking(booking) {
+        try {
+          const res = await fetch('/api/bookings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(booking)
+          });
+          if (res.ok) {
+            const saved = await res.json();
+            return saved;
+          }
+        } catch (e) {
+          console.warn('Error saving booking to API:', e);
+        }
+        return null;
+      }
+
+      async function apiUpdateBooking(id, updates) {
+        try {
+          await fetch('/api/bookings/' + encodeURIComponent(id), {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates)
+          });
+        } catch (e) {
+          console.warn('Error updating booking on API:', e);
+        }
+      }
+
+      async function apiDeleteBooking(id) {
+        try {
+          await fetch('/api/bookings/' + encodeURIComponent(id), {
+            method: 'DELETE'
+          });
+        } catch (e) {
+          console.warn('Error deleting booking on API:', e);
+        }
+      }
+  
+
       // Switcher
       const tabTable = document.getElementById('tab-table');
       const tabCalendar = document.getElementById('tab-calendar');

@@ -1258,6 +1258,18 @@
       font-weight: 700;
       border-color: var(--accent);
     }
+    .time-slot-btn.booked {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      cursor: not-allowed;
+      box-shadow: inset 0 0 12px rgba(239, 68, 68, 0.08);
+    }
+    .time-slot-btn.booked:hover {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.6);
+      color: #fca5a5;
+    }
 
     /* MECHANIC SPECIALIST SELECTOR */
     .mechanic-grid {
@@ -3800,7 +3812,7 @@
             btn.classList.add('booked');
             btn.disabled = true;
             btn.title = bookedLabel;
-            btn.innerHTML = `${slot}<span style="display:block; font-size:0.62rem; color:#ff5252; opacity:0.85; margin-top:2px;">${bookedLabel}</span>`;
+            btn.innerHTML = `<span style="color:#fca5a5; font-weight:600;">${slot}</span><span style="display:block; font-size:0.64rem; font-weight:700; color:#ef4444; margin-top:2px; letter-spacing:0.02em;">${bookedLabel}</span>`;
           } else {
             if (!firstAvailable) firstAvailable = slot;
             btn.textContent = slot;

@@ -938,11 +938,189 @@
       animation: slideUpToast 0.25s ease-out;
     }
 
-    @keyframes slideUpToast {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    /* ADD ORDER MODAL STYLES */
+    .add-order-modal-card {
+      background: #121622;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      max-width: 720px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), 0 0 40px rgba(56, 189, 248, 0.1);
+      overflow: hidden;
     }
-        /* ADMIN AUTH 2-STEP (PASSWORD + 2FA) OVERLAY */
+
+    .add-order-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .add-order-section {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .add-order-section-title {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .parts-choice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .parts-choice-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .part-choice-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+      transition: all 0.15s ease;
+      color: #fff;
+    }
+
+    .part-choice-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    .part-choice-btn.selected {
+      background: rgba(56, 189, 248, 0.12);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .part-choice-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.2);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    .part-choice-info h6 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      margin: 0;
+    }
+
+    .part-choice-info span {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 540px) {
+      .form-grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .photo-preview-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .photo-preview-item {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .photo-preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-preview-remove {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.75);
+      border: none;
+      color: #f87171;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .audio-recording-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--danger);
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .audio-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--danger);
+      animation: pulseAnim 1s infinite alternate;
+    }
+
+    @keyframes pulseAnim {
+      from { opacity: 0.4; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* ADMIN AUTH 2-STEP (PASSWORD + 2FA) OVERLAY */
     #admin-auth-overlay {
       position: fixed;
       inset: 0;
@@ -1815,7 +1993,225 @@
           </div>
         </div>
 
+  <!-- Add Order (Manual Booking) Modal -->
+  <div class="modal-overlay" id="add-order-modal">
+    <div class="add-order-modal-card">
+      
+      <!-- Modal Header -->
+      <div class="modal-header" style="padding: 20px 24px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:36px; height:36px; border-radius:8px; background:rgba(56,189,248,0.15); border:1px solid var(--accent); color:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.1rem;">
+            +
+          </div>
+          <div>
+            <div class="modal-title">Nová servisná zákazka</div>
+            <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">
+              Zaevidovanie novej zákazky a rezervácie termínu do systému
+            </div>
+          </div>
+        </div>
+        <button type="button" class="modal-close" id="add-order-close">&times;</button>
       </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="add-order-body">
+
+        <!-- 1. Diel / Komponent -->
+        <div class="add-order-section">
+          <div class="add-order-section-title">
+            <span>1. Výber servisovaného dielu / komponentu</span>
+          </div>
+          <div class="parts-choice-grid" id="add-order-parts-grid">
+            <button type="button" class="part-choice-btn selected" data-code="E" data-name="Motor & Prevodovka" data-price="€45.00">
+              <div class="part-choice-badge">E</div>
+              <div class="part-choice-info">
+                <h6>Motor & Prevodovka</h6>
+                <span>POHON • Od €45.00</span>
+              </div>
+            </button>
+            <button type="button" class="part-choice-btn" data-code="S" data-name="Podvozok & Brzdy" data-price="€35.00">
+              <div class="part-choice-badge">S</div>
+              <div class="part-choice-info">
+                <h6>Podvozok & Brzdy</h6>
+                <span>NÁPRAVA • Od €35.00</span>
+              </div>
+            </button>
+            <button type="button" class="part-choice-btn" data-code="X" data-name="Výfukový systém" data-price="€25.00">
+              <div class="part-choice-badge">X</div>
+              <div class="part-choice-info">
+                <h6>Výfukový systém</h6>
+                <span>EMISIE • Od €25.00</span>
+              </div>
+            </button>
+            <button type="button" class="part-choice-btn" data-code="W" data-name="Kolesá & Disky" data-price="€20.00">
+              <div class="part-choice-badge">W</div>
+              <div class="part-choice-info">
+                <h6>Kolesá & Disky</h6>
+                <span>PNEU • Od €20.00</span>
+              </div>
+            </button>
+            <button type="button" class="part-choice-btn" data-code="B" data-name="Karoséria & Svetlá" data-price="€30.00">
+              <div class="part-choice-badge">B</div>
+              <div class="part-choice-info">
+                <h6>Karoséria & Svetlá</h6>
+                <span>EXTERIÉR • Od €30.00</span>
+              </div>
+            </button>
+            <button type="button" class="part-choice-btn" data-code="I" data-name="Interiér & Elektronika" data-price="€30.00">
+              <div class="part-choice-badge">I</div>
+              <div class="part-choice-info">
+                <h6>Interiér & Elektronika</h6>
+                <span>PALUBOVKA • Od €30.00</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Popis problému -->
+        <div class="add-order-section">
+          <div class="add-order-section-title">
+            <span>2. Popis závady / požiadavky na servis</span>
+          </div>
+          <div class="form-group">
+            <textarea id="add-order-desc" class="form-input" style="height:75px; resize:vertical;" placeholder="Podrobne popíšte závadu (napr. klepanie v motore pri otáčkach, výmena oleja a filtrov, kontrola bŕzd...)"></textarea>
+          </div>
+        </div>
+
+        <!-- 3. Termín, Čas a Mechanik -->
+        <div class="add-order-section">
+          <div class="add-order-section-title">
+            <span>3. Termín servisu & Priradený mechanik</span>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Dátum termínu *</label>
+              <div style="display:flex; gap:6px;">
+                <input type="date" id="add-order-date" class="form-input" style="flex:1;">
+                <button type="button" class="btn-test" id="add-order-date-today" style="padding:8px 10px; font-size:0.78rem;">Dnes</button>
+                <button type="button" class="btn-test" id="add-order-date-tomorrow" style="padding:8px 10px; font-size:0.78rem;">Zajtra</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Čas termínu *</label>
+              <input type="text" id="add-order-time" class="form-input" placeholder="09:00" value="09:00">
+            </div>
+          </div>
+
+          <!-- Quick Time Slot Selection -->
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;" id="add-order-quick-times">
+            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">08:00</button>
+            <button type="button" class="time-slot-btn active" style="padding:4px 8px; font-size:0.75rem;">09:00</button>
+            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">10:00</button>
+            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">11:00</button>
+            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">13:00</button>
+            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">14:00</button>
+            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">15:00</button>
+            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">16:00</button>
+            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">17:00</button>
+          </div>
+
+          <div class="form-grid-2" style="margin-top:6px;">
+            <div class="form-group">
+              <label class="form-label">Priradený mechanik</label>
+              <select id="add-order-mechanic" class="form-input" style="cursor:pointer;">
+                <option value="Markus Vance">Markus Vance (Motory & prevodovky)</option>
+                <option value="Elena Rostova">Elena Rostova (Podvozky & diagnostika)</option>
+                <option value="Viktor Thorne">Viktor Thorne (Elektroinštalácia & karosérie)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Odhadovaná cena (€)</label>
+              <input type="text" id="add-order-price" class="form-input" placeholder="€45.00" value="€45.00">
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Údaje zákazníka & Vozidlo -->
+        <div class="add-order-section">
+          <div class="add-order-section-title">
+            <span>4. Údaje zákazníka & Informácie o vozidle</span>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Meno a priezvisko *</label>
+              <input type="text" id="add-order-cust-name" class="form-input" placeholder="napr. Ján Novák" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Telefónne číslo *</label>
+              <input type="tel" id="add-order-cust-phone" class="form-input" placeholder="+421 9XX XXX XXX" required>
+            </div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">E-mailová adresa</label>
+              <input type="email" id="add-order-cust-email" class="form-input" placeholder="klient@email.sk">
+            </div>
+            <div class="form-group">
+              <label class="form-label">EČV / Model vozidla</label>
+              <input type="text" id="add-order-cust-plate" class="form-input" placeholder="BA 123 XY • Škoda Octavia">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Stav zákazky</label>
+            <select id="add-order-status" class="form-input" style="cursor:pointer;">
+              <option value="pending">Nová / Čaká na potvrdenie (Pending)</option>
+              <option value="confirmed" selected>Potvrdená / Schválená (Confirmed)</option>
+              <option value="in_progress">V servise / Prebieha oprava (In Progress)</option>
+              <option value="completed">Dokončená / Odovzdaná (Completed)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 5. Prílohy (Fotografie & Zvukový záznam) -->
+        <div class="add-order-section">
+          <div class="add-order-section-title">
+            <span>5. Prílohy — Fotografie & Zvukový záznam (Voliteľné)</span>
+          </div>
+          
+          <div class="form-grid-2">
+            <!-- Photos -->
+            <div class="form-group">
+              <label class="form-label">Fotografie závady (max 5 ks)</label>
+              <button type="button" id="btn-add-order-photo" class="btn-test" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 12px; width:100%;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                <span>Vybrať fotografie...</span>
+              </button>
+              <input type="file" id="add-order-photo-input" accept="image/*" multiple style="display:none;">
+              <div class="photo-preview-grid" id="add-order-photo-previews"></div>
+            </div>
+
+            <!-- Audio Recording -->
+            <div class="form-group">
+              <label class="form-label">Zvukový záznam závady</label>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <button type="button" id="btn-add-order-audio-rec" class="btn-test" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 12px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                  <span id="add-order-audio-rec-text">Nahrať zvuk mikrofónom</span>
+                </button>
+                <button type="button" id="btn-add-order-audio-play" class="btn-test" style="display:none; padding:8px 12px; color:var(--accent);">
+                  ▶ Prehrať
+                </button>
+              </div>
+              <div id="add-order-audio-status" style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-msg" id="add-order-status-msg"></div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-actions" style="padding: 16px 24px; background: rgba(14, 18, 26, 0.95); margin-top:0;">
+        <button type="button" class="btn-test" id="btn-cancel-add-order">Zrušiť</button>
+        <button type="button" class="btn-save" id="btn-submit-add-order" style="display:flex; align-items:center; gap:8px; background:var(--accent); color:#000; font-weight:700;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Vytvoriť a zaevidovať zákazku</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -3107,57 +3503,382 @@
         thStatusFilter.addEventListener('change', renderTable);
       }
 
-      // ADD TEST BOOKING (Endless random bookings)
-      const TEST_NAMES = ['Jozef Valko', 'Patrik Hric', 'Lucia Vrbovská', 'Matej Slanina', 'Boris Kysel', 'Adriana Tóthová', 'Gabriel Varga', 'Daniela Mečiarová'];
-      const TEST_PARTS = [
-        { code: 'E', name: '2.0 TFSI Motor & Chladenie', urg: 'critical', price: '190 €' },
-        { code: 'S', name: 'Predná náprava & Stabilizátory', urg: 'moderate', price: '95 €' },
-        { code: 'B', name: 'Športové brzdy & Platničky', urg: 'critical', price: '160 €' },
-        { code: 'W', name: 'Kované disky & 3D Geometria', urg: 'moderate', price: '75 €' },
-        { code: 'X', name: 'Športový výfuk & Klapka', urg: 'minor', price: '120 €' },
-        { code: 'I', name: 'Virtuálny kokpit & Diagnostika', urg: 'minor', price: '50 €' }
-      ];
-      const TEST_PLATES = ['BA 789 XY', 'KE 555 KK', 'ZA 234 CC', 'NR 111 BB', 'TT 678 DD', 'BB 432 EE', 'TN 987 FF', 'PO 654 GG'];
+      // =========================================================
+      // ADD NEW ORDER (MANUAL BOOKING MODAL CONTROLLER)
+      // =========================================================
+      const addOrderModal = document.getElementById('add-order-modal');
+      const addOrderClose = document.getElementById('add-order-close');
+      const btnCancelAddOrder = document.getElementById('btn-cancel-add-order');
+      const btnSubmitAddOrder = document.getElementById('btn-submit-add-order');
+      const addOrderPartsGrid = document.getElementById('add-order-parts-grid');
+      const addOrderDesc = document.getElementById('add-order-desc');
+      const addOrderDate = document.getElementById('add-order-date');
+      const addOrderTime = document.getElementById('add-order-time');
+      const addOrderMechanic = document.getElementById('add-order-mechanic');
+      const addOrderPrice = document.getElementById('add-order-price');
+      const addOrderCustName = document.getElementById('add-order-cust-name');
+      const addOrderCustPhone = document.getElementById('add-order-cust-phone');
+      const addOrderCustEmail = document.getElementById('add-order-cust-email');
+      const addOrderCustPlate = document.getElementById('add-order-cust-plate');
+      const addOrderStatus = document.getElementById('add-order-status');
+      const addOrderStatusMsg = document.getElementById('add-order-status-msg');
+      const btnAddOrderDateToday = document.getElementById('add-order-date-today');
+      const btnAddOrderDateTomorrow = document.getElementById('add-order-date-tomorrow');
+      const addOrderQuickTimes = document.getElementById('add-order-quick-times');
 
-      addTestBtn.addEventListener('click', () => {
-        const id = 'JK-' + Math.floor(100000 + Math.random() * 900000);
-        const name = TEST_NAMES[Math.floor(Math.random() * TEST_NAMES.length)];
-        const part = TEST_PARTS[Math.floor(Math.random() * TEST_PARTS.length)];
-        const plate = TEST_PLATES[Math.floor(Math.random() * TEST_PLATES.length)];
-        const time = TIME_SLOTS[Math.floor(Math.random() * TIME_SLOTS.length)];
-        
-        // Random date within -2 to +10 days
-        const offsetDays = Math.floor(Math.random() * 10);
-        const targetDateObj = new Date();
-        targetDateObj.setDate(targetDateObj.getDate() + offsetDays);
+      // Photo upload elements
+      const btnAddOrderPhoto = document.getElementById('btn-add-order-photo');
+      const addOrderPhotoInput = document.getElementById('add-order-photo-input');
+      const addOrderPhotoPreviews = document.getElementById('add-order-photo-previews');
 
-        bookings.unshift({
-          id: id,
-          customer: name,
-          phone: '+421 90' + Math.floor(1000000 + Math.random() * 9000000),
-          email: name.toLowerCase().replace(/\s+/g, '.') + '@gmail.com',
-          plate: plate,
-          partName: part.name,
-          partCode: part.code,
-          urgency: part.urg,
-          date: formatDateForBooking(targetDateObj),
-          time: time,
-          price: part.price,
-          mechanic: 'Viktor Thorne',
-          problemDesc: 'Servisná diagnostika a kontrola komponentu.',
-          symptoms: ['Servisná prehliadka'],
-          hasAudio: false,
-          audioData: null,
-          photos: [],
-          photosCount: 0,
-          status: 'pending'
+      // Audio recording elements
+      const btnAddOrderAudioRec = document.getElementById('btn-add-order-audio-rec');
+      const addOrderAudioRecText = document.getElementById('add-order-audio-rec-text');
+      const btnAddOrderAudioPlay = document.getElementById('btn-add-order-audio-play');
+      const addOrderAudioStatus = document.getElementById('add-order-audio-status');
+
+      let selectedNewOrderPart = { code: 'E', name: 'Motor & Prevodovka', price: '€45.00' };
+      let newOrderPhotos = [];
+      let newOrderAudioData = null;
+      let newOrderMediaRecorder = null;
+      let newOrderAudioChunks = [];
+      let isRecordingNewOrderAudio = false;
+      let newOrderAudioTimer = null;
+      let newOrderAudioSeconds = 0;
+      let newOrderAudioAudioEl = null;
+
+      function formatIsoDate(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+
+      function resetAddOrderForm() {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        addOrderDate.value = formatIsoDate(tomorrow);
+        addOrderTime.value = '09:00';
+        addOrderDesc.value = '';
+        addOrderCustName.value = '';
+        addOrderCustPhone.value = '';
+        addOrderCustEmail.value = '';
+        addOrderCustPlate.value = '';
+        addOrderStatus.value = 'confirmed';
+        addOrderStatusMsg.style.display = 'none';
+
+        // Reset part selection to Engine
+        selectedNewOrderPart = { code: 'E', name: 'Motor & Prevodovka', price: '€45.00' };
+        addOrderPrice.value = '€45.00';
+        if (addOrderPartsGrid) {
+          addOrderPartsGrid.querySelectorAll('.part-choice-btn').forEach(btn => {
+            btn.classList.toggle('selected', btn.dataset.code === 'E');
+          });
+        }
+
+        // Reset quick time buttons
+        if (addOrderQuickTimes) {
+          addOrderQuickTimes.querySelectorAll('.time-slot-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.textContent.trim() === '09:00');
+          });
+        }
+
+        // Reset photos
+        newOrderPhotos = [];
+        renderNewOrderPhotos();
+
+        // Reset audio
+        stopNewOrderRecording();
+        newOrderAudioData = null;
+        if (btnAddOrderAudioPlay) btnAddOrderAudioPlay.style.display = 'none';
+        if (addOrderAudioStatus) addOrderAudioStatus.textContent = '';
+        if (addOrderAudioRecText) addOrderAudioRecText.textContent = 'Nahrať zvuk mikrofónom';
+      }
+
+      function openAddOrderModal() {
+        resetAddOrderForm();
+        if (addOrderModal) addOrderModal.classList.add('open');
+      }
+
+      function closeAddOrderModal() {
+        stopNewOrderRecording();
+        if (addOrderModal) addOrderModal.classList.remove('open');
+      }
+
+      // Open on "+ Pridať zákazku" button
+      addTestBtn.addEventListener('click', openAddOrderModal);
+
+      // Close modal events
+      if (addOrderClose) addOrderClose.addEventListener('click', closeAddOrderModal);
+      if (btnCancelAddOrder) btnCancelAddOrder.addEventListener('click', closeAddOrderModal);
+      if (addOrderModal) {
+        addOrderModal.addEventListener('click', (e) => {
+          if (e.target === addOrderModal) closeAddOrderModal();
         });
+      }
 
-        saveData();
-        renderTable();
-        renderCalendar();
-        showRescheduleToast(`Zákazka #${id} (${name}) bola úspešne pridaná! Celkovo: ${bookings.length} zákaziek.`);
-      });
+      // Part selection
+      if (addOrderPartsGrid) {
+        addOrderPartsGrid.querySelectorAll('.part-choice-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            addOrderPartsGrid.querySelectorAll('.part-choice-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedNewOrderPart = {
+              code: btn.dataset.code,
+              name: btn.dataset.name,
+              price: btn.dataset.price
+            };
+            addOrderPrice.value = btn.dataset.price;
+          });
+        });
+      }
+
+      // Quick date buttons
+      if (btnAddOrderDateToday) {
+        btnAddOrderDateToday.addEventListener('click', () => {
+          addOrderDate.value = formatIsoDate(new Date());
+        });
+      }
+      if (btnAddOrderDateTomorrow) {
+        btnAddOrderDateTomorrow.addEventListener('click', () => {
+          const tom = new Date();
+          tom.setDate(tom.getDate() + 1);
+          addOrderDate.value = formatIsoDate(tom);
+        });
+      }
+
+      // Quick time slots
+      if (addOrderQuickTimes) {
+        addOrderQuickTimes.querySelectorAll('.time-slot-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            addOrderQuickTimes.querySelectorAll('.time-slot-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            addOrderTime.value = btn.textContent.trim();
+          });
+        });
+      }
+
+      // Photos upload
+      if (btnAddOrderPhoto && addOrderPhotoInput) {
+        btnAddOrderPhoto.addEventListener('click', () => addOrderPhotoInput.click());
+        addOrderPhotoInput.addEventListener('change', (e) => {
+          const files = Array.from(e.target.files);
+          files.forEach(file => {
+            if (!file.type.startsWith('image/')) return;
+            if (newOrderPhotos.length >= 5) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+              newOrderPhotos.push(evt.target.result);
+              renderNewOrderPhotos();
+            };
+            reader.readAsDataURL(file);
+          });
+          addOrderPhotoInput.value = '';
+        });
+      }
+
+      function renderNewOrderPhotos() {
+        if (!addOrderPhotoPreviews) return;
+        addOrderPhotoPreviews.innerHTML = '';
+        newOrderPhotos.forEach((src, idx) => {
+          const item = document.createElement('div');
+          item.className = 'photo-preview-item';
+          item.innerHTML = `
+            <img src="${src}" alt="Náhľad ${idx + 1}">
+            <button type="button" class="photo-preview-remove" title="Odstrániť">&times;</button>
+          `;
+          item.querySelector('.photo-preview-remove').addEventListener('click', (e) => {
+            e.stopPropagation();
+            newOrderPhotos.splice(idx, 1);
+            renderNewOrderPhotos();
+          });
+          addOrderPhotoPreviews.appendChild(item);
+        });
+      }
+
+      // Audio recording logic
+      if (btnAddOrderAudioRec) {
+        btnAddOrderAudioRec.addEventListener('click', async () => {
+          if (!isRecordingNewOrderAudio) {
+            startNewOrderRecording();
+          } else {
+            stopNewOrderRecording();
+          }
+        });
+      }
+
+      async function startNewOrderRecording() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          newOrderAudioChunks = [];
+          newOrderMediaRecorder = new MediaRecorder(stream);
+
+          newOrderMediaRecorder.ondataavailable = (e) => {
+            if (e.data && e.data.size > 0) {
+              newOrderAudioChunks.push(e.data);
+            }
+          };
+
+          newOrderMediaRecorder.onstop = () => {
+            const blob = new Blob(newOrderAudioChunks, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.onload = () => {
+              newOrderAudioData = reader.result;
+              if (addOrderAudioStatus) {
+                addOrderAudioStatus.innerHTML = `<span style="color:#34d399; font-weight:600;">✓ Zvuk úspešne nahraný (${newOrderAudioSeconds}s)</span>`;
+              }
+              if (btnAddOrderAudioPlay) btnAddOrderAudioPlay.style.display = 'inline-block';
+            };
+            reader.readAsDataURL(blob);
+
+            // Stop mic tracks
+            stream.getTracks().forEach(t => t.stop());
+          };
+
+          newOrderMediaRecorder.start();
+          isRecordingNewOrderAudio = true;
+          newOrderAudioSeconds = 0;
+          if (addOrderAudioRecText) addOrderAudioRecText.textContent = '⏹ Zastaviť nahrávanie';
+          if (addOrderAudioStatus) {
+            addOrderAudioStatus.innerHTML = `<span class="audio-recording-indicator"><span class="audio-pulse-dot"></span> Nahrávam zvuk... 00:00</span>`;
+          }
+
+          clearInterval(newOrderAudioTimer);
+          newOrderAudioTimer = setInterval(() => {
+            newOrderAudioSeconds++;
+            const s = String(newOrderAudioSeconds % 60).padStart(2, '0');
+            const m = String(Math.floor(newOrderAudioSeconds / 60)).padStart(2, '0');
+            if (addOrderAudioStatus && isRecordingNewOrderAudio) {
+              addOrderAudioStatus.innerHTML = `<span class="audio-recording-indicator"><span class="audio-pulse-dot"></span> Nahrávam zvuk... ${m}:${s}</span>`;
+            }
+            if (newOrderAudioSeconds >= 30) {
+              stopNewOrderRecording();
+            }
+          }, 1000);
+
+        } catch (err) {
+          console.warn('Microphone error:', err);
+          if (addOrderAudioStatus) {
+            addOrderAudioStatus.innerHTML = `<span style="color:#f87171;">Mikrofón nie je dostupný (${err.message})</span>`;
+          }
+        }
+      }
+
+      function stopNewOrderRecording() {
+        clearInterval(newOrderAudioTimer);
+        if (newOrderMediaRecorder && newOrderMediaRecorder.state !== 'inactive') {
+          newOrderMediaRecorder.stop();
+        }
+        isRecordingNewOrderAudio = false;
+        if (addOrderAudioRecText) {
+          addOrderAudioRecText.textContent = newOrderAudioData ? 'Nahrať znova' : 'Nahrať zvuk mikrofónom';
+        }
+      }
+
+      if (btnAddOrderAudioPlay) {
+        btnAddOrderAudioPlay.addEventListener('click', () => {
+          if (!newOrderAudioData) return;
+          if (newOrderAudioAudioEl) {
+            newOrderAudioAudioEl.pause();
+            newOrderAudioAudioEl = null;
+            btnAddOrderAudioPlay.textContent = '▶ Prehrať';
+            return;
+          }
+          newOrderAudioAudioEl = new Audio(newOrderAudioData);
+          btnAddOrderAudioPlay.textContent = '⏸ Pauza';
+          newOrderAudioAudioEl.onended = () => {
+            btnAddOrderAudioPlay.textContent = '▶ Prehrať';
+            newOrderAudioAudioEl = null;
+          };
+          newOrderAudioAudioEl.play();
+        });
+      }
+
+      // Submit and save new manual booking
+      if (btnSubmitAddOrder) {
+        btnSubmitAddOrder.addEventListener('click', () => {
+          const custName = (addOrderCustName.value || '').trim();
+          const custPhone = (addOrderCustPhone.value || '').trim();
+          const custEmail = (addOrderCustEmail.value || '').trim();
+          const custPlate = (addOrderCustPlate.value || '').trim();
+          const custDesc = (addOrderDesc.value || '').trim();
+          const custPrice = (addOrderPrice.value || selectedNewOrderPart.price || '€45.00').trim();
+          const custTime = (addOrderTime.value || '09:00').trim();
+          const custMech = addOrderMechanic.value || 'Markus Vance';
+          const custStatus = addOrderStatus.value || 'confirmed';
+
+          if (!custName) {
+            addOrderStatusMsg.className = 'status-msg error';
+            addOrderStatusMsg.textContent = 'Prosím, zadajte meno a priezvisko zákazníka.';
+            addOrderStatusMsg.style.display = 'block';
+            addOrderCustName.focus();
+            return;
+          }
+
+          if (!custPhone) {
+            addOrderStatusMsg.className = 'status-msg error';
+            addOrderStatusMsg.textContent = 'Prosím, zadajte telefónne číslo zákazníka.';
+            addOrderStatusMsg.style.display = 'block';
+            addOrderCustPhone.focus();
+            return;
+          }
+
+          let targetDateObj = new Date();
+          if (addOrderDate.value) {
+            const [y, m, d] = addOrderDate.value.split('-').map(Number);
+            targetDateObj = new Date(y, m - 1, d);
+          } else {
+            targetDateObj.setDate(targetDateObj.getDate() + 1);
+          }
+
+          const formattedDate = formatDateForBooking(targetDateObj);
+          const newBookingId = 'JK-' + Math.floor(100000 + Math.random() * 900000);
+
+          const newBooking = {
+            id: newBookingId,
+            customer: custName,
+            phone: custPhone,
+            email: custEmail || (custName.toLowerCase().replace(/\s+/g, '.') + '@gmail.com'),
+            plate: custPlate || 'BA 123 XY',
+            partName: selectedNewOrderPart.name,
+            partCode: selectedNewOrderPart.code,
+            date: formattedDate,
+            time: custTime,
+            price: custPrice,
+            mechanic: custMech,
+            problemDesc: custDesc || 'Servisná zákazka zaevidovaná cez dispečing.',
+            symptoms: ['Servisná požiadavka'],
+            hasAudio: !!newOrderAudioData,
+            audioData: newOrderAudioData || null,
+            photos: newOrderPhotos,
+            photosCount: newOrderPhotos.length,
+            status: custStatus,
+            timestamp: new Date().toISOString()
+          };
+
+          // Add to top of bookings list
+          bookings.unshift(newBooking);
+          saveData();
+
+          // Refresh both views
+          renderTable();
+          renderCalendar();
+
+          // Try sending Brevo notification if server is active
+          try {
+            fetch('/api/send-notification', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(newBooking)
+            }).catch(() => {});
+          } catch (e) {}
+
+          // Show confirmation toast and close modal
+          closeAddOrderModal();
+          showRescheduleToast(`✓ Zákazka #${newBookingId} (${custName}) bola úspešne vytvorená a zaevidovaná!`);
+        });
+      }
 
       // Brevo Modal & Settings Dropdown Events
       const settingsMenuToggle = document.getElementById('settings-menu-toggle');

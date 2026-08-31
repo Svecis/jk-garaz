@@ -2872,6 +2872,19 @@
     (function() {
       const STORAGE_KEY = 'automek_bookings';
 
+      // order.html opens in a new tab (window.open target=_blank), and sessionStorage
+      // is per-tab — hand the admin token to that tab via a short-lived localStorage
+      // key (localStorage IS shared across tabs) so it isn't stuck logged out when it
+      // calls authenticated endpoints (status changes, delete). order.html reads this
+      // key once on load and deletes it immediately.
+      function openOrderCard(id) {
+        const token = sessionStorage.getItem('jk_admin_jwt');
+        if (token) {
+          try { localStorage.setItem('jk_admin_jwt_handoff', token); } catch (e) {}
+        }
+        window.open('order.html?id=' + encodeURIComponent(id), '_blank');
+      }
+
       function getAuthHeaders() {
         const token = sessionStorage.getItem('jk_admin_jwt');
         return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
@@ -3429,15 +3442,22 @@
 
           tr.addEventListener('click', (e) => {
             if (e.target.closest('select') || e.target.closest('a')) return;
-            window.open(orderUrl, '_blank');
+            openOrderCard(b.id);
           });
 
           tr.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               if (e.target.closest('select') || e.target.closest('a')) return;
               e.preventDefault();
-              window.open(orderUrl, '_blank');
+              openOrderCard(b.id);
             }
+          });
+
+          tr.querySelectorAll('a[target="_blank"]').forEach(a => {
+            a.addEventListener('click', () => {
+              const token = sessionStorage.getItem('jk_admin_jwt');
+              if (token) { try { localStorage.setItem('jk_admin_jwt_handoff', token); } catch (e) {} }
+            });
           });
 
           const sel = tr.querySelector('.row-status');
@@ -3563,7 +3583,7 @@
 
           chip.addEventListener('click', (e) => {
             if (e.target.closest('.chip-time-btn')) return;
-            window.open('order.html?id=' + encodeURIComponent(b.id), '_blank');
+            openOrderCard(b.id);
           });
 
           chip.addEventListener('keydown', (e) => {
@@ -3571,7 +3591,7 @@
               if (e.target.closest('.chip-time-btn')) return;
               e.preventDefault();
               e.stopPropagation();
-              window.open('order.html?id=' + encodeURIComponent(b.id), '_blank');
+              openOrderCard(b.id);
             }
           });
 

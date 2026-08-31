@@ -1716,15 +1716,15 @@
         <div class="info-block">
           <h3 class="info-heading" data-i18n="contact_title">Kontaktujte nás</h3>
           <p class="info-text">
-            <a href="tel:0255960793">02 559 607 93</a>
+            <a href="tel:0912345678">091 234 56 78</a>
           </p>
         </div>
 
         <div class="info-block">
           <h3 class="info-heading" data-i18n="address_title">Nájdete nás</h3>
           <p class="info-text">
-            Velehradská 11<br />
-            821 08 Bratislava
+            Skúšobná 42<br />
+            010 01 Žilina
           </p>
         </div>
       </div>
@@ -1757,7 +1757,7 @@
         <div class="info-block">
           <h3 class="info-heading" data-i18n="email_title">Napíšte nám</h3>
           <p class="info-text">
-            <a href="mailto:info@tvojautoservis.sk">info@tvojautoservis.sk</a>
+            <a href="mailto:info@ukazkovyservis.sk">info@ukazkovyservis.sk</a>
           </p>
         </div>
 
@@ -4026,7 +4026,7 @@
         try {
           const dict = TRANSLATIONS[currentLang];
           const bookingTitle = `Servis vozidla - JK Garáž (${selectedDateStr} o ${selectedTimeSlot})`;
-          const description = `Rezervácia servisu v JK Garáž pre diel ${currentSelectedPart.code} u mechanika ${selectedMechanic}. Adresa: Velehradská 11, Bratislava.`;
+          const description = `Rezervácia servisu v JK Garáž pre diel ${currentSelectedPart.code} u mechanika ${selectedMechanic}. Adresa: Skúšobná 42, Žilina.`;
           
           // Formátovanie .ics súboru
           const icsData = [
@@ -4036,7 +4036,7 @@
             'BEGIN:VEVENT',
             `SUMMARY:${bookingTitle}`,
             `DESCRIPTION:${description}`,
-            'LOCATION:Velehradská 11, 821 08 Bratislava, Slovensko',
+            'LOCATION:Skúšobná 42, 010 01 Žilina, Slovensko',
             `STATUS:CONFIRMED`,
             'END:VEVENT',
             'END:VCALENDAR'

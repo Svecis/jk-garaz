@@ -2,11 +2,258 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const QRCode = require('qrcode');
 
 const PORT = 3000;
 const CONFIG_FILE = path.join(__dirname, 'email_config.json');
+const AUTH_FILE = path.join(__dirname, 'admin_auth.json');
+const BOOKINGS_FILE = path.join(__dirname, 'bookings.json');
+const TOKEN_TTL_MS = 12 * 60 * 60 * 1000; // 12 hodín
 
+// =====================================================================
+// AT-REST ENCRYPTION (AES-256-GCM) — used for email_config.json and
+// bookings.json, both of which hold secrets / customer PII.
+// =====================================================================
+function encryptJson(obj, keyHex) {
+  const key = Buffer.from(keyHex, 'hex');
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const plaintext = Buffer.from(JSON.stringify(obj), 'utf8');
+  const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return { v: 1, iv: iv.toString('hex'), tag: tag.toString('hex'), data: encrypted.toString('hex') };
+}
+
+function decryptJson(payload, keyHex) {
+  const key = Buffer.from(keyHex, 'hex');
+  const iv = Buffer.from(payload.iv, 'hex');
+  const tag = Buffer.from(payload.tag, 'hex');
+  const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+  decipher.setAuthTag(tag);
+  const decrypted = Buffer.concat([decipher.update(Buffer.from(payload.data, 'hex')), decipher.final()]);
+  return JSON.parse(decrypted.toString('utf8'));
+}
+
+function isEncryptedPayload(obj) {
+  return !!(obj && typeof obj === 'object' &&
+    obj.v === 1 && typeof obj.iv === 'string' && typeof obj.tag === 'string' && typeof obj.data === 'string');
+}
+
+// =====================================================================
+// ADMIN AUTH: password hashing, TOTP 2FA, signed session tokens
+// =====================================================================
+const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+
+function base32Encode(buffer) {
+  let bits = 0, value = 0, output = '';
+  for (const byte of buffer) {
+    value = (value << 8) | byte;
+    bits += 8;
+    while (bits >= 5) {
+      output += BASE32_ALPHABET[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) output += BASE32_ALPHABET[(value << (5 - bits)) & 31];
+  return output;
+}
+
+function base32Decode(str) {
+  str = str.toUpperCase().replace(/=+$/, '');
+  let bits = 0, value = 0;
+  const bytes = [];
+  for (const ch of str) {
+    const idx = BASE32_ALPHABET.indexOf(ch);
+    if (idx === -1) continue;
+    value = (value << 5) | idx;
+    bits += 5;
+    if (bits >= 8) {
+      bytes.push((value >>> (bits - 8)) & 0xff);
+      bits -= 8;
+    }
+  }
+  return Buffer.from(bytes);
+}
+
+function generateTotpSecret() {
+  return base32Encode(crypto.randomBytes(20));
+}
+
+function totpCodeForCounter(secretBase32, counter) {
+  const key = base32Decode(secretBase32);
+  const buf = Buffer.alloc(8);
+  buf.writeUInt32BE(Math.floor(counter / 0x100000000), 0);
+  buf.writeUInt32BE(counter >>> 0, 4);
+  const hmac = crypto.createHmac('sha1', key).update(buf).digest();
+  const offset = hmac[hmac.length - 1] & 0xf;
+  const code = ((hmac[offset] & 0x7f) << 24 |
+    (hmac[offset + 1] & 0xff) << 16 |
+    (hmac[offset + 2] & 0xff) << 8 |
+    (hmac[offset + 3] & 0xff)) % 1000000;
+  return String(code).padStart(6, '0');
+}
+
+// Accepts a code from the current or adjacent 30s time-step to tolerate clock drift
+function totpVerify(secretBase32, token) {
+  if (!token || !/^\d{6}$/.test(token)) return false;
+  const counter = Math.floor(Date.now() / 1000 / 30);
+  for (let drift = -1; drift <= 1; drift++) {
+    if (totpCodeForCounter(secretBase32, counter + drift) === token) return true;
+  }
+  return false;
+}
+
+function hashPassword(password, salt) {
+  return crypto.scryptSync(password, salt, 64).toString('hex');
+}
+
+function verifyPasswordMatch(password, salt, expectedHash) {
+  const provided = Buffer.from(hashPassword(password, salt), 'hex');
+  const expected = Buffer.from(expectedHash, 'hex');
+  return provided.length === expected.length && crypto.timingSafeEqual(provided, expected);
+}
+
+function b64url(buf) {
+  return Buffer.from(buf).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function b64urlToBuffer(str) {
+  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (str.length % 4) str += '=';
+  return Buffer.from(str, 'base64');
+}
+
+function signToken(payload, secret) {
+  const body = b64url(JSON.stringify(payload));
+  const sig = b64url(crypto.createHmac('sha256', secret).update(body).digest());
+  return body + '.' + sig;
+}
+
+function verifyToken(token, secret) {
+  if (!token || typeof token !== 'string' || !token.includes('.')) return null;
+  const [body, sig] = token.split('.');
+  const expectedSig = b64url(crypto.createHmac('sha256', secret).update(body).digest());
+  const sigBuf = Buffer.from(sig);
+  const expectedBuf = Buffer.from(expectedSig);
+  if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) return null;
+  try {
+    const payload = JSON.parse(b64urlToBuffer(body).toString('utf8'));
+    if (!payload.exp || Date.now() > payload.exp) return null;
+    return payload;
+  } catch (e) {
+    return null;
+  }
+}
+
+function maskEmail(email) {
+  const [user, domain] = email.split('@');
+  if (!domain) return email;
+  const visible = user.slice(0, 1);
+  return visible + '***@' + domain;
+}
+
+function loadOrCreateAdminAuth() {
+  if (fs.existsSync(AUTH_FILE)) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
+      // Back-fill the at-rest encryption key for auth files created before it existed
+      if (!parsed.dataKey) {
+        parsed.dataKey = crypto.randomBytes(32).toString('hex');
+        fs.writeFileSync(AUTH_FILE, JSON.stringify(parsed, null, 2), 'utf8');
+      }
+      return parsed;
+    } catch (e) {}
+  }
+  const initialPassword = crypto.randomBytes(6).toString('hex');
+  const salt = crypto.randomBytes(16).toString('hex');
+  const auth = {
+    passwordSalt: salt,
+    passwordHash: hashPassword(initialPassword, salt),
+    totpSecret: null,
+    totpEnabled: false,
+    recoveryEmail: null,
+    resetCode: null,
+    resetCodeExpiry: null,
+    jwtSecret: crypto.randomBytes(32).toString('hex'),
+    dataKey: crypto.randomBytes(32).toString('hex')
+  };
+  fs.writeFileSync(AUTH_FILE, JSON.stringify(auth, null, 2), 'utf8');
+  console.log('\n=====================================================');
+  console.log(' PRVOTNÉ ADMIN HESLO (uložte si ho, zmeňte pri prvom prihlásení):');
+  console.log(' ' + initialPassword);
+  console.log('=====================================================\n');
+  return auth;
+}
+
+let adminAuth = loadOrCreateAdminAuth();
+function saveAdminAuth() {
+  fs.writeFileSync(AUTH_FILE, JSON.stringify(adminAuth, null, 2), 'utf8');
+}
+
+// Simple in-memory brute-force guard for the login endpoint
+const loginAttempts = new Map();
+function isLockedOut(ip) {
+  const entry = loginAttempts.get(ip);
+  return !!(entry && entry.lockUntil && entry.lockUntil > Date.now());
+}
+function registerFailedAttempt(ip) {
+  const entry = loginAttempts.get(ip) || { count: 0, lockUntil: 0 };
+  entry.count += 1;
+  if (entry.count >= 5) {
+    entry.lockUntil = Date.now() + 5 * 60 * 1000;
+    entry.count = 0;
+  }
+  loginAttempts.set(ip, entry);
+}
+function clearAttempts(ip) {
+  loginAttempts.delete(ip);
+}
+
+function getBearerToken(req) {
+  const header = req.headers['authorization'] || '';
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  return match ? match[1] : null;
+}
+
+// Writes a 401 response and returns null if the request isn't authenticated,
+// otherwise returns the decoded token payload.
+function requireAuth(req, res) {
+  const token = getBearerToken(req);
+  const payload = token ? verifyToken(token, adminAuth.jwtSecret) : null;
+  if (!payload) {
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Unauthorized' }));
+    return null;
+  }
+  return payload;
+}
+
+// =====================================================================
+// BOOKINGS PERSISTENCE (bookings.json, encrypted at rest — contains
+// customer PII: name, phone, e-mail, license plate, photos, audio)
+// =====================================================================
+function loadBookings() {
+  if (!fs.existsSync(BOOKINGS_FILE)) return [];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(BOOKINGS_FILE, 'utf8'));
+    if (isEncryptedPayload(parsed)) return decryptJson(parsed, adminAuth.dataKey);
+    if (Array.isArray(parsed)) return parsed; // legacy plaintext file — re-encrypted on next save
+    return [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveBookings(bookings) {
+  fs.writeFileSync(BOOKINGS_FILE, JSON.stringify(encryptJson(bookings, adminAuth.dataKey), null, 2), 'utf8');
+}
+
+// =====================================================================
+// E-MAIL CONFIG (email_config.json, encrypted at rest — holds the
+// Brevo API key / SMTP password)
+// =====================================================================
 let emailConfig = {
   provider: 'brevo', // 'brevo' or 'custom_smtp'
   recipientEmail: 'servis@automek.sk',
@@ -25,19 +272,26 @@ let emailConfig = {
   }
 };
 
-if (fs.existsSync(CONFIG_FILE)) {
-  try {
-    const raw = fs.readFileSync(CONFIG_FILE, 'utf8');
-    emailConfig = { ...emailConfig, ...JSON.parse(raw) };
-  } catch (e) {}
-}
-
 function saveConfig() {
   try {
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(emailConfig, null, 2), 'utf8');
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(encryptJson(emailConfig, adminAuth.dataKey), null, 2), 'utf8');
   } catch (e) {
     console.error('Error saving config:', e);
   }
+}
+
+if (fs.existsSync(CONFIG_FILE)) {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+    if (isEncryptedPayload(parsed)) {
+      emailConfig = { ...emailConfig, ...decryptJson(parsed, adminAuth.dataKey) };
+    } else {
+      // Legacy plaintext config from before encryption-at-rest was added — load it once, then re-save encrypted
+      emailConfig = { ...emailConfig, ...parsed };
+      console.log('[CONFIG] email_config.json bol v čitateľnom formáte — šifrujem ho na disku.');
+      saveConfig();
+    }
+  } catch (e) {}
 }
 
 const MIME_TYPES = {
@@ -55,14 +309,12 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
-// Send via Brevo HTTP API
-function sendViaBrevoApi(apiKey, senderEmail, recipientEmail, booking) {
-  return new Promise((resolve, reject) => {
-    const plateFormatted = (booking.plate || '-').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
-    
-    const orderUrl = 'http://localhost:' + PORT + '/order.html?id=' + encodeURIComponent(booking.id);
+// Build the HTML body for a new-booking notification e-mail
+function buildBookingEmailHtml(booking) {
+  const plateFormatted = (booking.plate || '-').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+  const orderUrl = 'http://localhost:' + PORT + '/order.html?id=' + encodeURIComponent(booking.id);
 
-    const htmlContent = `
+  return `
       <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; padding:20px; border:1px solid #e2e8f0; border-radius:10px; background:#ffffff;">
         <h2 style="color:#0f172a; margin-top:0;">Nová servisná zákazka #${booking.id}</h2>
         <p style="color:#64748b; font-size:14px;">Zákazka bola prijatá cez online servisný systém AutoMek.</p>
@@ -82,11 +334,15 @@ function sendViaBrevoApi(apiKey, senderEmail, recipientEmail, booking) {
         </div>
       </div>
     `;
+}
 
+// Send an arbitrary e-mail via Brevo HTTP API
+function sendViaBrevoApi(apiKey, senderEmail, recipientEmail, subject, htmlContent) {
+  return new Promise((resolve, reject) => {
     const payload = JSON.stringify({
       sender: { name: "AutoMek Servis", email: senderEmail },
       to: [{ email: recipientEmail }],
-      subject: 'AutoMek: Nová zákazka #' + booking.id + ' - ' + (booking.customer || 'Klient') + ' (' + plateFormatted + ')',
+      subject: subject,
       htmlContent: htmlContent
     });
 
@@ -127,8 +383,8 @@ function sendViaBrevoApi(apiKey, senderEmail, recipientEmail, booking) {
   });
 }
 
-// Send via Brevo SMTP (Nodemailer)
-function sendViaBrevoSmtp(login, key, recipientEmail, booking) {
+// Send an arbitrary e-mail via Brevo SMTP (Nodemailer)
+function sendViaBrevoSmtp(login, key, recipientEmail, subject, htmlContent) {
   const transporter = nodemailer.createTransport({
     host: 'smtp-relay.brevo.com',
     port: 587,
@@ -139,34 +395,38 @@ function sendViaBrevoSmtp(login, key, recipientEmail, booking) {
     }
   });
 
-  const plateFormatted = (booking.plate || '-').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
-  const orderUrl = 'http://localhost:' + PORT + '/order.html?id=' + encodeURIComponent(booking.id);
-
   return transporter.sendMail({
     from: '"AutoMek Servis" <' + login + '>',
     to: recipientEmail,
-    subject: 'AutoMek: Nová zákazka #' + booking.id + ' - ' + (booking.customer || 'Klient') + ' (' + plateFormatted + ')',
-    html: '<h3>Nová zákazka #' + booking.id + '</h3><p>Zákazník: ' + booking.customer + ' (' + booking.phone + ')</p><p>EČV: ' + plateFormatted + '</p><p>Diel: [' + booking.partCode + '] ' + booking.partName + '</p><p>Termín: ' + booking.date + ' o ' + booking.time + '</p><p>Cena: ' + booking.price + '</p><p><a href="' + orderUrl + '">Otvoriť kartu zákazky</a></p>'
+    subject: subject,
+    html: htmlContent
   });
 }
 
-// Main dispatcher
-async function dispatchNotification(recipient, booking) {
+// Generic e-mail dispatcher: tries Brevo HTTP API first, falls back to SMTP
+async function sendEmailGeneric(recipient, subject, htmlContent) {
   const brevoKey = (emailConfig.brevo && emailConfig.brevo.apiKey ? emailConfig.brevo.apiKey : (emailConfig.smtp && emailConfig.smtp.auth ? emailConfig.smtp.auth.pass : '')).trim();
   const brevoSender = (emailConfig.brevo && emailConfig.brevo.senderEmail ? emailConfig.brevo.senderEmail : (emailConfig.smtp && emailConfig.smtp.auth ? emailConfig.smtp.auth.user : '')).trim();
 
   if (brevoKey && brevoSender) {
     try {
       // First try Brevo HTTP API (fastest, never blocked by ports)
-      return await sendViaBrevoApi(brevoKey, brevoSender, recipient, booking);
+      return await sendViaBrevoApi(brevoKey, brevoSender, recipient, subject, htmlContent);
     } catch (apiErr) {
       console.warn('[BREVO API error, trying SMTP fallback]:', apiErr.message);
       // Fallback to Brevo SMTP
-      return await sendViaBrevoSmtp(brevoSender, brevoKey, recipient, booking);
+      return await sendViaBrevoSmtp(brevoSender, brevoKey, recipient, subject, htmlContent);
     }
   } else {
     throw new Error('Neboli zadané prihlasovacie údaje pre Brevo (Email a API/SMTP kľúč).');
   }
+}
+
+// Booking-specific notification
+function dispatchNotification(recipient, booking) {
+  const plateFormatted = (booking.plate || '-').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+  const subject = 'AutoMek: Nová zákazka #' + booking.id + ' - ' + (booking.customer || 'Klient') + ' (' + plateFormatted + ')';
+  return sendEmailGeneric(recipient, subject, buildBookingEmailHtml(booking));
 }
 
 const server = http.createServer((req, res) => {
@@ -175,7 +435,7 @@ const server = http.createServer((req, res) => {
 
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -185,6 +445,8 @@ const server = http.createServer((req, res) => {
 
   // API ROUTE: Send booking notification
   if (pathname === '/api/send-notification' && req.method === 'POST') {
+    const payload = requireAuth(req, res);
+    if (!payload) return;
     let body = '';
     req.on('data', chunk => { body += chunk; });
     req.on('end', async () => {
@@ -207,8 +469,10 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // API ROUTE: Get Settings
+  // API ROUTE: Get Settings (admin only — exposes the Brevo API key)
   if (pathname === '/api/get-settings' && req.method === 'GET') {
+    const payload = requireAuth(req, res);
+    if (!payload) return;
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       recipientEmail: emailConfig.recipientEmail || '',
@@ -218,15 +482,17 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // API ROUTE: Save Settings
+  // API ROUTE: Save Settings (admin only)
   if (pathname === '/api/save-settings' && req.method === 'POST') {
+    const payload = requireAuth(req, res);
+    if (!payload) return;
     let body = '';
     req.on('data', chunk => { body += chunk; });
     req.on('end', () => {
       try {
         const data = JSON.parse(body || '{}');
         if (data.recipientEmail) emailConfig.recipientEmail = data.recipientEmail.trim();
-        
+
         emailConfig.brevo = emailConfig.brevo || {};
         if (data.brevoSender) emailConfig.brevo.senderEmail = data.brevoSender.trim();
         if (data.brevoKey) emailConfig.brevo.apiKey = data.brevoKey.trim();
@@ -250,8 +516,10 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // API ROUTE: Send Test Email
+  // API ROUTE: Send Test Email (admin only)
   if (pathname === '/api/test-email' && req.method === 'POST') {
+    const payload = requireAuth(req, res);
+    if (!payload) return;
     let body = '';
     req.on('data', chunk => { body += chunk; });
     req.on('end', async () => {
@@ -292,12 +560,336 @@ const server = http.createServer((req, res) => {
         console.log('[TEST EMAIL] Brevo úspešne odoslal test na ' + targetEmail);
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ 
-          success: true, 
-          message: 'Testovací email bol ÚSPEŠNE odoslaný cez Brevo na adresu ' + targetEmail + '!' 
+        res.end(JSON.stringify({
+          success: true,
+          message: 'Testovací email bol ÚSPEŠNE odoslaný cez Brevo na adresu ' + targetEmail + '!'
         }));
       } catch (err) {
         console.error('[TEST EMAIL] Brevo chyba:', err.message);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
+  // =========================================================
+  // AUTH ROUTES
+  // =========================================================
+
+  // API ROUTE: Login (password, then TOTP 2FA)
+  if (pathname === '/api/auth/login' && req.method === 'POST') {
+    const ip = req.socket.remoteAddress || 'unknown';
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        if (isLockedOut(ip)) {
+          res.writeHead(429, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Príliš veľa neúspešných pokusov. Skúste to znova o pár minút.' }));
+          return;
+        }
+
+        const data = JSON.parse(body || '{}');
+        const { password, code2fa, setupSecret } = data;
+
+        if (!password || !verifyPasswordMatch(password, adminAuth.passwordSalt, adminAuth.passwordHash)) {
+          registerFailedAttempt(ip);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Nesprávne administrátorské heslo' }));
+          return;
+        }
+
+        // Step 1 (password only): decide whether 2FA needs to be set up or just verified
+        if (!code2fa) {
+          if (!adminAuth.totpEnabled) {
+            const secret = generateTotpSecret();
+            const otpauth = `otpauth://totp/AutoMek:admin?secret=${secret}&issuer=AutoMek&digits=6&period=30`;
+            const qrDataUrl = await QRCode.toDataURL(otpauth);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, needsSetup: true, setupSecret: secret, qrDataUrl }));
+          } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true }));
+          }
+          return;
+        }
+
+        // Step 2: verify the 6-digit TOTP code (against the new secret if enrolling, else the stored one)
+        const secretToCheck = setupSecret || adminAuth.totpSecret;
+        if (!secretToCheck || !totpVerify(secretToCheck, code2fa)) {
+          registerFailedAttempt(ip);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Neplatný 2FA overovací kód' }));
+          return;
+        }
+
+        if (setupSecret) {
+          adminAuth.totpSecret = setupSecret;
+          adminAuth.totpEnabled = true;
+          saveAdminAuth();
+        }
+
+        clearAttempts(ip);
+        const token = signToken({ sub: 'admin', exp: Date.now() + TOKEN_TTL_MS }, adminAuth.jwtSecret);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, token, needsRecoverySetup: !adminAuth.recoveryEmail }));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
+  // API ROUTE: Verify an existing session token
+  if (pathname === '/api/auth/verify' && req.method === 'GET') {
+    const payload = requireAuth(req, res);
+    if (!payload) return;
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true }));
+    return;
+  }
+
+  // API ROUTE: Masked recovery-email info (for the "forgot password" screen)
+  if (pathname === '/api/auth/recovery-info' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      hasRecoveryEmail: !!adminAuth.recoveryEmail,
+      maskedEmail: adminAuth.recoveryEmail ? maskEmail(adminAuth.recoveryEmail) : null
+    }));
+    return;
+  }
+
+  // API ROUTE: Set the recovery e-mail (first-login setup, requires a valid session)
+  if (pathname === '/api/auth/set-recovery-email' && req.method === 'POST') {
+    const payload = requireAuth(req, res);
+    if (!payload) return;
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body || '{}');
+        if (!data.email || !data.email.includes('@')) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Neplatná e-mailová adresa' }));
+          return;
+        }
+        adminAuth.recoveryEmail = data.email.trim();
+        saveAdminAuth();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
+  // API ROUTE: Account/security overview for the settings panel (admin only)
+  if (pathname === '/api/auth/account-info' && req.method === 'GET') {
+    const payload = requireAuth(req, res);
+    if (!payload) return;
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      totpEnabled: !!adminAuth.totpEnabled,
+      recoveryEmail: adminAuth.recoveryEmail || ''
+    }));
+    return;
+  }
+
+  // API ROUTE: Change the admin password while already logged in (admin only)
+  if (pathname === '/api/auth/change-password' && req.method === 'POST') {
+    const payload = requireAuth(req, res);
+    if (!payload) return;
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const { currentPassword, newPassword } = JSON.parse(body || '{}');
+
+        if (!currentPassword || !verifyPasswordMatch(currentPassword, adminAuth.passwordSalt, adminAuth.passwordHash)) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Súčasné heslo nie je správne.' }));
+          return;
+        }
+        if (!newPassword || newPassword.length < 6) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Nové heslo musí mať aspoň 6 znakov.' }));
+          return;
+        }
+
+        const salt = crypto.randomBytes(16).toString('hex');
+        adminAuth.passwordSalt = salt;
+        adminAuth.passwordHash = hashPassword(newPassword, salt);
+        saveAdminAuth();
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
+  // API ROUTE: Request a password-reset OTP by e-mail
+  if (pathname === '/api/auth/request-reset' && req.method === 'POST') {
+    (async () => {
+      try {
+        if (!adminAuth.recoveryEmail) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Nie je nastavený obnovovací e-mail.' }));
+          return;
+        }
+        const code = String(Math.floor(100000 + Math.random() * 900000));
+        adminAuth.resetCode = code;
+        adminAuth.resetCodeExpiry = Date.now() + 10 * 60 * 1000;
+        saveAdminAuth();
+
+        const html = `<p>Váš overovací kód na obnovenie hesla do AutoMek administrácie je:</p><h2 style="letter-spacing:4px;">${code}</h2><p>Kód platí 10 minút. Ak ste o reset nežiadali, tento e-mail ignorujte.</p>`;
+        await sendEmailGeneric(adminAuth.recoveryEmail, 'AutoMek: Kód na obnovenie hesla', html);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+      } catch (err) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
+    })();
+    return;
+  }
+
+  // API ROUTE: Confirm the OTP and set a new password
+  if (pathname === '/api/auth/reset-password' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const { resetCode, newPassword } = JSON.parse(body || '{}');
+
+        if (!adminAuth.resetCode || !adminAuth.resetCodeExpiry || Date.now() > adminAuth.resetCodeExpiry) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Kód expiroval, vyžiadajte si nový.' }));
+          return;
+        }
+        if (resetCode !== adminAuth.resetCode) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Nesprávny kód.' }));
+          return;
+        }
+        if (!newPassword || newPassword.length < 6) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Heslo musí mať aspoň 6 znakov.' }));
+          return;
+        }
+
+        const salt = crypto.randomBytes(16).toString('hex');
+        adminAuth.passwordSalt = salt;
+        adminAuth.passwordHash = hashPassword(newPassword, salt);
+        adminAuth.resetCode = null;
+        adminAuth.resetCodeExpiry = null;
+        // Reset via e-mail also clears 2FA — the next login re-enrolls with a fresh QR code.
+        // This is what lets you back in if you've lost the phone/app your old TOTP secret was on.
+        adminAuth.totpSecret = null;
+        adminAuth.totpEnabled = false;
+        saveAdminAuth();
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
+  // =========================================================
+  // BOOKINGS ROUTES
+  // =========================================================
+
+  // API ROUTE: List all bookings (admin only)
+  if (pathname === '/api/bookings' && req.method === 'GET') {
+    const payload = requireAuth(req, res);
+    if (!payload) return;
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(loadBookings()));
+    return;
+  }
+
+  // API ROUTE: Create or upsert a booking (public — used by the customer-facing booking form)
+  if (pathname === '/api/bookings' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const booking = JSON.parse(body || '{}');
+        if (!booking.id) booking.id = 'JK-' + Math.floor(100000 + Math.random() * 900000);
+
+        const bookings = loadBookings();
+        const idx = bookings.findIndex(b => b.id === booking.id);
+        const isNew = idx === -1;
+
+        if (isNew) {
+          booking.createdAt = booking.createdAt || new Date().toISOString();
+          bookings.push(booking);
+        } else {
+          bookings[idx] = { ...bookings[idx], ...booking };
+        }
+        saveBookings(bookings);
+
+        if (isNew) {
+          const targetEmail = emailConfig.recipientEmail || 'servis@automek.sk';
+          dispatchNotification(targetEmail, booking).catch(err => {
+            console.warn('[BOOKING] Email notifikácia zlyhala:', err.message);
+          });
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(isNew ? booking : bookings[idx]));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
+  // API ROUTE: Update / delete a single booking (admin only)
+  if (pathname.startsWith('/api/bookings/') && (req.method === 'PUT' || req.method === 'DELETE')) {
+    const payload = requireAuth(req, res);
+    if (!payload) return;
+
+    const id = decodeURIComponent(pathname.slice('/api/bookings/'.length));
+    const bookings = loadBookings();
+    const idx = bookings.findIndex(b => b.id === id);
+    if (idx === -1) {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Zákazka nenájdená' }));
+      return;
+    }
+
+    if (req.method === 'DELETE') {
+      bookings.splice(idx, 1);
+      saveBookings(bookings);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true }));
+      return;
+    }
+
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const updates = JSON.parse(body || '{}');
+        bookings[idx] = { ...bookings[idx], ...updates };
+        saveBookings(bookings);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(bookings[idx]));
+      } catch (err) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: err.message }));
       }

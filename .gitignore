@@ -1,0 +1,16 @@
+node_modules/
+
+# Secrets & local runtime data — never commit these
+email_config.json
+admin_auth.json
+bookings.json
+PRIHLASOVACIE_UDAJE.md
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+
+# Local dev server artifacts
+server.pid
+server_out.log
+server_err.log

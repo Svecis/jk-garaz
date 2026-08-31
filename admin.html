@@ -2300,6 +2300,13 @@
             </svg>
             <span>BREVO</span>
           </button>
+          <button type="button" id="dropdown-item-account" class="dropdown-menu-item" style="width:100%; display:flex; align-items:center; gap:8px; padding:10px 14px; background:transparent; border:none; color:#fff; font-family:inherit; font-size:0.85rem; font-weight:600; text-align:left; border-radius:6px; cursor:pointer; transition:all 0.15s ease;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span>ÚČET</span>
+          </button>
           <div style="height:1px; background:rgba(255,255,255,0.08); margin:4px 0;"></div>
           <button type="button" id="admin-logout-btn" class="dropdown-menu-item" style="width:100%; display:flex; align-items:center; gap:8px; padding:10px 14px; background:transparent; border:none; color:#f87171; font-family:inherit; font-size:0.85rem; font-weight:600; text-align:left; border-radius:6px; cursor:pointer; transition:all 0.15s ease;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2">
@@ -2445,6 +2452,57 @@
       <div class="modal-actions" style="display:flex; justify-content:flex-end; gap:8px; margin-top:20px; border-top:1px solid rgba(255,255,255,0.08); padding-top:16px;">
         <button type="button" class="btn-test" id="btn-test-brevo">Odoslať testovací email</button>
         <button type="button" class="btn-save" id="btn-save-brevo">Uložiť nastavenia</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account / Security Modal -->
+  <div class="modal-overlay" id="account-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="modal-title">Účet & Zabezpečenie</span>
+        </div>
+        <button type="button" class="modal-close" id="account-close-btn" aria-label="Zatvoriť nastavenia účtu">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Stav 2FA</label>
+        <div id="account-2fa-status" style="font-size:0.85rem; color:var(--text-muted); padding:8px 0;">Načítavam...</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Obnovovací e-mail (pre "Zabudnuté heslo")</label>
+        <input type="email" id="account-recovery-email" class="form-input" placeholder="tvoj@email.sk">
+        <span class="form-hint">Sem príde OTP kód, ak si niekedy zabudneš heslo.</span>
+      </div>
+      <div class="modal-actions" style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+        <button type="button" class="btn-save" id="btn-save-recovery-email">Uložiť e-mail</button>
+      </div>
+
+      <div style="height:1px; background:rgba(255,255,255,0.08); margin:8px 0 16px;"></div>
+
+      <div class="form-group">
+        <label class="form-label">Súčasné heslo</label>
+        <input type="password" id="account-current-pass" class="form-input" autocomplete="current-password">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nové heslo</label>
+        <input type="password" id="account-new-pass" class="form-input" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Zopakovať nové heslo</label>
+        <input type="password" id="account-confirm-pass" class="form-input" autocomplete="new-password">
+      </div>
+
+      <div class="status-msg" id="account-modal-status-msg"></div>
+
+      <div class="modal-actions" style="display:flex; justify-content:flex-end; gap:8px; margin-top:20px; border-top:1px solid rgba(255,255,255,0.08); padding-top:16px;">
+        <button type="button" class="btn-save" id="btn-change-password">Zmeniť heslo</button>
       </div>
     </div>
   </div>
@@ -4325,9 +4383,13 @@
 
           // Try sending Brevo notification if server is active
           try {
+            const notifToken = sessionStorage.getItem('jk_admin_jwt');
             fetch('/api/send-notification', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + (notifToken || '')
+              },
               body: JSON.stringify(newBooking)
             }).catch(() => {});
           } catch (e) {}
@@ -4412,7 +4474,10 @@
       function openBrevoModal() {
         if (settingsDropdownMenu) settingsDropdownMenu.style.display = 'none';
         if (modalStatus) modalStatus.style.display = 'none';
-        fetch('/api/get-settings')
+        const settingsToken = sessionStorage.getItem('jk_admin_jwt');
+        fetch('/api/get-settings', {
+          headers: { 'Authorization': 'Bearer ' + (settingsToken || '') }
+        })
           .then(r => r.json())
           .then(cfg => {
             if (cfg.recipientEmail && cfg.recipientEmail !== 'servis@automek.sk') cfgRecipient.value = cfg.recipientEmail;
@@ -4513,6 +4578,116 @@
         modalStatus.textContent = text;
         modalStatus.className = isError ? 'status-msg error' : 'status-msg success';
         modalStatus.style.display = 'block';
+      }
+
+      // Account / Security Modal
+      const dropdownItemAccount = document.getElementById('dropdown-item-account');
+      const accountModal = document.getElementById('account-modal');
+      const accountCloseBtn = document.getElementById('account-close-btn');
+      const account2faStatus = document.getElementById('account-2fa-status');
+      const accountRecoveryEmail = document.getElementById('account-recovery-email');
+      const btnSaveRecoveryEmail = document.getElementById('btn-save-recovery-email');
+      const accountCurrentPass = document.getElementById('account-current-pass');
+      const accountNewPass = document.getElementById('account-new-pass');
+      const accountConfirmPass = document.getElementById('account-confirm-pass');
+      const btnChangePassword = document.getElementById('btn-change-password');
+      const accountModalStatus = document.getElementById('account-modal-status-msg');
+
+      function showAccountStatus(text, isError = false) {
+        accountModalStatus.textContent = text;
+        accountModalStatus.className = isError ? 'status-msg error' : 'status-msg success';
+        accountModalStatus.style.display = 'block';
+      }
+
+      function openAccountModal() {
+        if (settingsDropdownMenu) settingsDropdownMenu.style.display = 'none';
+        if (accountModalStatus) accountModalStatus.style.display = 'none';
+        accountCurrentPass.value = '';
+        accountNewPass.value = '';
+        accountConfirmPass.value = '';
+
+        fetch('/api/auth/account-info', { headers: getAuthHeaders() })
+          .then(r => r.json())
+          .then(info => {
+            account2faStatus.textContent = info.totpEnabled ? '✅ 2FA je aktívne' : '⚠️ 2FA nie je nastavené';
+            accountRecoveryEmail.value = info.recoveryEmail || '';
+            accountModal.classList.add('open');
+          })
+          .catch(() => {
+            account2faStatus.textContent = 'Nepodarilo sa načítať stav.';
+            accountModal.classList.add('open');
+          });
+      }
+
+      if (dropdownItemAccount) dropdownItemAccount.addEventListener('click', openAccountModal);
+
+      if (accountCloseBtn) {
+        accountCloseBtn.addEventListener('click', () => accountModal.classList.remove('open'));
+      }
+      if (accountModal) {
+        accountModal.addEventListener('click', (e) => {
+          if (e.target === accountModal) accountModal.classList.remove('open');
+        });
+      }
+
+      if (btnSaveRecoveryEmail) {
+        btnSaveRecoveryEmail.addEventListener('click', () => {
+          const email = accountRecoveryEmail.value.trim();
+          if (!email || !email.includes('@')) {
+            showAccountStatus('Zadajte platnú e-mailovú adresu.', true);
+            return;
+          }
+          fetch('/api/auth/set-recovery-email', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ email })
+          })
+          .then(r => r.json())
+          .then(res => {
+            if (res.success) showAccountStatus('Obnovovací e-mail bol uložený.');
+            else showAccountStatus('Chyba: ' + (res.error || 'Neznáma chyba'), true);
+          })
+          .catch(err => showAccountStatus('Chyba spojenia: ' + err.message, true));
+        });
+      }
+
+      if (btnChangePassword) {
+        btnChangePassword.addEventListener('click', () => {
+          const currentPassword = accountCurrentPass.value.trim();
+          const newPassword = accountNewPass.value.trim();
+          const confirmPassword = accountConfirmPass.value.trim();
+
+          if (!currentPassword) {
+            showAccountStatus('Zadajte súčasné heslo.', true);
+            return;
+          }
+          if (!newPassword || newPassword.length < 6) {
+            showAccountStatus('Nové heslo musí mať aspoň 6 znakov.', true);
+            return;
+          }
+          if (newPassword !== confirmPassword) {
+            showAccountStatus('Nové heslá sa nezhodujú.', true);
+            return;
+          }
+
+          fetch('/api/auth/change-password', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ currentPassword, newPassword })
+          })
+          .then(r => r.json())
+          .then(res => {
+            if (res.success) {
+              showAccountStatus('Heslo bolo úspešne zmenené.');
+              accountCurrentPass.value = '';
+              accountNewPass.value = '';
+              accountConfirmPass.value = '';
+            } else {
+              showAccountStatus('Chyba: ' + (res.error || 'Neznáma chyba'), true);
+            }
+          })
+          .catch(err => showAccountStatus('Chyba spojenia: ' + err.message, true));
+        });
       }
 
       function formatPlate(plate) {

@@ -945,7 +945,23 @@ const server = http.createServer((req, res) => {
 
   // Static files
   let safePath = pathname === '/' ? '/index.html' : pathname;
-  let filePath = path.join(__dirname, safePath);
+
+  // Never serve secrets or source (admin_auth.json holds jwtSecret + dataKey!) or
+  // let ../ escape __dirname — this backend's own folder holds both public assets
+  // and these files on some deployments, so the extension/path alone isn't enough.
+  const BLOCKED_BASENAMES = new Set([
+    'admin_auth.json', 'email_config.json', 'bookings.json',
+    'server.js', 'package.json', 'package-lock.json'
+  ]);
+  const requestedBasename = path.basename(safePath);
+  const filePath = path.resolve(__dirname, '.' + safePath);
+  const isWithinRoot = filePath === __dirname || filePath.startsWith(__dirname + path.sep);
+
+  if (!isWithinRoot || BLOCKED_BASENAMES.has(requestedBasename) || requestedBasename.startsWith('.')) {
+    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('404 Súbor nenájdený');
+    return;
+  }
 
   fs.stat(filePath, (err, stats) => {
     if (err || !stats.isFile()) {

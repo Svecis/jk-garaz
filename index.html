@@ -3771,18 +3771,29 @@
 
         let firstAvailable = null;
         const bookedLabel = currentLang === 'sk' ? 'Obsadené' : 'Booked';
+        const passedLabel = currentLang === 'sk' ? 'Uplynulo' : 'Passed';
+        const now = new Date();
+        const isToday = selectedDateObj.toDateString() === now.toDateString();
 
         allSlots.forEach((slot) => {
           const isBooked = isSlotBooked(selectedDateObj, slot);
+          let isPast = false;
+          if (isToday) {
+            const [h, m] = slot.split(':').map(Number);
+            const slotTime = new Date(selectedDateObj);
+            slotTime.setHours(h, m, 0, 0);
+            isPast = slotTime <= now;
+          }
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'time-slot-btn';
 
-          if (isBooked) {
+          if (isBooked || isPast) {
+            const label = isBooked ? bookedLabel : passedLabel;
             btn.classList.add('booked');
             btn.disabled = true;
-            btn.title = bookedLabel;
-            btn.innerHTML = `<span style="color:#fca5a5; font-weight:600;">${slot}</span><span style="display:block; font-size:0.64rem; font-weight:700; color:#ef4444; margin-top:2px; letter-spacing:0.02em;">${bookedLabel}</span>`;
+            btn.title = label;
+            btn.innerHTML = `<span style="color:#fca5a5; font-weight:600;">${slot}</span><span style="display:block; font-size:0.64rem; font-weight:700; color:#ef4444; margin-top:2px; letter-spacing:0.02em;">${label}</span>`;
           } else {
             if (!firstAvailable) firstAvailable = slot;
             btn.textContent = slot;

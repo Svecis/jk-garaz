@@ -1874,6 +1874,47 @@
       transform: translateY(-1px);
     }
 
+    .twofa-qr-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px dashed rgba(56, 189, 248, 0.35);
+      border-radius: 12px;
+      margin: 4px 0 8px;
+    }
+
+    .twofa-qr-img {
+      width: 160px;
+      height: 160px;
+      border-radius: 8px;
+      background: #0e121a;
+      padding: 6px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .twofa-secret-badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.12);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      user-select: all;
+      word-break: break-all;
+    }
+
+    .twofa-instructions {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      text-align: center;
+    }
+
     .auth-back-btn {
       background: transparent;
       border: none;
@@ -2238,9 +2279,16 @@
 
       <!-- STEP 2: 2FA VERIFICATION CODE -->
       <div id="auth-step-2fa" class="auth-form-step" style="display: none;">
-        <span class="auth-step-badge">2. Krok • 2FA Overenie</span>
-        <h2 class="auth-title">Dvojfaktorové overenie</h2>
-        <p class="auth-sub">Zadajte 6-miestny overovací kód z vašej aplikácie (Google / Apple Authenticator)</p>
+        <span class="auth-step-badge" id="twofa-badge-title">2. Krok • 2FA Overenie</span>
+        <h2 class="auth-title" id="twofa-step-heading">Dvojfaktorové overenie</h2>
+        <p class="auth-sub" id="twofa-step-desc">Zadajte 6-miestny overovací kód z aplikácie Google Authenticator alebo Apple Passwords</p>
+
+        <!-- Dynamic QR Setup Box (Shown on First-Time 2FA Activation) -->
+        <div id="twofa-setup-box" class="twofa-qr-wrap" style="display: none;">
+          <img id="twofa-qr-image" class="twofa-qr-img" alt="2FA QR Code" src="" />
+          <div class="twofa-instructions">Naskenujte QR kód v <strong>Google Authenticator</strong>, <strong>1Password</strong> alebo <strong>Apple Passwords</strong></div>
+          <div class="twofa-secret-badge" id="twofa-manual-secret" title="Kliknite pre skopírovanie"></div>
+        </div>
 
         <div class="twofa-inputs-wrap">
           <input type="text" maxlength="1" class="twofa-digit" data-idx="0" inputmode="numeric" />
@@ -2254,7 +2302,7 @@
         <div class="auth-error-msg" id="twofa-error-msg"></div>
 
         <button type="button" class="auth-submit-btn" id="twofa-submit-btn">
-          <span>Overiť a odomknúť portál</span>
+          <span id="twofa-submit-text">Overiť a odomknúť portál</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
@@ -5020,10 +5068,11 @@
   
   
   // =========================================================
-  // SECURE SERVER-SIDE PASSWORD + 2FA AUTHENTICATION CONTROLLER
+  // SECURE REAL TOTP 2FA AUTHENTICATION CONTROLLER
   // =========================================================
   (function() {
     let tempEnteredPassword = '';
+    let currentSetupSecret = '';
 
     const authOverlay = document.getElementById('admin-auth-overlay');
     const authCard = document.getElementById('auth-card');
@@ -5034,6 +5083,14 @@
     const passSubmitBtn = document.getElementById('pass-submit-btn');
     const passErrorMsg = document.getElementById('pass-error-msg');
     const togglePassBtn = document.getElementById('toggle-pass-visibility');
+
+    const twofaBadgeTitle = document.getElementById('twofa-badge-title');
+    const twofaStepHeading = document.getElementById('twofa-step-heading');
+    const twofaStepDesc = document.getElementById('twofa-step-desc');
+    const twofaSetupBox = document.getElementById('twofa-setup-box');
+    const twofaQrImage = document.getElementById('twofa-qr-image');
+    const twofaManualSecret = document.getElementById('twofa-manual-secret');
+    const twofaSubmitText = document.getElementById('twofa-submit-text');
 
     const twofaDigits = document.querySelectorAll('.twofa-digit');
     const twofaSubmitBtn = document.getElementById('twofa-submit-btn');
@@ -5062,11 +5119,12 @@
     }
     window.checkAdminSession = checkSession;
 
-    function showStep(stepNum) {
+    function showStep(stepNum, setupData = null) {
       if (stepNum === 1) {
         stepPassword.style.display = 'flex';
         step2FA.style.display = 'none';
         passErrorMsg.textContent = '';
+        currentSetupSecret = '';
         if (passInput) {
           passInput.value = '';
           passInput.focus();
@@ -5076,6 +5134,29 @@
         step2FA.style.display = 'flex';
         twofaErrorMsg.textContent = '';
         twofaDigits.forEach(d => d.value = '');
+
+        if (setupData && setupData.needsSetup) {
+          // First-time 2FA Setup
+          currentSetupSecret = setupData.setupSecret;
+          if (twofaSetupBox) twofaSetupBox.style.display = 'flex';
+          if (twofaQrImage && setupData.qrDataUrl) twofaQrImage.src = setupData.qrDataUrl;
+          if (twofaManualSecret && setupData.setupSecret) {
+            twofaManualSecret.textContent = 'Kľúč: ' + setupData.setupSecret;
+          }
+          if (twofaBadgeTitle) twofaBadgeTitle.textContent = '2. Krok • Aktivácia 2FA';
+          if (twofaStepHeading) twofaStepHeading.textContent = 'Naskenujte QR kód do aplikácie';
+          if (twofaStepDesc) twofaStepDesc.textContent = 'Otvorte Google Authenticator alebo Apple Passwords, naskenujte QR kód a zadajte 6-miestny kód:';
+          if (twofaSubmitText) twofaSubmitText.textContent = 'Aktivovať 2FA & Vstúpiť do portálu';
+        } else {
+          // Normal 2FA Verification
+          currentSetupSecret = '';
+          if (twofaSetupBox) twofaSetupBox.style.display = 'none';
+          if (twofaBadgeTitle) twofaBadgeTitle.textContent = '2. Krok • 2FA Overenie';
+          if (twofaStepHeading) twofaStepHeading.textContent = 'Dvojfaktorové overenie';
+          if (twofaStepDesc) twofaStepDesc.textContent = 'Zadajte 6-miestny kód z aplikácie Google Authenticator alebo Apple Passwords:';
+          if (twofaSubmitText) twofaSubmitText.textContent = 'Overiť a odomknúť portál';
+        }
+
         if (twofaDigits[0]) twofaDigits[0].focus();
       }
     }
@@ -5112,7 +5193,7 @@
         if (res.ok && data.success) {
           tempEnteredPassword = entered;
           passErrorMsg.textContent = '';
-          showStep(2);
+          showStep(2, data);
         } else {
           passErrorMsg.textContent = data.error || 'Nesprávne administrátorské heslo';
           triggerShake();
@@ -5126,28 +5207,33 @@
       }
     }
 
-    // Step 2: Verify 2FA on Server
+    // Step 2: Verify Real TOTP 2FA on Server
     async function verify2FA() {
       let code = '';
       twofaDigits.forEach(d => code += d.value.trim());
 
       if (code.length !== 6) {
-        twofaErrorMsg.textContent = 'Zadajte 6-miestny overovací kód';
+        twofaErrorMsg.textContent = 'Zadajte 6-miestny kód z aplikácie';
         triggerShake();
         return;
       }
 
       twofaSubmitBtn.disabled = true;
-      twofaErrorMsg.textContent = 'Overujem 2FA...';
+      twofaErrorMsg.textContent = 'Overujem 2FA kód...';
 
       try {
+        const payload = {
+          password: tempEnteredPassword,
+          code2fa: code
+        };
+        if (currentSetupSecret) {
+          payload.setupSecret = currentSetupSecret;
+        }
+
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            password: tempEnteredPassword,
-            code2fa: code
-          })
+          body: JSON.stringify(payload)
         });
         const data = await res.json();
 
@@ -5156,6 +5242,7 @@
           twofaErrorMsg.textContent = '';
           authOverlay.classList.add('unlocked');
           tempEnteredPassword = '';
+          currentSetupSecret = '';
           if (typeof syncFromBackend === 'function') syncFromBackend();
         } else {
           twofaErrorMsg.textContent = data.error || 'Neplatný 2FA overovací kód';
@@ -5192,7 +5279,6 @@
         if (digit.value && idx < twofaDigits.length - 1) {
           twofaDigits[idx + 1].focus();
         }
-        // Auto-submit on 6 digits
         let full = '';
         twofaDigits.forEach(d => full += d.value);
         if (full.length === 6) verify2FA();

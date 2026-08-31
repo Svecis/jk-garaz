@@ -943,7 +943,7 @@
       animation: slideUpToast 0.25s ease-out;
     }
 
-        /* =========================================================
+            /* =========================================================
        BOOKIO-STYLE MECHANIC DIAGNOSTIC & RESERVATION MODAL
        ========================================================= */
     body.modal-open {
@@ -2392,11 +2392,24 @@
         </div>
       </div>
 
+      <!-- Selected Day Agenda Card (Mobile & Quick Review) -->
+      <div class="cal-selected-day-agenda">
+        <div class="agenda-header">
+          <div class="agenda-header-left">
+            <div class="agenda-title" id="agenda-date-title">Pondelok, 31. August 2026</div>
+            <div class="agenda-badge" id="agenda-count-badge">0 zákaziek</div>
           </div>
+        </div>
+        <div class="agenda-items-list" id="agenda-items-list">
+          <!-- Dynamically populated agenda items -->
+        </div>
+      </div>
+
+    </div>
 
   </main>
 
-  <!-- Brevo SMTP Settings Modal -->
+    <!-- Brevo SMTP Settings Modal -->
   <div class="modal-overlay" id="brevo-modal">
     <div class="modal-card">
       <div class="modal-header">
@@ -2537,7 +2550,11 @@
           </div>
         </div>
 
-    <div id="booking-modal">
+      </div>
+    </div>
+  </div>
+
+  <div id="booking-modal">
     <div class="modal-container">
       
       <!-- SUCCESS OVERLAY -->
@@ -2586,13 +2603,6 @@
           <button type="button" class="part-pill" data-part="I" style="padding:5px 10px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#94a3b8; font-family:'Space Mono',monospace; font-weight:700; font-size:0.75rem; cursor:pointer;">[I] Interiér</button>
         </div>
 
-        <button class="modal-close-btn" id="modal-close-btn" title="Zatvoriť">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
         <button class="modal-close-btn" id="modal-close-btn" title="Zatvoriť">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -2787,211 +2797,6 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
-        </button>
-      </div>
-
-    </div>
-  </div>
-        </div>
-        <button type="button" class="modal-close" id="add-order-close">&times;</button>
-      </div>
-
-      <!-- Modal Body (Scrollable) -->
-      <div class="add-order-body">
-
-        <!-- 1. Diel / Komponent -->
-        <div class="add-order-section">
-          <div class="add-order-section-title">
-            <span>1. Výber servisovaného dielu / komponentu</span>
-          </div>
-          <div class="parts-choice-grid" id="add-order-parts-grid">
-            <button type="button" class="part-choice-btn selected" data-code="E" data-name="Motor & Prevodovka" data-price="€45.00">
-              <div class="part-choice-badge">E</div>
-              <div class="part-choice-info">
-                <h6>Motor & Prevodovka</h6>
-                <span>POHON • Od €45.00</span>
-              </div>
-            </button>
-            <button type="button" class="part-choice-btn" data-code="S" data-name="Podvozok & Brzdy" data-price="€35.00">
-              <div class="part-choice-badge">S</div>
-              <div class="part-choice-info">
-                <h6>Podvozok & Brzdy</h6>
-                <span>NÁPRAVA • Od €35.00</span>
-              </div>
-            </button>
-            <button type="button" class="part-choice-btn" data-code="X" data-name="Výfukový systém" data-price="€25.00">
-              <div class="part-choice-badge">X</div>
-              <div class="part-choice-info">
-                <h6>Výfukový systém</h6>
-                <span>EMISIE • Od €25.00</span>
-              </div>
-            </button>
-            <button type="button" class="part-choice-btn" data-code="W" data-name="Kolesá & Disky" data-price="€20.00">
-              <div class="part-choice-badge">W</div>
-              <div class="part-choice-info">
-                <h6>Kolesá & Disky</h6>
-                <span>PNEU • Od €20.00</span>
-              </div>
-            </button>
-            <button type="button" class="part-choice-btn" data-code="B" data-name="Karoséria & Svetlá" data-price="€30.00">
-              <div class="part-choice-badge">B</div>
-              <div class="part-choice-info">
-                <h6>Karoséria & Svetlá</h6>
-                <span>EXTERIÉR • Od €30.00</span>
-              </div>
-            </button>
-            <button type="button" class="part-choice-btn" data-code="I" data-name="Interiér & Elektronika" data-price="€30.00">
-              <div class="part-choice-badge">I</div>
-              <div class="part-choice-info">
-                <h6>Interiér & Elektronika</h6>
-                <span>PALUBOVKA • Od €30.00</span>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <!-- 2. Popis problému -->
-        <div class="add-order-section">
-          <div class="add-order-section-title">
-            <span>2. Popis závady / požiadavky na servis</span>
-          </div>
-          <div class="form-group">
-            <textarea id="add-order-desc" class="form-input" style="height:75px; resize:vertical;" placeholder="Podrobne popíšte závadu (napr. klepanie v motore pri otáčkach, výmena oleja a filtrov, kontrola bŕzd...)"></textarea>
-          </div>
-        </div>
-
-        <!-- 3. Termín, Čas a Mechanik -->
-        <div class="add-order-section">
-          <div class="add-order-section-title">
-            <span>3. Termín servisu & Priradený mechanik</span>
-          </div>
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label class="form-label">Dátum termínu *</label>
-              <div style="display:flex; gap:6px;">
-                <input type="date" id="add-order-date" class="form-input" style="flex:1;">
-                <button type="button" class="btn-test" id="add-order-date-today" style="padding:8px 10px; font-size:0.78rem;">Dnes</button>
-                <button type="button" class="btn-test" id="add-order-date-tomorrow" style="padding:8px 10px; font-size:0.78rem;">Zajtra</button>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Čas termínu *</label>
-              <input type="text" id="add-order-time" class="form-input" placeholder="09:00" value="09:00">
-            </div>
-          </div>
-
-          <!-- Quick Time Slot Selection -->
-          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;" id="add-order-quick-times">
-            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">08:00</button>
-            <button type="button" class="time-slot-btn active" style="padding:4px 8px; font-size:0.75rem;">09:00</button>
-            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">10:00</button>
-            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">11:00</button>
-            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">13:00</button>
-            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">14:00</button>
-            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">15:00</button>
-            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">16:00</button>
-            <button type="button" class="time-slot-btn" style="padding:4px 8px; font-size:0.75rem;">17:00</button>
-          </div>
-
-          <div class="form-grid-2" style="margin-top:6px;">
-            <div class="form-group">
-              <label class="form-label">Priradený mechanik</label>
-              <select id="add-order-mechanic" class="form-input" style="cursor:pointer;">
-                <option value="Markus Vance">Markus Vance (Motory & prevodovky)</option>
-                <option value="Elena Rostova">Elena Rostova (Podvozky & diagnostika)</option>
-                <option value="Viktor Thorne">Viktor Thorne (Elektroinštalácia & karosérie)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Odhadovaná cena (€)</label>
-              <input type="text" id="add-order-price" class="form-input" placeholder="€45.00" value="€45.00">
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. Údaje zákazníka & Vozidlo -->
-        <div class="add-order-section">
-          <div class="add-order-section-title">
-            <span>4. Údaje zákazníka & Informácie o vozidle</span>
-          </div>
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label class="form-label">Meno a priezvisko *</label>
-              <input type="text" id="add-order-cust-name" class="form-input" placeholder="napr. Ján Novák" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Telefónne číslo *</label>
-              <input type="tel" id="add-order-cust-phone" class="form-input" placeholder="+421 9XX XXX XXX" required>
-            </div>
-          </div>
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label class="form-label">E-mailová adresa</label>
-              <input type="email" id="add-order-cust-email" class="form-input" placeholder="klient@email.sk">
-            </div>
-            <div class="form-group">
-              <label class="form-label">EČV / Model vozidla</label>
-              <input type="text" id="add-order-cust-plate" class="form-input" placeholder="BA 123 XY • Škoda Octavia">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Stav zákazky</label>
-            <select id="add-order-status" class="form-input" style="cursor:pointer;">
-              <option value="pending">Nová / Čaká na potvrdenie (Pending)</option>
-              <option value="confirmed" selected>Potvrdená / Schválená (Confirmed)</option>
-              <option value="in_progress">V servise / Prebieha oprava (In Progress)</option>
-              <option value="completed">Dokončená / Odovzdaná (Completed)</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- 5. Prílohy (Fotografie & Zvukový záznam) -->
-        <div class="add-order-section">
-          <div class="add-order-section-title">
-            <span>5. Prílohy — Fotografie & Zvukový záznam (Voliteľné)</span>
-          </div>
-          
-          <div class="form-grid-2">
-            <!-- Photos -->
-            <div class="form-group">
-              <label class="form-label">Fotografie závady (max 5 ks)</label>
-              <button type="button" id="btn-add-order-photo" class="btn-test" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 12px; width:100%;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                <span>Vybrať fotografie...</span>
-              </button>
-              <input type="file" id="add-order-photo-input" accept="image/*" multiple style="display:none;">
-              <div class="photo-preview-grid" id="add-order-photo-previews"></div>
-            </div>
-
-            <!-- Audio Recording -->
-            <div class="form-group">
-              <label class="form-label">Zvukový záznam závady</label>
-              <div style="display:flex; gap:6px; align-items:center;">
-                <button type="button" id="btn-add-order-audio-rec" class="btn-test" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 12px;">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-                  <span id="add-order-audio-rec-text">Nahrať zvuk mikrofónom</span>
-                </button>
-                <button type="button" id="btn-add-order-audio-play" class="btn-test" style="display:none; padding:8px 12px; color:var(--accent);">
-                  ▶ Prehrať
-                </button>
-              </div>
-              <div id="add-order-audio-status" style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="status-msg" id="add-order-status-msg"></div>
-
-      </div>
-
-      <!-- Modal Footer -->
-      <div class="modal-actions" style="padding: 16px 24px; background: rgba(14, 18, 26, 0.95); margin-top:0;">
-        <button type="button" class="btn-test" id="btn-cancel-add-order">Zrušiť</button>
-        <button type="button" class="btn-save" id="btn-submit-add-order" style="display:flex; align-items:center; gap:8px; background:var(--accent); color:#000; font-weight:700;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-          <span>Vytvoriť a zaevidovať zákazku</span>
         </button>
       </div>
 

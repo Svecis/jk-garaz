@@ -1066,8 +1066,28 @@
         if (statusSelect) {
           statusSelect.addEventListener('change', (e) => {
             b.status = e.target.value;
+            if (b.status === 'completed') {
+              b.photos = [];
+              b.photosCount = 0;
+              b.hasAudio = false;
+              b.audioData = null;
+            }
             saveAllBookings(bookings);
             renderPrintSheet(b);
+            renderOrderPage(b);
+
+            // Sync to backend
+            const token = sessionStorage.getItem('jk_admin_jwt');
+            if (token) {
+              fetch('/api/bookings', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(b)
+              }).catch(() => {});
+            }
           });
         }
 

@@ -2332,11 +2332,11 @@
       <!-- STEP 3: INITIAL RECOVERY EMAIL SETUP (PROMPT UPON FIRST LOGIN) -->
       <div id="auth-step-recovery-setup" class="auth-form-step" style="display: none;">
         <span class="auth-step-badge" style="color:#10b981; border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.1);">Zabezpečenie účtu</span>
-        <h2 class="auth-title">Záchranný e-mail pre reset hesla</h2>
+        <h2 class="auth-title">E-mail pre resetovanie hesla</h2>
         <p class="auth-sub">Pre prípad, že zabudnete heslo, zadajte svoj e-mail, na ktorý vám pošleme jednorazový overovací kód:</p>
 
         <div class="auth-input-group">
-          <label class="auth-input-label" for="recovery-email-input">Váš záchranný e-mail</label>
+          <label class="auth-input-label" for="recovery-email-input">Váš e-mail pre resetovanie hesla</label>
           <input type="email" id="recovery-email-input" class="auth-text-input" placeholder="napriklad@gmail.com" />
         </div>
 
@@ -2354,12 +2354,12 @@
       <div id="auth-step-forgot" class="auth-form-step" style="display: none;">
         <span class="auth-step-badge" style="color:#f59e0b; border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.1);">Obnova prístupu</span>
         <h2 class="auth-title">Zabudnuté heslo</h2>
-        <p class="auth-sub" id="forgot-step-desc">Pošleme vám 6-miestny overovací kód na váš záchranný e-mail</p>
+        <p class="auth-sub" id="forgot-step-desc">Pošleme vám 6-miestny overovací kód na váš e-mail pre resetovanie hesla</p>
 
         <!-- Sub-stage 1: Send OTP code button -->
         <div id="forgot-stage-send" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
           <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); padding: 12px; border-radius: 10px; font-size: 0.85rem; color: #fff; text-align: center;" id="forgot-target-email-box">
-            Kód bude odoslaný na záchranný e-mail
+            Kód bude odoslaný na e-mail pre resetovanie hesla
           </div>
           <button type="button" class="auth-submit-btn" id="forgot-send-btn">
             <span>Odoslať resetovací kód na e-mail</span>
@@ -5293,7 +5293,7 @@
               if (info.hasRecoveryEmail && info.maskedEmail) {
                 forgotTargetEmailBox.textContent = 'Resetovací kód bude odoslaný na: ' + info.maskedEmail;
               } else {
-                forgotTargetEmailBox.textContent = 'Kód bude odoslaný na nastavený záchranný email dispečingu.';
+                forgotTargetEmailBox.textContent = 'Kód bude odoslaný na nastavený e-mail pre resetovanie hesla.';
               }
             })
             .catch(() => {});

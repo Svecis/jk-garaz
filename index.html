@@ -3845,7 +3845,19 @@
           persistBookings();
           updateActiveBookingsUI();
 
-          
+          // Automatické odoslanie rezervácie na backend a spustenie emailovej notifikácie
+          fetch('/api/bookings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newBooking)
+          })
+          .then(r => r.json())
+          .then(saved => {
+            console.log('✅ Servisná rezervácia úspešne uložená na serveri, odoslaný potvrdzovací e-mail:', saved.id);
+          })
+          .catch(err => {
+            console.warn('Backend offline, zákazka uložená lokálne:', err);
+          });
         };
 
         if (recordedAudioBlob) {

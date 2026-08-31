@@ -546,8 +546,17 @@
       border-radius: 50%;
     }
 
+    .cal-main-layout {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      width: 100%;
+    }
+
     /* CALENDAR GRID */
     .cal-grid-card {
+      flex: 1;
+      min-width: 0;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 14px;
@@ -1983,9 +1992,20 @@
       color: var(--accent);
     }
 
-    /* SELECTED DAY AGENDA - VÝHRADNE NA MOBILE */
+    /* SELECTED DAY AGENDA (PC & MOBILE) */
     .cal-selected-day-agenda {
-      display: none !important; /* Na PC / Desktope je toto okno kompletne skryté */
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 360px;
+      flex-shrink: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+      position: sticky;
+      top: 16px;
     }
 
     .agenda-header {
@@ -2146,17 +2166,12 @@
 
     /* RESPONSIVE MOBILE MEDIA QUERIES */
     @media (max-width: 768px) {
-      /* Zobrazenie dennej agendy VÝHRADNE na mobile */
-      .cal-selected-day-agenda {
-        display: flex !important;
-        background: var(--card-bg);
-        border: 1px solid var(--card-border);
-        border-radius: 14px;
-        padding: 16px;
-        margin-top: 16px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+      .cal-main-layout {
         flex-direction: column;
-        gap: 14px;
+      }
+      .cal-selected-day-agenda {
+        width: 100%;
+        position: static;
       }
       .top-bar {
         padding: 12px 16px;
@@ -2518,9 +2533,9 @@
         <div class="cal-title-section">
           <div class="cal-nav-title-wrap">
             <div class="cal-nav-btns">
-              <button type="button" class="cal-nav-btn" id="cal-prev-btn" title="Predchádzajúci mesiac">&lt;</button>
-              <button type="button" class="cal-nav-btn" id="cal-next-btn" title="Nasledujúci mesiac">&gt;</button>
-              <button type="button" class="cal-today-btn" id="cal-today-btn" title="Prejsť na dnešok">Dnes</button>
+              <button type="button" class="cal-nav-btn" id="cal-prev-btn" title="Predchádzajúci mesiac" aria-label="Predchádzajúci mesiac">&lt;</button>
+              <button type="button" class="cal-nav-btn" id="cal-next-btn" title="Nasledujúci mesiac" aria-label="Nasledujúci mesiac">&gt;</button>
+              <button type="button" class="cal-today-btn" id="cal-today-btn" title="Prejsť na dnešok" aria-label="Prejsť na dnešný dátum">Dnes</button>
             </div>
             <span class="cal-month-title" id="cal-month-title">August 2026</span>
           </div>
@@ -2531,7 +2546,7 @@
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input type="text" id="cal-search-input" class="cal-search-input" placeholder="Hľadať meno alebo EČV...">
+            <input type="text" id="cal-search-input" class="cal-search-input" placeholder="Hľadať meno alebo EČV..." aria-label="Hľadať v kalendári podľa mena alebo EČV">
           </div>
         </div>
 
@@ -2543,23 +2558,26 @@
         </div>
       </div>
 
-      <!-- Calendar Grid Card -->
-      <div class="cal-grid-card">
-        <div class="cal-days-grid" id="cal-days-grid">
-          <!-- Dynamically populated day cells -->
-        </div>
-      </div>
-
-      <!-- Selected Day Agenda Card (Mobile & Quick Review) -->
-      <div class="cal-selected-day-agenda">
-        <div class="agenda-header">
-          <div class="agenda-header-left">
-            <div class="agenda-title" id="agenda-date-title">Pondelok, 31. August 2026</div>
-            <div class="agenda-badge" id="agenda-count-badge">0 zákaziek</div>
+      <!-- Calendar Main Layout (Grid + Sticky Agenda) -->
+      <div class="cal-main-layout">
+        <!-- Calendar Grid Card -->
+        <div class="cal-grid-card">
+          <div class="cal-days-grid" id="cal-days-grid">
+            <!-- Dynamically populated day cells -->
           </div>
         </div>
-        <div class="agenda-items-list" id="agenda-items-list">
-          <!-- Dynamically populated agenda items -->
+
+        <!-- Selected Day Agenda Card -->
+        <div class="cal-selected-day-agenda">
+          <div class="agenda-header">
+            <div class="agenda-header-left">
+              <div class="agenda-title" id="agenda-date-title">Pondelok, 31. August 2026</div>
+              <div class="agenda-badge" id="agenda-count-badge">0 zákaziek</div>
+            </div>
+          </div>
+          <div class="agenda-items-list" id="agenda-items-list">
+            <!-- Dynamically populated agenda items -->
+          </div>
         </div>
       </div>
 
@@ -2578,7 +2596,7 @@
           </svg>
           <span class="modal-title">Nastavenia systému & Brevo SMTP</span>
         </div>
-        <button type="button" class="modal-close" id="brevo-close-btn">&times;</button>
+        <button type="button" class="modal-close" id="brevo-close-btn" aria-label="Zatvoriť nastavenia Brevo">&times;</button>
       </div>
 
       <div class="form-group">
@@ -2615,7 +2633,7 @@
           <div class="modal-title" id="time-modal-title">Zmena času termínu</div>
           <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;" id="time-modal-subtitle">Zákazka #JK-482019 &bull; Peter Novák</div>
         </div>
-        <button type="button" class="modal-close" id="time-modal-close">&times;</button>
+        <button type="button" class="modal-close" id="time-modal-close" aria-label="Zatvoriť výber času">&times;</button>
       </div>
 
       <div class="form-group" style="margin-bottom: 4px;">
@@ -2661,7 +2679,7 @@
             Synchronizujte všetky servisné termíny s vaším kalendárom
           </div>
         </div>
-        <button type="button" class="modal-close" id="cal-sync-close">&times;</button>
+        <button type="button" class="modal-close" id="cal-sync-close" aria-label="Zatvoriť synchronizáciu kalendára">&times;</button>
       </div>
 
       <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
@@ -2986,7 +3004,7 @@
             const data = await res.json();
             if (Array.isArray(data)) {
               bookings = data;
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+              saveData();
               renderTable();
               renderCalendar();
               updateStats();
@@ -3600,8 +3618,21 @@
 
       function saveData() {
         try {
+          if (bookings.length > 500) {
+            bookings.length = 500;
+          }
           localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
-        } catch (e) {}
+        } catch (err) {
+          console.warn('LocalStorage save failed in admin, attempting quota recovery:', err);
+          try {
+            if (bookings.length > 1) {
+              bookings.splice(Math.floor(bookings.length / 2));
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+            }
+          } catch (err2) {
+            console.error('LocalStorage quota critically exceeded in admin:', err2);
+          }
+        }
       }
 
       window.addEventListener('storage', (e) => {
@@ -3882,12 +3913,15 @@
         tableBody.innerHTML = '';
         filtered.forEach(b => {
           const tr = document.createElement('tr');
+          tr.setAttribute('role', 'button');
+          tr.setAttribute('tabindex', '0');
+          tr.setAttribute('aria-label', `Zákazka ${b.id}, zákazník ${b.customer}, vozidlo ${b.plate}`);
 
           const orderUrl = 'order.html?id=' + encodeURIComponent(b.id);
 
           tr.innerHTML = `
             <td>
-              <a href="${orderUrl}" target="_blank" class="id-tag" title="Otvoriť zákazku v novej karte">#${escapeHtml(b.id)}</a>
+              <a href="${orderUrl}" target="_blank" class="id-tag" title="Otvoriť zákazku v novej karte" aria-label="Zákazka #${b.id}">#${escapeHtml(b.id)}</a>
             </td>
             <td>
               <div class="cust-col">
@@ -3903,14 +3937,14 @@
             </td>
             <td>
               <div class="row-right">
-                <select class="status-select row-status" data-id="${b.id}">
+                <select class="status-select row-status" data-id="${b.id}" aria-label="Zmeniť stav zákazky ${b.id}">
                   <option value="pending" ${b.status === 'pending' ? 'selected' : ''}>Nová (Čaká)</option>
                   <option value="confirmed" ${b.status === 'confirmed' ? 'selected' : ''}>Schválená</option>
                   <option value="in_progress" ${b.status === 'in_progress' ? 'selected' : ''}>V servise</option>
                   <option value="completed" ${b.status === 'completed' ? 'selected' : ''}>Dokončená</option>
                   <option value="cancelled" ${b.status === 'cancelled' ? 'selected' : ''}>Zrušená</option>
                 </select>
-                <a href="${orderUrl}" target="_blank" class="open-card-link">
+                <a href="${orderUrl}" target="_blank" class="open-card-link" aria-label="Otvoriť kartu zákazky ${b.id}">
                   <span>Otvoriť kartu</span>
                 </a>
               </div>
@@ -3920,6 +3954,14 @@
           tr.addEventListener('click', (e) => {
             if (e.target.closest('select') || e.target.closest('a')) return;
             window.open(orderUrl, '_blank');
+          });
+
+          tr.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              if (e.target.closest('select') || e.target.closest('a')) return;
+              e.preventDefault();
+              window.open(orderUrl, '_blank');
+            }
           });
 
           const sel = tr.querySelector('.row-status');
@@ -4032,6 +4074,8 @@
         cell.dataset.day = cellDay;
         cell.dataset.month = cellMonth;
         cell.dataset.year = cellYear;
+        cell.setAttribute('role', 'button');
+        cell.setAttribute('tabindex', '0');
 
         const todayObj = new Date();
         const isToday = todayObj.getFullYear() === cellYear && todayObj.getMonth() === cellMonth && todayObj.getDate() === cellDay;
@@ -4045,6 +4089,7 @@
 
         const cellDateObj = new Date(cellYear, cellMonth, cellDay);
         const cellWeekdayFull = WEEKDAYS_FULL_SK[cellDateObj.getDay()];
+        cell.setAttribute('aria-label', `${cellWeekdayFull}, ${cellDay}. ${MONTHS_SK[cellMonth]} ${cellYear}`);
 
         const dayHeader = document.createElement('div');
         dayHeader.className = 'cal-day-header';
@@ -4086,13 +4131,16 @@
           const chip = document.createElement('div');
           chip.className = `cal-booking-chip chip-${b.status || 'pending'}`;
           chip.setAttribute('draggable', 'true');
+          chip.setAttribute('role', 'button');
+          chip.setAttribute('tabindex', '0');
+          chip.setAttribute('aria-label', `Zákazka ${b.id}, ${b.customer || ''}, ${b.time || ''}`);
           chip.dataset.id = b.id;
           
           const plateClean = formatPlate(b.plate);
 
           chip.innerHTML = `
             <div class="chip-time-cust">
-              <button type="button" class="chip-time-btn" title="Kliknite pre zmenu času a dátumu">
+              <button type="button" class="chip-time-btn" title="Kliknite pre zmenu času a dátumu" aria-label="Zmeniť čas pre ${b.id}">
                 <span>${escapeHtml(b.time || '10:00')}</span>
                 <span class="chip-time-arrow">&#9662;</span>
               </button>
@@ -4115,6 +4163,15 @@
             window.open('order.html?id=' + encodeURIComponent(b.id), '_blank');
           });
 
+          chip.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              if (e.target.closest('.chip-time-btn')) return;
+              e.preventDefault();
+              e.stopPropagation();
+              window.open('order.html?id=' + encodeURIComponent(b.id), '_blank');
+            }
+          });
+
           chip.addEventListener('dragstart', (e) => {
             e.dataTransfer.setData('text/plain', b.id);
             e.dataTransfer.effectAllowed = 'move';
@@ -4133,7 +4190,7 @@
         cell.appendChild(dayBookingsContainer);
 
         // Click on day cell
-        cell.addEventListener('click', (e) => {
+        const handleSelectCell = (e) => {
           if (e.target.closest('.chip-time-btn') || e.target.closest('.cal-booking-chip')) return;
           selectedAgendaDate = new Date(cellYear, cellMonth, cellDay);
           if (isFiller) {
@@ -4143,6 +4200,16 @@
             document.querySelectorAll('.cal-day-cell').forEach(c => c.classList.remove('selected'));
             cell.classList.add('selected');
             renderAgendaForDate(selectedAgendaDate);
+          }
+        };
+
+        cell.addEventListener('click', handleSelectCell);
+        cell.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            if (!e.target.closest('.chip-time-btn') && !e.target.closest('.cal-booking-chip')) {
+              e.preventDefault();
+              handleSelectCell(e);
+            }
           }
         });
 

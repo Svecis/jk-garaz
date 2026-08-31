@@ -475,7 +475,7 @@
 
   <!-- Top bar -->
   <header class="top-nav">
-    <a href="admin.html" class="back-btn">
+    <a href="admin.html" class="back-btn" aria-label="Návrat späť do zoznamu zákaziek">
       <span>Späť do zoznamu zákaziek</span>
     </a>
     <span style="font-weight: 700; font-size: 0.92rem; color: #fff;">AutoMek Servisný list</span>
@@ -486,8 +486,8 @@
   </main>
 
   <!-- Lightbox -->
-  <div class="lightbox-overlay" id="lightbox-overlay">
-    <button type="button" class="lightbox-close" id="lightbox-close">&times;</button>
+  <div class="lightbox-overlay" id="lightbox-overlay" role="dialog" aria-modal="true" aria-label="Náhľad fotografie">
+    <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Zatvoriť zväčšenú fotografiu">&times;</button>
     <img src="" class="lightbox-img" id="lightbox-img" alt="Zväčšená fotografia">
   </div>
 
@@ -678,7 +678,7 @@
 
             <div class="status-picker-box">
               <span class="status-picker-label">Stav zákazky:</span>
-              <select id="order-status-select" class="status-picker-select">
+              <select id="order-status-select" class="status-picker-select" aria-label="Zmeniť stav zákazky">
                 <option value="pending" ${b.status === 'pending' ? 'selected' : ''}>Nová (Čaká)</option>
                 <option value="confirmed" ${b.status === 'confirmed' ? 'selected' : ''}>Schválená</option>
                 <option value="in_progress" ${b.status === 'in_progress' ? 'selected' : ''}>V servise</option>
@@ -703,11 +703,11 @@
                 </div>
                 <div class="kv-row">
                   <span class="kv-label">Telefónny kontakt</span>
-                  <span class="kv-val"><a href="tel:${b.phone}">${escapeHtml(b.phone || '-')}</a></span>
+                  <span class="kv-val"><a href="tel:${b.phone}" aria-label="Zavolať zákazníkovi ${escapeHtml(b.phone || '')}">${escapeHtml(b.phone || '-')}</a></span>
                 </div>
                 <div class="kv-row">
                   <span class="kv-label">Email</span>
-                  <span class="kv-val">${b.email ? `<a href="mailto:${b.email}">${escapeHtml(b.email)}</a>` : '<span style="color:var(--text-muted);">Nezadaný</span>'}</span>
+                  <span class="kv-val">${b.email ? `<a href="mailto:${b.email}" aria-label="Napísať email zákazníkovi">${escapeHtml(b.email)}</a>` : '<span style="color:var(--text-muted);">Nezadaný</span>'}</span>
                 </div>
                 <div class="kv-row">
                   <span class="kv-label">EČV Vozidla</span>
@@ -729,9 +729,9 @@
                 <div class="kv-row">
                   <span class="kv-label">Termín pristavenia vozidla</span>
                   <span class="kv-val" style="display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                    <input type="date" id="order-date-input" value="${parseBookingToIso(b)}" style="background:#181c27; border:1px solid rgba(255,255,255,0.15); color:#fff; font-family:inherit; font-size:0.85rem; font-weight:600; padding:2px 8px; border-radius:6px; outline:none; cursor:pointer;">
+                    <input type="date" id="order-date-input" value="${parseBookingToIso(b)}" aria-label="Zmeniť dátum rezervácie" style="background:#181c27; border:1px solid rgba(255,255,255,0.15); color:#fff; font-family:inherit; font-size:0.85rem; font-weight:600; padding:2px 8px; border-radius:6px; outline:none; cursor:pointer;">
                     <span>o</span>
-                    <select id="order-time-select" style="background:#181c27; border:1px solid rgba(255,255,255,0.15); color:#fff; font-family:'Space Mono', monospace; font-size:0.85rem; font-weight:700; padding:2px 8px; border-radius:6px; outline:none; cursor:pointer;">
+                    <select id="order-time-select" aria-label="Zmeniť čas rezervácie" style="background:#181c27; border:1px solid rgba(255,255,255,0.15); color:#fff; font-family:'Space Mono', monospace; font-size:0.85rem; font-weight:700; padding:2px 8px; border-radius:6px; outline:none; cursor:pointer;">
                       ${['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'].map(t => `<option value="${t}" ${b.time === t ? 'selected' : ''}>${t}</option>`).join('')}
                     </select>
                   </span>
@@ -787,7 +787,7 @@
                     <span style="font-size:0.8rem; color:var(--text-secondary);" id="audio-time-label">0:00 / 0:03.5 &bull; Záznam klienta pri diagnostike</span>
                   </div>
                 </div>
-                <button type="button" class="audio-btn" id="audio-play-btn">
+                <button type="button" class="audio-btn" id="audio-play-btn" aria-label="Prehrať alebo pozastaviť zvukový záznam">
                   <span>Prehrať zvuk</span>
                 </button>
               </div>
@@ -802,7 +802,7 @@
               </div>
               <div class="photos-grid-list">
                 ${b.photos.map((p, idx) => `
-                  <div class="photo-card" data-src="${p}">
+                  <div class="photo-card" data-src="${p}" role="button" tabindex="0" aria-label="Zväčšiť fotografiu #${idx+1}">
                     <img src="${p}" class="photo-img" alt="Foto závady #${idx+1}">
                     <div class="photo-overlay">Zväčšiť fotografiu</div>
                   </div>
@@ -813,8 +813,8 @@
 
           <!-- FOOTER ACTIONS -->
           <div class="footer-actions">
-            <button type="button" class="btn-delete" id="delete-order-btn">Zmazať túto zákazku</button>
-            <button type="button" class="btn-print" id="export-single-ics-btn" style="background:#1e293b; border:1px solid rgba(56,189,248,0.4); color:var(--accent); display:inline-flex; align-items:center; gap:6px;">
+            <button type="button" class="btn-delete" id="delete-order-btn" aria-label="Zmazať túto zákazku">Zmazať túto zákazku</button>
+            <button type="button" class="btn-print" id="export-single-ics-btn" aria-label="Pridať termín do kalendára (.ICS)" style="background:#1e293b; border:1px solid rgba(56,189,248,0.4); color:var(--accent); display:inline-flex; align-items:center; gap:6px;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -823,7 +823,7 @@
               </svg>
               <span>Pridať termín do kalendára (.ICS)</span>
             </button>
-            <button type="button" class="btn-print" onclick="window.print()">Vytlačiť zákazkový list</button>
+            <button type="button" class="btn-print" onclick="window.print()" aria-label="Vytlačiť zákazkový list">Vytlačiť zákazkový list</button>
           </div>
         `;
 
@@ -874,10 +874,17 @@
 
         // Lightbox
         document.querySelectorAll('.photo-card').forEach(card => {
-          card.addEventListener('click', () => {
+          const openPhoto = () => {
             const src = card.getAttribute('data-src');
             lightboxImg.src = src;
             lightboxOverlay.classList.add('open');
+          };
+          card.addEventListener('click', openPhoto);
+          card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openPhoto();
+            }
           });
         });
 
@@ -974,7 +981,22 @@
       });
 
       function saveAllBookings(data) {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+        try {
+          if (data && data.length > 300) {
+            data.length = 300;
+          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        } catch (err) {
+          console.warn('LocalStorage save failed in order.html, attempting quota recovery:', err);
+          try {
+            if (data && data.length > 1) {
+              data.splice(Math.floor(data.length / 2));
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            }
+          } catch (err2) {
+            console.error('LocalStorage quota critically exceeded in order.html:', err2);
+          }
+        }
       }
 
       

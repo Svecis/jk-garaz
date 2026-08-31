@@ -4090,7 +4090,7 @@
 
         const cellDateObj = new Date(cellYear, cellMonth, cellDay);
         const cellWeekdayFull = WEEKDAYS_FULL_SK[cellDateObj.getDay()];
-        cell.setAttribute('aria-label', `${cellWeekdayFull}, ${cellDay}. ${MONTHS_SK[cellMonth]} ${cellYear}`);
+        cell.setAttribute('aria-label', `${cellWeekdayFull}, ${cellDay}. ${MONTH_NAMES_SK[cellMonth]} ${cellYear}`);
 
         const dayHeader = document.createElement('div');
         dayHeader.className = 'cal-day-header';

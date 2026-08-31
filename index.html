@@ -1621,9 +1621,9 @@
   <!-- TOP NAVIGATION: LANGUAGE SWITCHER -->
   <div class="top-nav-bar">
     <!-- Language Switcher Box -->
-    <div class="lang-switcher-box" id="lang-switcher">
-      <button class="lang-btn active" data-lang="sk">SK</button>
-      <button class="lang-btn" data-lang="en">EN</button>
+    <div class="lang-switcher-box" id="lang-switcher" role="group" aria-label="Language selector">
+      <button type="button" class="lang-btn active" data-lang="sk" aria-label="Prepnúť do slovenčiny" aria-pressed="true">SK</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-label="Switch to English" aria-pressed="false">EN</button>
     </div>
   </div>
 
@@ -1643,7 +1643,7 @@
         <span id="load-percent" class="progress-percent">0%</span>
       </div>
 
-      <button id="skip-load-btn" class="skip-btn" data-i18n="loader_skip">Spustiť ihneď s postupným načítavaním</button>
+      <button type="button" id="skip-load-btn" class="skip-btn" data-i18n="loader_skip" aria-label="Spustiť ihneď s postupným načítavaním">Spustiť ihneď s postupným načítavaním</button>
     </div>
   </div>
 
@@ -1654,7 +1654,7 @@
     <p class="hero-description" data-i18n="hero_desc">
       Pred rezerváciou kliknite na problémovú časť auta, nahláste závadu, nahrajte foto alebo zvuk a zarezervujte si termín u certifikovaného mechanika.
     </p>
-    <button class="hero-cta-btn" id="hero-jump-btn">
+    <button type="button" class="hero-cta-btn" id="hero-jump-btn" aria-label="Rezervácia online">
       <span data-i18n="hero_cta">Rezervácia online</span>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
@@ -1773,7 +1773,7 @@
   <!-- =========================================================
        BOOKIO-STYLE RESERVATION MODAL
        ========================================================= -->
-  <div id="booking-modal">
+  <div id="booking-modal" role="dialog" aria-modal="true" aria-labelledby="modal-part-name">
     <div class="modal-container">
       
       <!-- SUCCESS OVERLAY -->
@@ -1793,10 +1793,10 @@
         </div>
 
         <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
-          <button class="confirm-booking-btn" id="add-cal-btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;" data-i18n="success_add_cal">
+          <button type="button" class="confirm-booking-btn" id="add-cal-btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;" data-i18n="success_add_cal" aria-label="Pridať do kalendára">
             Pridať do kalendára (.ics)
           </button>
-          <button class="confirm-booking-btn" id="finish-booking-btn" data-i18n="success_done">
+          <button type="button" class="confirm-booking-btn" id="finish-booking-btn" data-i18n="success_done" aria-label="Hotovo, návrat k rozloženému pohľadu">
             Hotovo &bull; Návrat k rozloženému pohľadu
           </button>
         </div>
@@ -1811,7 +1811,7 @@
             <span id="modal-part-category">POHON &bull; 2.0 TFSI</span>
           </div>
         </div>
-        <button class="modal-close-btn" id="modal-close-btn" title="Zatvoriť">
+        <button type="button" class="modal-close-btn" id="modal-close-btn" title="Zatvoriť" aria-label="Zatvoriť rezervačné okno">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1850,8 +1850,8 @@
           <div class="media-grid">
             <!-- Photo Upload Dropzone -->
             <div>
-              <div class="upload-box" id="photo-dropzone">
-                <input type="file" id="photo-input" accept="image/*" multiple />
+              <div class="upload-box" id="photo-dropzone" tabindex="0" role="button" aria-label="Nahrať fotografiu dielu">
+                <input type="file" id="photo-input" accept="image/*" multiple aria-label="Výber súboru fotografie" />
                 <svg class="upload-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                   <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -1867,11 +1867,11 @@
             <div class="audio-record-box" id="audio-box">
               <div class="record-header">
                 <span class="record-title" data-i18n="step2_audio_title">Nahrať zvuk závady</span>
-                <span class="record-timer" id="record-timer">00:00</span>
+                <span class="record-timer" id="record-timer" aria-live="polite">00:00</span>
               </div>
 
               <!-- Animated Sound Waveform -->
-              <div class="waveform-visualizer" id="waveform-bars">
+              <div class="waveform-visualizer" id="waveform-bars" aria-hidden="true">
                 <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
                 <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
                 <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
@@ -1880,13 +1880,13 @@
               </div>
 
               <div class="record-controls">
-                <button type="button" class="mic-btn" id="record-btn">
+                <button type="button" class="mic-btn" id="record-btn" aria-label="Nahrať zvukový záznam závady">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                     <circle cx="12" cy="12" r="10"></circle>
                   </svg>
                   <span id="record-btn-text" data-i18n="step2_record_start">Nahrať zvukový záznam</span>
                 </button>
-                <button type="button" class="audio-playback-btn" id="audio-play-btn" data-i18n="step2_play">
+                <button type="button" class="audio-playback-btn" id="audio-play-btn" data-i18n="step2_play" aria-label="Prehrať nahraný zvukový záznam">
                   ▶ Prehrať
                 </button>
               </div>
@@ -1910,11 +1910,11 @@
             <!-- Left Column: Interactive Month Calendar -->
             <div class="booqme-cal-card">
               <div class="cal-header-row">
-                <button type="button" class="cal-nav-btn" id="modal-cal-prev" title="Predchádzajúci mesiac">
+                <button type="button" class="cal-nav-btn" id="modal-cal-prev" title="Predchádzajúci mesiac" aria-label="Predchádzajúci mesiac">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 </button>
                 <div class="cal-month-title" id="modal-cal-month-title">August 2026</div>
-                <button type="button" class="cal-nav-btn" id="modal-cal-next" title="Nasledujúci mesiac">
+                <button type="button" class="cal-nav-btn" id="modal-cal-next" title="Nasledujúci mesiac" aria-label="Nasledujúci mesiac">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </button>
               </div>
@@ -2104,7 +2104,15 @@
           drawer_title: "Naplánované rezervácie",
           drawer_empty: "Zatiaľ nemáte žiadne aktívne rezervácie.<br />Kliknite na ktorýkoľvek rozložený diel pre rezerváciu termínu.",
           status_confirmed: "Potvrdené",
-          cal_sync_msg: "Servisný termín bol synchronizovaný! Pozvánka do kalendára (.ics) a potvrdzujúca SMS bola odoslaná."
+          cal_sync_msg: "Servisný termín bol synchronizovaný! Pozvánka do kalendára (.ics) a potvrdzujúca SMS bola odoslaná.",
+          aria_close_modal: "Zatvoriť rezervačné okno",
+          aria_record_audio: "Nahrať zvukový záznam závady",
+          aria_play_audio: "Prehrať nahraný zvukový záznam",
+          aria_prev_month: "Predchádzajúci mesiac",
+          aria_next_month: "Nasledujúci mesiac",
+          aria_upload_photo: "Nahrať fotografiu dielu",
+          aria_lang_sk: "Prepnúť do slovenčiny",
+          aria_lang_en: "Switch to English"
         },
         en: {
           nav_bookings: "Reservations",
@@ -2190,7 +2198,15 @@
           drawer_title: "Scheduled Reservations",
           drawer_empty: "No active reservations yet.<br />Click any exploded car component to book a slot.",
           status_confirmed: "Confirmed",
-          cal_sync_msg: "Service appointment synced! A calendar invite (.ics) & confirmation SMS has been dispatched."
+          cal_sync_msg: "Service appointment synced! A calendar invite (.ics) & confirmation SMS has been dispatched.",
+          aria_close_modal: "Close booking dialog",
+          aria_record_audio: "Record problem sound note",
+          aria_play_audio: "Play recorded audio note",
+          aria_prev_month: "Previous month",
+          aria_next_month: "Next month",
+          aria_upload_photo: "Upload part photo",
+          aria_lang_sk: "Prepnúť do slovenčiny",
+          aria_lang_en: "Switch to English"
         }
       };
 
@@ -2685,13 +2701,18 @@
       // =========================================================
       // LANGUAGE SWITCHER ENGINE
       // =========================================================
+      let lastFocusedElement = null;
+
       function setLanguage(lang) {
         currentLang = lang;
         document.documentElement.lang = lang;
         localStorage.setItem('automek_lang', lang);
 
         langBtns.forEach(btn => {
-          btn.classList.toggle('active', btn.dataset.lang === lang);
+          const isActive = btn.dataset.lang === lang;
+          btn.classList.toggle('active', isActive);
+          btn.setAttribute('aria-pressed', String(isActive));
+          btn.setAttribute('aria-label', lang === 'sk' ? (btn.dataset.lang === 'sk' ? 'Slovenský jazyk (aktívny)' : 'Prepnúť do angličtiny') : (btn.dataset.lang === 'en' ? 'English language (active)' : 'Switch to Slovak'));
         });
 
         const dict = TRANSLATIONS[lang];
@@ -2713,6 +2734,16 @@
           const key = el.dataset.i18nPlaceholder;
           if (dict[key]) el.setAttribute('placeholder', dict[key]);
         });
+
+        // Update icon button aria-labels
+        if (modalCloseBtn) modalCloseBtn.setAttribute('aria-label', dict.aria_close_modal);
+        if (recordBtn) recordBtn.setAttribute('aria-label', dict.aria_record_audio);
+        if (audioPlayBtn) audioPlayBtn.setAttribute('aria-label', dict.aria_play_audio);
+        const calPrev = document.getElementById('modal-cal-prev');
+        const calNext = document.getElementById('modal-cal-next');
+        if (calPrev) calPrev.setAttribute('aria-label', dict.aria_prev_month);
+        if (calNext) calNext.setAttribute('aria-label', dict.aria_next_month);
+        if (photoDropzone) photoDropzone.setAttribute('aria-label', dict.aria_upload_photo);
 
         // 4. Update Category Filters Bar
         renderCategoryFilterBar();
@@ -2744,7 +2775,9 @@
         // 1. Zvýraznenie aktívneho tlačidla v lište
         if (categoryFilterBar) {
           categoryFilterBar.querySelectorAll('.cat-btn').forEach(b => {
-            b.classList.toggle('active', b.dataset.filter === code);
+            const isMatch = b.dataset.filter === code;
+            b.classList.toggle('active', isMatch);
+            b.setAttribute('aria-pressed', String(isMatch));
           });
         }
 
@@ -2765,13 +2798,13 @@
       function renderCategoryFilterBar() {
         const dict = TRANSLATIONS[currentLang];
         categoryFilterBar.innerHTML = `
-          <button class="cat-btn ${currentCategoryFilter === 'all' ? 'active' : ''}" data-filter="all">${dict.cat_all}</button>
-          <button class="cat-btn ${currentCategoryFilter === 'E' ? 'active' : ''}" data-filter="E">${dict.cat_e}</button>
-          <button class="cat-btn ${currentCategoryFilter === 'B' ? 'active' : ''}" data-filter="B">${dict.cat_b}</button>
-          <button class="cat-btn ${currentCategoryFilter === 'I' ? 'active' : ''}" data-filter="I">${dict.cat_i}</button>
-          <button class="cat-btn ${currentCategoryFilter === 'S' ? 'active' : ''}" data-filter="S">${dict.cat_s}</button>
-          <button class="cat-btn ${currentCategoryFilter === 'X' ? 'active' : ''}" data-filter="X">${dict.cat_x}</button>
-          <button class="cat-btn ${currentCategoryFilter === 'W' ? 'active' : ''}" data-filter="W">${dict.cat_w}</button>
+          <button type="button" class="cat-btn ${currentCategoryFilter === 'all' ? 'active' : ''}" data-filter="all" aria-pressed="${currentCategoryFilter === 'all'}" aria-label="${dict.cat_all}">${dict.cat_all}</button>
+          <button type="button" class="cat-btn ${currentCategoryFilter === 'E' ? 'active' : ''}" data-filter="E" aria-pressed="${currentCategoryFilter === 'E'}" aria-label="${dict.cat_e}">${dict.cat_e}</button>
+          <button type="button" class="cat-btn ${currentCategoryFilter === 'B' ? 'active' : ''}" data-filter="B" aria-pressed="${currentCategoryFilter === 'B'}" aria-label="${dict.cat_b}">${dict.cat_b}</button>
+          <button type="button" class="cat-btn ${currentCategoryFilter === 'I' ? 'active' : ''}" data-filter="I" aria-pressed="${currentCategoryFilter === 'I'}" aria-label="${dict.cat_i}">${dict.cat_i}</button>
+          <button type="button" class="cat-btn ${currentCategoryFilter === 'S' ? 'active' : ''}" data-filter="S" aria-pressed="${currentCategoryFilter === 'S'}" aria-label="${dict.cat_s}">${dict.cat_s}</button>
+          <button type="button" class="cat-btn ${currentCategoryFilter === 'X' ? 'active' : ''}" data-filter="X" aria-pressed="${currentCategoryFilter === 'X'}" aria-label="${dict.cat_x}">${dict.cat_x}</button>
+          <button type="button" class="cat-btn ${currentCategoryFilter === 'W' ? 'active' : ''}" data-filter="W" aria-pressed="${currentCategoryFilter === 'W'}" aria-label="${dict.cat_w}">${dict.cat_w}</button>
         `;
 
         categoryFilterBar.querySelectorAll('.cat-btn').forEach(btn => {
@@ -2786,8 +2819,43 @@
         return `${FRAME_PREFIX}${num}${FRAME_EXT}`;
       }
 
+      function loadSingleFrame(i) {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.src = getFrameUrl(i);
+
+          img.onload = () => {
+            loadedImagesCount++;
+            images[i] = img;
+            updateProgress();
+
+            if (loadedImagesCount === FRAME_COUNT) {
+              finishPreloading();
+            }
+            resolve(img);
+          };
+
+          img.onerror = () => {
+            loadedImagesCount++;
+            images[i] = images[0] || null;
+            updateProgress();
+            if (loadedImagesCount === FRAME_COUNT) {
+              finishPreloading();
+            }
+            resolve(null);
+          };
+        });
+      }
+
+      async function loadImageBatch(indices, batchSize = 6) {
+        for (let i = 0; i < indices.length; i += batchSize) {
+          const batch = indices.slice(i, i + batchSize);
+          await Promise.all(batch.map(idx => loadSingleFrame(idx)));
+        }
+      }
+
       function preloadFrames() {
-        // Okamžité načítanie úvodnej snímky (Frame 0) pre okamžité zobrazenie auta bez čakania
+        // 1. Okamžité načítanie úvodnej snímky (Frame 0) pre okamžité zobrazenie auta bez čakania
         const firstImg = new Image();
         firstImg.src = getFrameUrl(0);
         firstImg.onload = () => {
@@ -2803,30 +2871,13 @@
           updateProgress();
         };
 
-        // Asynchrónne načítanie zvyšných snímok (1 - 239)
+        // 2. Asynchrónne dávkované načítanie zvyšných snímok (1 - 239) po max 6 súbežných spojení
+        const remainingIndices = [];
         for (let i = 1; i < FRAME_COUNT; i++) {
-          const img = new Image();
-          img.src = getFrameUrl(i);
-
-          img.onload = () => {
-            loadedImagesCount++;
-            images[i] = img;
-            updateProgress();
-
-            if (loadedImagesCount === FRAME_COUNT) {
-              finishPreloading();
-            }
-          };
-
-          img.onerror = () => {
-            loadedImagesCount++;
-            images[i] = images[0] || null;
-            updateProgress();
-            if (loadedImagesCount === FRAME_COUNT) {
-              finishPreloading();
-            }
-          };
+          remainingIndices.push(i);
         }
+
+        loadImageBatch(remainingIndices, 6);
       }
 
       function updateProgress() {
@@ -2975,6 +3026,26 @@
       }
 
       function initScrollTrigger() {
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (prefersReducedMotion) {
+          // Pre používateľov s požiadavkou na zníženie pohybu nevytvárame pin/scrub scroll-jack
+          playhead.frame = FRAME_COUNT - 1;
+          render();
+          isDiagnosticActive = true;
+          diagnosticLayer.classList.add('active');
+          repositionHotspots();
+
+          function handleReducedMotionResize() {
+            resizeCanvas();
+            render();
+            repositionHotspots();
+          }
+          window.addEventListener('resize', handleReducedMotionResize);
+          window.addEventListener('orientationchange', handleReducedMotionResize);
+          return;
+        }
+
         const sequenceTimeline = gsap.timeline({
           scrollTrigger: {
             id: "sequence-scroll",
@@ -3008,6 +3079,24 @@
 
         window.addEventListener('resize', handleWindowResize);
         window.addEventListener('orientationchange', handleWindowResize);
+
+        // Listener na zmenu preferencie zníženia pohybu za behu
+        try {
+          const motionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+          motionMediaQuery.addEventListener('change', (e) => {
+            const trigger = ScrollTrigger.getById('sequence-scroll');
+            if (e.matches) {
+              if (trigger) trigger.kill();
+              playhead.frame = FRAME_COUNT - 1;
+              render();
+              isDiagnosticActive = true;
+              diagnosticLayer.classList.add('active');
+              repositionHotspots();
+            } else {
+              initScrollTrigger();
+            }
+          });
+        } catch(e) {}
       }
 
       function updateDiagnosticState(progress) {
@@ -3067,6 +3156,9 @@
           el.className = 'part-hotspot';
           el.dataset.id = part.id;
           el.dataset.code = part.code;
+          el.setAttribute('role', 'button');
+          el.setAttribute('tabindex', '0');
+          el.setAttribute('aria-label', `${loc.name} - ${dict.tooltip_report}`);
 
           if (currentCategoryFilter !== 'all' && part.code !== currentCategoryFilter) {
             el.style.display = 'none';
@@ -3106,8 +3198,18 @@
           el.addEventListener('touchstart', updateClamping, { passive: true });
           el.addEventListener('focusin', updateClamping);
 
+          el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+              e.preventDefault();
+              lastFocusedElement = el;
+              applyCategoryFilter(part.code);
+              openBookingModal(part);
+            }
+          });
+
           el.addEventListener('click', (e) => {
             e.stopPropagation();
+            lastFocusedElement = el;
             applyCategoryFilter(part.code);
             openBookingModal(part);
           });
@@ -3156,6 +3258,7 @@
       // BOOKIO-STYLE RESERVATION MODAL LOGIC
       // =========================================================
       function openBookingModal(part) {
+        lastFocusedElement = document.activeElement;
         currentSelectedPart = part;
         updateModalLanguage();
 
@@ -3179,6 +3282,14 @@
 
         const mb = bookingModal.querySelector('.modal-body');
         if (mb) mb.scrollTop = 0;
+
+        setTimeout(() => {
+          if (problemDescInput) {
+            problemDescInput.focus();
+          } else if (modalCloseBtn) {
+            modalCloseBtn.focus();
+          }
+        }, 50);
       }
 
       function updateModalLanguage() {
@@ -3205,6 +3316,11 @@
         // Obnoviť normalizeScroll pre plynulú 3D animáciu po zatvorení modálu
         if (typeof ScrollTrigger !== 'undefined' && ScrollTrigger.normalizeScroll) {
           ScrollTrigger.normalizeScroll(true);
+        }
+
+        // Vrátiť fokus na prvok, ktorý modál otvoril
+        if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+          lastFocusedElement.focus();
         }
       }
 

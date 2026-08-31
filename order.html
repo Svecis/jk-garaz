@@ -513,73 +513,8 @@
         bookings = [];
       }
 
-      if (!bookings || bookings.length === 0) {
-        bookings = [
-          {
-            id: 'JK-482019',
-            customer: 'Peter Novák',
-            phone: '+421 905 456 789',
-            email: 'novak.peter@techfirm.sk',
-            plate: 'BA 892 TT',
-            partName: '2.0 TFSI Motor & Prevodovka',
-            partCode: 'E',
-            urgency: 'critical',
-            date: 'Po, 1. Sep',
-            time: '10:00',
-            price: '180 €',
-            mechanic: 'Markus Vance',
-            problemDesc: 'Pri studenom štarte počuť kovové klepanie z oblasti rozvodov. Na bloku motora je viditeľný únik oleja.',
-            symptoms: ['Klepavý zvuk pri voľnobehu', 'Únik kvapaliny', 'Svieti kontrolka motora'],
-            hasAudio: true,
-            audioData: EMBEDDED_AUDIO_B64,
-            photos: ['sample_photo_motor.svg', 'sample_photo_podvozok.svg'],
-            photosCount: 2,
-            status: 'pending'
-          },
-          {
-            id: 'JK-319402',
-            customer: 'Martina Kováčová',
-            phone: '+421 911 888 222',
-            email: 'm.kovacova@gmail.com',
-            plate: 'KE 401 BE',
-            partName: 'Predná náprava & Podvozok',
-            partCode: 'S',
-            urgency: 'moderate',
-            date: 'Ut, 2. Sep',
-            time: '13:30',
-            price: '85 €',
-            mechanic: 'Viktor Thorne',
-            problemDesc: 'Pri prejazde retardérmi sa ozýva tupé búchanie od pravého predného kolesa. Podozrenie na poškodené horné uloženie tlmiča.',
-            symptoms: ['Búchanie pri nerovnostiach', 'Vôľa v riadení'],
-            hasAudio: false,
-            audioData: null,
-            photos: ['sample_photo_podvozok.svg'],
-            photosCount: 1,
-            status: 'confirmed'
-          },
-          {
-            id: 'JK-110824',
-            customer: 'Miroslav Horváth',
-            phone: '+421 948 123 456',
-            email: 'miroslav@automek.sk',
-            plate: 'NR 777 AX',
-            partName: 'Virtuálny kokpit & Infotainment',
-            partCode: 'I',
-            urgency: 'minor',
-            date: 'St, 3. Sep',
-            time: '15:00',
-            price: '60 €',
-            mechanic: 'Elena Rostova',
-            problemDesc: 'Displej občas zamrzne pri pripojení telefónu cez Apple CarPlay.',
-            symptoms: ['Pomalá odozva systému', 'Chybové hlásenie'],
-            hasAudio: false,
-            audioData: null,
-            photos: [],
-            photosCount: 0,
-            status: 'in_progress'
-          }
-        ];
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings)); } catch (e) {}
+      if (!bookings || !Array.isArray(bookings)) {
+        bookings = [];
       }
 
       const MONTH_NAMES_SK = [
@@ -639,18 +574,23 @@
         });
       }
 
-      if (!booking) {
+      if (!booking && bookings.length > 0) {
         booking = bookings[0];
       }
 
-      if (booking.id === 'JK-482019' || booking.customer === 'Peter Novák') {
-        if (!booking.audioData || booking.audioData === 'sample_engine_noise.wav') {
-          booking.audioData = EMBEDDED_AUDIO_B64;
-          booking.hasAudio = true;
-        }
-        if (!booking.photos || booking.photos.length === 0) {
-          booking.photos = ['sample_photo_motor.svg', 'sample_photo_podvozok.svg'];
-        }
+      if (!booking) {
+        document.title = 'Zákazka nenájdená — JK Garáž';
+        mainContent.innerHTML = `
+          <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:48px 24px; text-align:center; max-width:600px; margin:40px auto;">
+            <div style="font-size:2.5rem; margin-bottom:16px;">📋</div>
+            <h2 style="color:#fff; font-size:1.4rem; font-weight:700; margin-bottom:8px;">Zákazka nebola nájdená</h2>
+            <p style="color:var(--text-muted); font-size:0.92rem; line-height:1.6; margin-bottom:24px;">Zvolená zákazka neexistuje alebo bola odstránená. Prejdite do administrácie a vyberte aktívnu zákazku.</p>
+            <a href="admin.html" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none;">
+              <span>Späť do administrácie</span>
+            </a>
+          </div>
+        `;
+        return;
       }
 
       document.title = 'Zákazka #' + booking.id + ' — ' + (booking.customer || '');

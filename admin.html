@@ -2836,6 +2836,7 @@
             <div class="form-group">
               <label class="form-label" for="cust-phone" data-i18n="step4_phone_label">Telefón *</label>
               <input type="tel" id="cust-phone" class="input-field" placeholder="+421 9XX XXX XXX" required autocomplete="tel" />
+              <span id="cust-phone-error" style="display:none; color:#ff5252; font-size:0.72rem; margin-top:4px;">Zadajte platné telefónne číslo, napr. +421 901 234 567</span>
             </div>
             <div class="form-group">
               <label class="form-label" for="cust-email" data-i18n="step4_email_label">E-mailová adresa</label>
@@ -4345,12 +4346,17 @@
             nameInput.style.borderColor = '';
           }
 
-          if (!custPhone || custPhone.length < 6) {
+          const phoneError = document.getElementById('cust-phone-error');
+          const normalizedPhone = custPhone.replace(/[\s\-()]/g, '');
+          const isPhoneValid = /^\+?\d{9,14}$/.test(normalizedPhone);
+          if (!isPhoneValid) {
             phoneInput.style.borderColor = '#ff5252';
+            if (phoneError) phoneError.style.display = 'block';
             if (!hasError) phoneInput.focus();
             hasError = true;
           } else {
             phoneInput.style.borderColor = '';
+            if (phoneError) phoneError.style.display = 'none';
           }
 
           if (hasError) return;

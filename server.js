@@ -7,6 +7,7 @@ const nodemailer = require('nodemailer');
 const QRCode = require('qrcode');
 
 const PORT = 3000;
+const PUBLIC_BASE_URL = 'https://test.sveckys.top';
 const CONFIG_FILE = path.join(__dirname, 'email_config.json');
 const AUTH_FILE = path.join(__dirname, 'admin_auth.json');
 const BOOKINGS_FILE = path.join(__dirname, 'bookings.json');
@@ -313,7 +314,7 @@ const MIME_TYPES = {
 // Build the HTML body for a new-booking notification e-mail
 function buildBookingEmailHtml(booking) {
   const plateFormatted = (booking.plate || '-').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
-  const orderUrl = 'http://localhost:' + PORT + '/order.html?id=' + encodeURIComponent(booking.id);
+  const orderUrl = PUBLIC_BASE_URL + '/order.html?id=' + encodeURIComponent(booking.id);
 
   return `
       <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; padding:20px; border:1px solid #e2e8f0; border-radius:10px; background:#ffffff;">

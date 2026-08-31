@@ -1979,6 +1979,7 @@
             <div class="form-group">
               <label class="form-label" for="cust-email" data-i18n="step4_email_label">E-mailová adresa</label>
               <input type="email" id="cust-email" class="input-field" placeholder="meno@domena.sk" autocomplete="email" />
+              <span id="cust-email-error" style="display:none; color:#ff5252; font-size:0.72rem; margin-top:4px;">Zadajte platnú e-mailovú adresu, napr. meno@domena.sk</span>
             </div>
             <div class="form-group">
               <label class="form-label" for="cust-plate" data-i18n="step4_plate_label">EČV / Model vozidla</label>
@@ -3914,6 +3915,18 @@
           if (phoneError) phoneError.style.display = 'none';
         }
 
+        const emailError = document.getElementById('cust-email-error');
+        const isEmailValid = !custEmail || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(custEmail);
+        if (!isEmailValid) {
+          emailInput.style.borderColor = '#ff5252';
+          if (emailError) emailError.style.display = 'block';
+          if (!hasError) emailInput.focus();
+          hasError = true;
+        } else {
+          emailInput.style.borderColor = '';
+          if (emailError) emailError.style.display = 'none';
+        }
+
         if (hasError) return;
 
         // Po úspešnej validácii okamžite zablokujeme tlačidlo a zobrazíme loading stav
@@ -3953,6 +3966,34 @@
           createdAt: new Date().toISOString()
         };
 
+        const showBookingSuccessScreen = () => {
+          const audioText = newBooking.hasAudio ? dict.receipt_audio_yes : dict.receipt_audio_no;
+          const mediaText = dict.receipt_media_val.replace('{photos}', newBooking.photosCount).replace('{audio}', audioText);
+
+          bookingReceiptDetails.innerHTML = `
+            <div class="ref-row"><span>${dict.receipt_ref}</span><strong>${bookingId}</strong></div>
+            <div class="ref-row"><span>${dict.receipt_comp}</span><strong>[${newBooking.partCode}] ${escapeHtml(newBooking.partName)}</strong></div>
+            <div class="ref-row"><span>${dict.receipt_slot}</span><strong>${newBooking.date} &bull; ${newBooking.time}</strong></div>
+            <div class="ref-row"><span>${dict.receipt_mech}</span><strong>${escapeHtml(newBooking.mechanic)}</strong></div>
+            <div class="ref-row"><span>${dict.receipt_plate}</span><strong>${escapeHtml(newBooking.plate)}</strong></div>
+            <div class="ref-row"><span>${dict.receipt_media}</span><strong>${mediaText}</strong></div>
+          `;
+
+          successScreen.classList.add('active');
+
+          // Okamžité vymazanie osobných údajov z formulára, aby neostali visieť v pamäti prehliadača
+          nameInput.value = '';
+          phoneInput.value = '';
+          emailInput.value = '';
+          plateInput.value = '';
+        };
+
+        const resetSubmitButtonAfterFailure = () => {
+          submitBookingBtn.disabled = false;
+          submitBookingBtn.removeAttribute('data-submitting');
+          if (confirmBtnSpan) confirmBtnSpan.textContent = TRANSLATIONS[currentLang].modal_confirm_btn;
+        };
+
         const saveAndRenderBooking = () => {
           activeBookings.unshift(newBooking);
           persistBookings();
@@ -3966,12 +4007,25 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newBooking)
           })
-          .then(r => r.json())
-          .then(saved => {
-            console.log('✅ Servisná rezervácia úspešne uložená na serveri, odoslaný potvrdzovací e-mail:', saved.id);
+          .then(r => r.json().then(data => ({ ok: r.ok, status: r.status, data })))
+          .then(({ ok, status, data }) => {
+            if (!ok && status === 429) {
+              // Server rezerváciu skutočne odmietol (rate-limit) - nesmie sa tváriť ako úspech
+              activeBookings.shift();
+              persistBookings();
+              resetSubmitButtonAfterFailure();
+              alert(data.error || (currentLang === 'sk'
+                ? 'Príliš veľa rezervácií z tejto adresy. Skúste to prosím o chvíľu.'
+                : 'Too many bookings from this address. Please try again shortly.'));
+              return;
+            }
+            console.log('✅ Servisná rezervácia úspešne uložená na serveri, odoslaný potvrdzovací e-mail:', data.id);
+            showBookingSuccessScreen();
           })
           .catch(err => {
+            // Sieťová chyba / backend nedostupný - zachovaj pôvodné odolné správanie
             console.warn('Backend offline, zákazka uložená lokálne:', err);
+            showBookingSuccessScreen();
           });
         };
 
@@ -3985,26 +4039,6 @@
         } else {
           saveAndRenderBooking();
         }
-
-        const audioText = newBooking.hasAudio ? dict.receipt_audio_yes : dict.receipt_audio_no;
-        const mediaText = dict.receipt_media_val.replace('{photos}', newBooking.photosCount).replace('{audio}', audioText);
-
-        bookingReceiptDetails.innerHTML = `
-          <div class="ref-row"><span>${dict.receipt_ref}</span><strong>${bookingId}</strong></div>
-          <div class="ref-row"><span>${dict.receipt_comp}</span><strong>[${newBooking.partCode}] ${escapeHtml(newBooking.partName)}</strong></div>
-          <div class="ref-row"><span>${dict.receipt_slot}</span><strong>${newBooking.date} &bull; ${newBooking.time}</strong></div>
-          <div class="ref-row"><span>${dict.receipt_mech}</span><strong>${escapeHtml(newBooking.mechanic)}</strong></div>
-          <div class="ref-row"><span>${dict.receipt_plate}</span><strong>${escapeHtml(newBooking.plate)}</strong></div>
-          <div class="ref-row"><span>${dict.receipt_media}</span><strong>${mediaText}</strong></div>
-        `;
-
-        successScreen.classList.add('active');
-
-        // Okamžité vymazanie osobných údajov z formulára, aby neostali visieť v pamäti prehliadača
-        nameInput.value = '';
-        phoneInput.value = '';
-        emailInput.value = '';
-        plateInput.value = '';
       });
 
       finishBookingBtn.addEventListener('click', closeModal);

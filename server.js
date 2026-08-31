@@ -13,6 +13,45 @@ const AUTH_FILE = path.join(__dirname, 'admin_auth.json');
 const BOOKINGS_FILE = path.join(__dirname, 'bookings.json');
 const TOKEN_TTL_MS = 12 * 60 * 60 * 1000; // 12 hodín
 
+// Server-side rate limiting for new public bookings (the client-side 15s cooldown
+// in index.html is trivially bypassed by clearing localStorage / using a new tab).
+const BOOKING_RATE_SHORT_WINDOW_MS = 60 * 1000; // 1 minute
+const BOOKING_RATE_SHORT_MAX = 1; // max 1 new booking per IP per minute
+const BOOKING_RATE_LONG_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const BOOKING_RATE_LONG_MAX = 5; // max 5 new bookings per IP per hour
+const bookingRateLimiter = new Map(); // ip -> array of request timestamps
+
+function getClientIp(req) {
+  const xff = req.headers['x-forwarded-for'];
+  if (xff) return xff.split(',')[0].trim();
+  return req.socket.remoteAddress || 'unknown';
+}
+
+function isBookingRateLimited(ip) {
+  const now = Date.now();
+  let timestamps = (bookingRateLimiter.get(ip) || []).filter(t => now - t < BOOKING_RATE_LONG_WINDOW_MS);
+
+  const recentShort = timestamps.filter(t => now - t < BOOKING_RATE_SHORT_WINDOW_MS);
+  if (recentShort.length >= BOOKING_RATE_SHORT_MAX || timestamps.length >= BOOKING_RATE_LONG_MAX) {
+    bookingRateLimiter.set(ip, timestamps);
+    return true;
+  }
+
+  timestamps.push(now);
+  bookingRateLimiter.set(ip, timestamps);
+  return false;
+}
+
+// Periodically drop IPs with no requests in the last hour so this Map doesn't grow forever
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, timestamps] of bookingRateLimiter) {
+    const fresh = timestamps.filter(t => now - t < BOOKING_RATE_LONG_WINDOW_MS);
+    if (fresh.length === 0) bookingRateLimiter.delete(ip);
+    else bookingRateLimiter.set(ip, fresh);
+  }
+}, 15 * 60 * 1000).unref();
+
 // =====================================================================
 // AT-REST ENCRYPTION (AES-256-GCM) — used for email_config.json and
 // bookings.json, both of which hold secrets / customer PII.
@@ -872,6 +911,12 @@ const server = http.createServer((req, res) => {
         const bookings = loadBookings();
         const idx = bookings.findIndex(b => b.id === booking.id);
         const isNew = idx === -1;
+
+        if (isNew && isBookingRateLimited(getClientIp(req))) {
+          res.writeHead(429, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Príliš veľa rezervácií z tejto adresy. Skúste to prosím o chvíľu.' }));
+          return;
+        }
 
         if (isNew) {
           booking.createdAt = booking.createdAt || new Date().toISOString();

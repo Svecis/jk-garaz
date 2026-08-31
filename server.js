@@ -508,6 +508,57 @@ function dispatchCustomerConfirmation(booking) {
   return sendEmailGeneric(booking.email, subject, buildCustomerConfirmationEmailHtml(booking));
 }
 
+// Customer-facing e-mail after a self-service reschedule via moja-rezervacia.html
+function buildCustomerRescheduleEmailHtml(booking) {
+  const plateFormatted = (booking.plate || '-').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+  const manageUrl = PUBLIC_BASE_URL + '/moja-rezervacia.html?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.manageToken || '');
+
+  return `
+      <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; padding:20px; border:1px solid #e2e8f0; border-radius:10px; background:#ffffff;">
+        <h2 style="color:#0f172a; margin-top:0;">Termín rezervácie zmenený — #${booking.id}</h2>
+        <p style="color:#64748b; font-size:14px;">Dobrý deň${booking.customer ? ', ' + booking.customer : ''}, váš nový termín je:</p>
+        <hr style="border:none; border-top:1px solid #e2e8f0; margin:16px 0;" />
+        <table style="width:100%; font-size:14px; border-collapse:collapse;">
+          <tr><td style="padding:6px 0; color:#64748b; width:140px;"><strong>Diel:</strong></td><td style="color:#2563eb; font-weight:bold;">[${booking.partCode || 'P'}] ${booking.partName || '-'}</td></tr>
+          <tr><td style="padding:6px 0; color:#64748b;"><strong>Nový termín:</strong></td><td style="color:#0f172a; font-weight:bold;">${booking.date || '-'} o ${booking.time || '-'}</td></tr>
+          <tr><td style="padding:6px 0; color:#64748b;"><strong>EČV Vozidla:</strong></td><td style="color:#0f172a; font-family:monospace; font-weight:bold;">${plateFormatted}</td></tr>
+        </table>
+        <div style="margin-top:24px; text-align:center;">
+          <a href="${manageUrl}" style="background:#2563eb; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:6px; font-weight:bold; font-size:14px; display:inline-block;">Spravovať moju rezerváciu</a>
+        </div>
+      </div>
+    `;
+}
+
+// Customer-facing e-mail after a self-service cancellation via moja-rezervacia.html
+function buildCustomerCancellationEmailHtml(booking) {
+  return `
+      <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; padding:20px; border:1px solid #e2e8f0; border-radius:10px; background:#ffffff;">
+        <h2 style="color:#0f172a; margin-top:0;">Rezervácia zrušená — #${booking.id}</h2>
+        <p style="color:#64748b; font-size:14px;">Dobrý deň${booking.customer ? ', ' + booking.customer : ''}, vaša rezervácia na termín ${booking.date || '-'} o ${booking.time || '-'} bola úspešne zrušená.</p>
+        <p style="color:#64748b; font-size:13px; margin-top:16px;">Ak ste zrušenie nevykonali vy, kontaktujte nás prosím čo najskôr priamo.</p>
+      </div>
+    `;
+}
+
+function dispatchCustomerRescheduleConfirmation(booking) {
+  const subject = 'Termín rezervácie #' + booking.id + ' zmenený — AutoMek';
+  return sendEmailGeneric(booking.email, subject, buildCustomerRescheduleEmailHtml(booking));
+}
+
+function dispatchCustomerCancellationConfirmation(booking) {
+  const subject = 'Rezervácia #' + booking.id + ' zrušená — AutoMek';
+  return sendEmailGeneric(booking.email, subject, buildCustomerCancellationEmailHtml(booking));
+}
+
+// Shop-facing heads-up when a customer changes their own booking via self-service
+function dispatchShopChangeNotification(booking, changeLabel) {
+  const plateFormatted = (booking.plate || '-').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+  const subject = 'AutoMek: ' + changeLabel + ' #' + booking.id + ' - ' + (booking.customer || 'Klient') + ' (' + plateFormatted + ')';
+  const targetEmail = emailConfig.recipientEmail || 'servis@automek.sk';
+  return sendEmailGeneric(targetEmail, subject, buildBookingEmailHtml(booking));
+}
+
 const server = http.createServer((req, res) => {
   const parsedUrl = new URL(req.url, 'http://localhost:' + PORT);
   const pathname = parsedUrl.pathname;
@@ -1058,6 +1109,16 @@ const server = http.createServer((req, res) => {
         }
         bookings[idx].status = 'cancelled';
         saveBookings(bookings);
+
+        dispatchShopChangeNotification(bookings[idx], 'Zákazník zrušil termín').catch(err => {
+          console.warn('[SELF-SERVICE] Notifikácia dielni o zrušení zlyhala:', err.message);
+        });
+        if (bookings[idx].email && bookings[idx].email.includes('@')) {
+          dispatchCustomerCancellationConfirmation(bookings[idx]).catch(err => {
+            console.warn('[SELF-SERVICE] Potvrdzovací email o zrušení zlyhal:', err.message);
+          });
+        }
+
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, booking: bookings[idx] }));
       } catch (err) {
@@ -1118,6 +1179,16 @@ const server = http.createServer((req, res) => {
         bookings[idx].date = date;
         bookings[idx].time = time;
         saveBookings(bookings);
+
+        dispatchShopChangeNotification(bookings[idx], 'Zákazník zmenil termín zákazky').catch(err => {
+          console.warn('[SELF-SERVICE] Notifikácia dielni o zmene termínu zlyhala:', err.message);
+        });
+        if (bookings[idx].email && bookings[idx].email.includes('@')) {
+          dispatchCustomerRescheduleConfirmation(bookings[idx]).catch(err => {
+            console.warn('[SELF-SERVICE] Potvrdzovací email o zmene termínu zlyhal:', err.message);
+          });
+        }
+
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, booking: bookings[idx] }));
       } catch (err) {

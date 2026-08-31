@@ -546,17 +546,9 @@
       border-radius: 50%;
     }
 
-    .cal-main-layout {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      width: 100%;
-    }
-
     /* CALENDAR GRID */
     .cal-grid-card {
-      flex: 1;
-      min-width: 0;
+      width: 100%;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 14px;
@@ -1992,168 +1984,6 @@
       color: var(--accent);
     }
 
-    /* SELECTED DAY AGENDA (PC & MOBILE) */
-    .cal-selected-day-agenda {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      width: 360px;
-      flex-shrink: 0;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 16px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
-      position: sticky;
-      top: 16px;
-    }
-
-    .agenda-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 12px;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .agenda-header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .agenda-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .agenda-badge {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--accent);
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      padding: 3px 10px;
-      border-radius: 100px;
-    }
-
-    .agenda-items-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .agenda-empty-msg {
-      padding: 24px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.88rem;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 10px;
-      border: 1px dashed rgba(255, 255, 255, 0.08);
-    }
-
-    .agenda-order-card {
-      background: var(--card-elevated);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-left: 4px solid var(--accent);
-      border-radius: 10px;
-      padding: 14px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      transition: all 0.15s;
-    }
-
-    .agenda-order-card:hover {
-      border-color: rgba(255, 255, 255, 0.18);
-      background: #1e2433;
-    }
-
-    .agenda-order-card.status-pending { border-left-color: #fbbf24; }
-    .agenda-order-card.status-confirmed { border-left-color: #38bdf8; }
-    .agenda-order-card.status-in_progress { border-left-color: #818cf8; }
-    .agenda-order-card.status-completed { border-left-color: #34d399; }
-    .agenda-order-card.status-cancelled { border-left-color: #f87171; }
-
-    .agenda-card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .agenda-time-pill {
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      color: var(--accent);
-      font-family: 'Space Mono', monospace;
-      font-weight: 700;
-      font-size: 0.82rem;
-      padding: 4px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .agenda-time-pill:hover {
-      background: var(--accent);
-      color: #000;
-    }
-
-    .agenda-cust-info {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .agenda-cust-name {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: #fff;
-    }
-
-    .agenda-cust-phone {
-      font-size: 0.8rem;
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .agenda-cust-phone:hover {
-      text-decoration: underline;
-    }
-
-    .agenda-card-body {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .agenda-part-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-    }
-
-    .agenda-card-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
     .cal-day-cell.selected {
       background: rgba(56, 189, 248, 0.08) !important;
       box-shadow: inset 0 0 0 2px var(--accent) !important;
@@ -2166,13 +1996,6 @@
 
     /* RESPONSIVE MOBILE MEDIA QUERIES */
     @media (max-width: 768px) {
-      .cal-main-layout {
-        flex-direction: column;
-      }
-      .cal-selected-day-agenda {
-        width: 100%;
-        position: static;
-      }
       .top-bar {
         padding: 12px 16px;
         gap: 10px;
@@ -2558,26 +2381,10 @@
         </div>
       </div>
 
-      <!-- Calendar Main Layout (Grid + Sticky Agenda) -->
-      <div class="cal-main-layout">
-        <!-- Calendar Grid Card -->
-        <div class="cal-grid-card">
-          <div class="cal-days-grid" id="cal-days-grid">
-            <!-- Dynamically populated day cells -->
-          </div>
-        </div>
-
-        <!-- Selected Day Agenda Card -->
-        <div class="cal-selected-day-agenda">
-          <div class="agenda-header">
-            <div class="agenda-header-left">
-              <div class="agenda-title" id="agenda-date-title">Pondelok, 31. August 2026</div>
-              <div class="agenda-badge" id="agenda-count-badge">0 zákaziek</div>
-            </div>
-          </div>
-          <div class="agenda-items-list" id="agenda-items-list">
-            <!-- Dynamically populated agenda items -->
-          </div>
+      <!-- Calendar Grid Card -->
+      <div class="cal-grid-card">
+        <div class="cal-days-grid" id="cal-days-grid">
+          <!-- Dynamically populated day cells -->
         </div>
       </div>
 
@@ -3115,9 +2922,6 @@
       const WEEKDAYS_SHORT_SK = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'];
       const MONTHS_SHORT_SK = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
       
-      // Selected day for mobile & quick agenda review (Default: today)
-      let selectedAgendaDate = new Date();
-
       const TIME_SLOTS = [
         '08:00', '08:30', '09:00', '09:30',
         '10:00', '10:30', '11:00', '11:30',
@@ -3744,9 +3548,8 @@
             dateChanged = true;
           }
           
-          // Switch calendar view directly to the new month & day!
+          // Switch calendar view directly to the new month
           calendarDate = new Date(y, m - 1, 1);
-          selectedAgendaDate = new Date(y, m - 1, d);
         }
 
         if (newTime) {
@@ -3980,94 +3783,6 @@
       // CALENDAR RENDER ENGINE WITH CROSS-MONTH DRAG & DROP
       // =========================================================
       let dragNavTimer = null;
-      const agendaDateTitle = document.getElementById('agenda-date-title');
-      const agendaCountBadge = document.getElementById('agenda-count-badge');
-      const agendaItemsList = document.getElementById('agenda-items-list');
-
-      function renderAgendaForDate(targetDate) {
-        if (!agendaDateTitle || !agendaItemsList) return;
-        const year = targetDate.getFullYear();
-        const month = targetDate.getMonth();
-        const day = targetDate.getDate();
-
-        const weekdayName = WEEKDAYS_FULL_SK[targetDate.getDay()];
-        const monthName = MONTH_NAMES_SK[month];
-        agendaDateTitle.textContent = `${weekdayName}, ${day}. ${monthName} ${year}`;
-
-        const dayBookings = bookings.filter(b => isBookingOnDate(b, year, month, day));
-        
-        dayBookings.sort((a, b) => {
-          const timeToMin = (t) => {
-            if (!t) return 0;
-            const p = String(t).trim().split(':');
-            return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
-          };
-          return timeToMin(a.time) - timeToMin(b.time);
-        });
-
-        agendaCountBadge.textContent = `${dayBookings.length} ${dayBookings.length === 1 ? 'zákazka' : dayBookings.length >= 2 && dayBookings.length <= 4 ? 'zákazky' : 'zákaziek'}`;
-
-        agendaItemsList.innerHTML = '';
-        if (dayBookings.length === 0) {
-          agendaItemsList.innerHTML = `<div class="agenda-empty-msg">Na tento deň nie sú naplánované žiadne servisné zákazky.</div>`;
-          return;
-        }
-
-        dayBookings.forEach(b => {
-          const card = document.createElement('div');
-          card.className = `agenda-order-card status-${b.status || 'pending'}`;
-          const orderUrl = 'order.html?id=' + encodeURIComponent(b.id);
-          const plateClean = formatPlate(b.plate);
-
-          card.innerHTML = `
-            <div class="agenda-card-top">
-              <div class="agenda-cust-info">
-                <button type="button" class="agenda-time-pill" title="Kliknite pre zmenu času a dátumu">
-                  <span>${escapeHtml(b.time || '10:00')}</span>
-                  <span style="font-size:0.65rem;">&#9662;</span>
-                </button>
-                <span class="agenda-cust-name">${escapeHtml(b.customer || 'Zákazník')}</span>
-                ${b.phone ? `<a href="tel:${escapeHtml(b.phone)}" class="agenda-cust-phone">${escapeHtml(b.phone)}</a>` : ''}
-              </div>
-            </div>
-
-            <div class="agenda-card-body">
-              <div class="agenda-part-badge">
-                <span class="part-badge">${escapeHtml(b.partCode || 'P')}</span>
-                <span>${escapeHtml(b.partName || '-')} &bull; <strong>${escapeHtml(plateClean)}</strong></span>
-              </div>
-              <div class="agenda-card-actions">
-                <select class="status-select row-status" data-id="${b.id}">
-                  <option value="pending" ${b.status === 'pending' ? 'selected' : ''}>Nová (Čaká)</option>
-                  <option value="confirmed" ${b.status === 'confirmed' ? 'selected' : ''}>Schválená</option>
-                  <option value="in_progress" ${b.status === 'in_progress' ? 'selected' : ''}>V servise</option>
-                  <option value="completed" ${b.status === 'completed' ? 'selected' : ''}>Dokončená</option>
-                  <option value="cancelled" ${b.status === 'cancelled' ? 'selected' : ''}>Zrušená</option>
-                </select>
-                <a href="${orderUrl}" target="_blank" class="open-card-link">
-                  <span>Karta</span>
-                </a>
-              </div>
-            </div>
-          `;
-
-          const timeBtn = card.querySelector('.agenda-time-pill');
-          timeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openTimePicker(b);
-          });
-
-          const statusSel = card.querySelector('.row-status');
-          statusSel.addEventListener('change', (e) => {
-            b.status = e.target.value;
-            saveData();
-            renderCalendar();
-            renderTable();
-          });
-
-          agendaItemsList.appendChild(card);
-        });
-      }
 
       function createCalendarCell(cellYear, cellMonth, cellDay, isFiller) {
         const cell = document.createElement('div');
@@ -4080,13 +3795,8 @@
 
         const todayObj = new Date();
         const isToday = todayObj.getFullYear() === cellYear && todayObj.getMonth() === cellMonth && todayObj.getDate() === cellDay;
-        const isSelectedDay = selectedAgendaDate &&
-                              selectedAgendaDate.getFullYear() === cellYear &&
-                              selectedAgendaDate.getMonth() === cellMonth &&
-                              selectedAgendaDate.getDate() === cellDay;
 
         if (isToday) cell.classList.add('today');
-        if (isSelectedDay) cell.classList.add('selected');
 
         const cellDateObj = new Date(cellYear, cellMonth, cellDay);
         const cellWeekdayFull = WEEKDAYS_FULL_SK[cellDateObj.getDay()];
@@ -4193,14 +3903,9 @@
         // Click on day cell
         const handleSelectCell = (e) => {
           if (e.target.closest('.chip-time-btn') || e.target.closest('.cal-booking-chip')) return;
-          selectedAgendaDate = new Date(cellYear, cellMonth, cellDay);
           if (isFiller) {
             calendarDate = new Date(cellYear, cellMonth, 1);
             renderCalendar();
-          } else {
-            document.querySelectorAll('.cal-day-cell').forEach(c => c.classList.remove('selected'));
-            cell.classList.add('selected');
-            renderAgendaForDate(selectedAgendaDate);
           }
         };
 
@@ -4246,7 +3951,6 @@
           
           if (isFiller) {
             calendarDate = new Date(cellYear, cellMonth, 1);
-            selectedAgendaDate = new Date(cellYear, cellMonth, cellDay);
           }
 
           saveData();
@@ -4299,9 +4003,6 @@
           const fillerCell = createCalendarCell(nextYear, nextMonth, j, true);
           calDaysGrid.appendChild(fillerCell);
         }
-
-        // Render agenda for mobile
-        renderAgendaForDate(selectedAgendaDate);
       }
 
       // AUTO-SWITCH MONTH ON DRAG HOVER OVER NAVIGATION ARROWS
@@ -4352,7 +4053,6 @@
 
       calTodayBtn.addEventListener('click', () => {
         calendarDate = new Date();
-        selectedAgendaDate = new Date();
         renderCalendar();
       });
 
@@ -4373,7 +4073,6 @@
               if (iso) {
                 const [y, m, d] = iso.split('-').map(Number);
                 calendarDate = new Date(y, m - 1, 1);
-                selectedAgendaDate = new Date(y, m - 1, d);
                 renderCalendar();
                 showRescheduleToast(`Zákazka pre ${match.customer} nájdená v mesiaci ${MONTH_NAMES_SK[m - 1]} ${y}!`);
               }

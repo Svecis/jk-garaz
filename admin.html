@@ -5496,9 +5496,23 @@
         const data = await res.json();
 
         if (res.ok && data.success) {
-          tempEnteredPassword = entered;
-          passErrorMsg.textContent = '';
-          showStep(2, data);
+          if (data.token) {
+            sessionStorage.setItem('jk_admin_jwt', data.token);
+            passErrorMsg.textContent = '';
+            tempEnteredPassword = '';
+            currentSetupSecret = '';
+
+            if (data.needsRecoverySetup) {
+              showStep(3);
+            } else {
+              authOverlay.classList.add('unlocked');
+              if (typeof syncFromBackend === 'function') syncFromBackend();
+            }
+          } else {
+            tempEnteredPassword = entered;
+            passErrorMsg.textContent = '';
+            showStep(2, data);
+          }
         } else {
           passErrorMsg.textContent = data.error || 'Nesprávne administrátorské heslo';
           triggerShake();

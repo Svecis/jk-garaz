@@ -2297,7 +2297,7 @@
         <div class="auth-error-msg" id="pass-error-msg"></div>
 
         <button type="button" class="auth-submit-btn" id="pass-submit-btn">
-          <span>Pokračovať na 2FA overenie</span>
+          <span>Prihlásiť sa do administrácie</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
@@ -3015,6 +3015,7 @@
           console.warn('⚠️ Backend offline, using local data fallback.');
         }
       }
+      window.syncFromBackend = syncFromBackend;
 
       async function apiSaveBooking(booking) {
         try {

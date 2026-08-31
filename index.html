@@ -482,7 +482,7 @@
       position: absolute;
       bottom: 100%;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translateX(calc(-50% - var(--arrow-offset, 0px)));
       border-width: 6px;
       border-style: solid;
       border-color: transparent transparent var(--accent) transparent;
@@ -606,14 +606,14 @@
       border: 1px solid rgba(0, 229, 255, 0.35);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
-      padding: 14px 16px;
+      padding: 12px 14px;
       border-radius: 14px;
-      width: 250px;
+      width: 220px;
       color: #fff;
       opacity: 0;
       pointer-events: none;
       visibility: hidden;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(0, 229, 255, 0.15);
       text-align: center;
       z-index: 60;
@@ -624,10 +624,32 @@
       position: absolute;
       top: 100%;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translateX(calc(-50% - var(--arrow-offset, 0px)));
       border-width: 7px;
       border-style: solid;
       border-color: rgba(13, 16, 23, 0.96) transparent transparent transparent;
+    }
+
+    .hotspot-tooltip.flipped-bottom {
+      bottom: auto;
+      top: calc(100% + 14px);
+    }
+
+    .hotspot-tooltip.flipped-bottom::after {
+      top: auto;
+      bottom: 100%;
+      border-color: transparent transparent rgba(13, 16, 23, 0.96) transparent;
+    }
+
+    .hotspot-hint-callout::after {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(calc(-50% - var(--arrow-offset, 0px)));
+      border-width: 6px;
+      border-style: solid;
+      border-color: transparent transparent var(--accent) transparent;
     }
 
     .part-hotspot:hover .hotspot-tooltip {
@@ -3001,8 +3023,40 @@
       }
 
       // =========================================================
-      // BUILD & POSITION INTERACTIVE HOTSPOTS
+      // BUILD & POSITION INTERACTIVE HOTSPOTS (WITH EDGE CLAMPING)
       // =========================================================
+      function clampToViewport(cardEl, hotspotEl) {
+        if (!cardEl) return;
+
+        // Reset na predvolenú centrovanú pozíciu pred meraním
+        cardEl.style.left = '50%';
+        cardEl.style.removeProperty('--arrow-offset');
+        cardEl.classList.remove('flipped-bottom');
+
+        const rect = cardEl.getBoundingClientRect();
+        const margin = 14;
+        let shiftX = 0;
+
+        // Horizontálna detekcia kolízie s okrajom okna
+        if (rect.left < margin) {
+          shiftX = margin - rect.left;
+        } else if (rect.right > window.innerWidth - margin) {
+          shiftX = (window.innerWidth - margin) - rect.right;
+        }
+
+        if (shiftX !== 0) {
+          cardEl.style.left = `calc(50% + ${shiftX}px)`;
+          cardEl.style.setProperty('--arrow-offset', `${shiftX}px`);
+        }
+
+        // Vertikálna detekcia (ak je príliš blízko horného okraja / hlavičky, preklopí sa pod bod)
+        if (cardEl.classList.contains('hotspot-tooltip')) {
+          if (rect.top < margin + 50) {
+            cardEl.classList.add('flipped-bottom');
+          }
+        }
+      }
+
       function buildHotspots() {
         hotspotsContainer.innerHTML = '';
         const dict = TRANSLATIONS[currentLang];
@@ -3040,6 +3094,18 @@
             </div>
           `;
 
+          const tooltip = el.querySelector('.hotspot-tooltip');
+          const hint = el.querySelector('.hotspot-hint-callout');
+
+          const updateClamping = () => {
+            if (tooltip) clampToViewport(tooltip, el);
+            if (hint) clampToViewport(hint, el);
+          };
+
+          el.addEventListener('mouseenter', updateClamping);
+          el.addEventListener('touchstart', updateClamping, { passive: true });
+          el.addEventListener('focusin', updateClamping);
+
           el.addEventListener('click', (e) => {
             e.stopPropagation();
             applyCategoryFilter(part.code);
@@ -3066,6 +3132,11 @@
 
           el.style.left = `${posX}px`;
           el.style.top = `${posY}px`;
+
+          const tooltip = el.querySelector('.hotspot-tooltip');
+          const hint = el.querySelector('.hotspot-hint-callout');
+          if (tooltip) clampToViewport(tooltip, el);
+          if (hint) clampToViewport(hint, el);
         });
       }
 

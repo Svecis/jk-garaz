@@ -3,39 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zákazkový list — JK Garáž</title>
+  <title>Detail zákazky — JK Garáž</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #07090e;
-      --card-bg: #0f131c;
-      --card-elevated: #151a27;
+      --bg: #0b0e14;
+      --card-bg: #141824;
+      --card-elevated: #1a2030;
       --card-border: rgba(255, 255, 255, 0.08);
-      --card-border-strong: rgba(255, 255, 255, 0.16);
+      --card-border-strong: rgba(255, 255, 255, 0.15);
       --text-main: #f8fafc;
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
-      
       --accent: #38bdf8;
-      --accent-hover: #0ea5e9;
-      --accent-glow: rgba(56, 189, 248, 0.2);
-      
-      --pending: #f59e0b;
-      --pending-glow: rgba(245, 158, 11, 0.18);
-      --confirmed: #38bdf8;
-      --confirmed-glow: rgba(56, 189, 248, 0.18);
-      --in-progress: #818cf8;
-      --in-progress-glow: rgba(129, 140, 248, 0.18);
-      --completed: #10b981;
-      --completed-glow: rgba(16, 185, 129, 0.18);
-      --cancelled: #f43f5e;
-      --cancelled-glow: rgba(244, 63, 94, 0.18);
-      
-      --radius-sm: 8px;
-      --radius-md: 14px;
-      --radius-lg: 20px;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+      --success: #34d399;
+      --danger: #f87171;
+      --radius: 12px;
     }
 
     * {
@@ -46,339 +32,137 @@
 
     body {
       background-color: var(--bg);
-      background-image: 
-        radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 100% 100%, rgba(129, 140, 248, 0.04) 0%, transparent 40%);
+      background-image: radial-gradient(circle at 50% -20%, rgba(56, 189, 248, 0.08) 0%, transparent 60%);
       color: var(--text-main);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       min-height: 100vh;
       font-size: 14px;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
-      padding-bottom: 60px;
     }
 
-    /* TOP NAVIGATION BAR */
+    /* Top navbar */
     .top-nav {
-      background: rgba(11, 14, 22, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(15, 20, 30, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--card-border);
-      padding: 14px 28px;
+      padding: 14px 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       position: sticky;
       top: 0;
-      z-index: 100;
-      gap: 16px;
-    }
-
-    .top-nav-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+      z-index: 50;
     }
 
     .back-btn {
       color: var(--text-secondary);
       text-decoration: none;
-      font-size: 0.86rem;
+      font-size: 0.85rem;
       font-weight: 600;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: var(--radius-sm);
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
       border: 1px solid var(--card-border);
       background: rgba(255, 255, 255, 0.03);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.15s;
     }
 
     .back-btn:hover {
       color: #fff;
       border-color: rgba(255, 255, 255, 0.25);
-      background: rgba(255, 255, 255, 0.08);
-      transform: translateX(-2px);
+      background: rgba(255, 255, 255, 0.06);
     }
 
-    .brand-title {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 800;
-      font-size: 1.05rem;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      letter-spacing: -0.01em;
-    }
-
-    .brand-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 12px var(--accent);
-    }
-
-    .top-nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn-action {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 8px 16px;
-      border-radius: var(--radius-sm);
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s ease;
-      text-decoration: none;
-    }
-
-    .btn-action:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.25);
-      color: #fff;
-    }
-
-    .btn-action-primary {
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      color: #fff;
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
-    }
-
-    .btn-action-primary:hover {
-      background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
-      border-color: var(--accent);
-      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
-      color: #fff;
-    }
-
-    /* MAIN CONTAINER */
     .page-container {
-      max-width: 1080px;
+      max-width: 960px;
       width: 100%;
-      margin: 28px auto 0;
-      padding: 0 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    /* HEADER WORK ORDER BANNER */
-    .order-hero-banner {
-      background: linear-gradient(145deg, #111624 0%, #0c101a 100%);
-      border: 1px solid var(--card-border-strong);
-      border-radius: var(--radius-lg);
-      padding: 28px 32px;
+      margin: 28px auto;
+      padding: 0 24px 60px;
       display: flex;
       flex-direction: column;
       gap: 20px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
-    .order-hero-banner::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, #38bdf8 0%, #818cf8 50%, #34d399 100%);
-    }
-
-    .hero-top-row {
+    /* Header Banner Card */
+    .header-banner {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 22px 28px;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      flex-wrap: wrap;
       gap: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     }
 
-    .hero-title-group {
+    .order-id-title {
       display: flex;
-      align-items: baseline;
-      gap: 14px;
-      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 4px;
     }
 
-    .order-id-code {
+    .order-id-badge {
       font-family: 'Space Mono', monospace;
-      font-size: 2rem;
+      font-size: 1.6rem;
       font-weight: 700;
       color: #fff;
-      letter-spacing: -0.03em;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      letter-spacing: -0.02em;
     }
 
-    .order-type-badge {
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      color: var(--accent);
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 100px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .order-submeta {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
     }
 
-    /* DYNAMIC STATUS BADGE SELECTOR */
-    .status-select-wrap {
-      display: inline-flex;
+    .status-picker-box {
+      display: flex;
       align-items: center;
-      gap: 8px;
-      background: #181f30;
-      border: 1.5px solid rgba(255, 255, 255, 0.12);
-      padding: 6px 14px;
-      border-radius: var(--radius-sm);
-      transition: all 0.2s ease;
+      gap: 10px;
+      background: var(--card-elevated);
+      border: 1px solid var(--card-border-strong);
+      padding: 8px 14px;
+      border-radius: 10px;
     }
 
-    .status-select-wrap:hover {
-      border-color: rgba(255, 255, 255, 0.25);
-      background: #1c2438;
+    .status-picker-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
-    .status-indicator-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .status-select-wrap.status-pending .status-indicator-dot { background: var(--pending); box-shadow: 0 0 10px var(--pending); }
-    .status-select-wrap.status-confirmed .status-indicator-dot { background: var(--confirmed); box-shadow: 0 0 10px var(--confirmed); }
-    .status-select-wrap.status-in_progress .status-indicator-dot { background: var(--in-progress); box-shadow: 0 0 10px var(--in-progress); }
-    .status-select-wrap.status-completed .status-indicator-dot { background: var(--completed); box-shadow: 0 0 10px var(--completed); }
-    .status-select-wrap.status-cancelled .status-indicator-dot { background: var(--cancelled); box-shadow: 0 0 10px var(--cancelled); }
-
-    .status-dropdown {
+    .status-picker-select {
       background: transparent;
       border: none;
       color: #fff;
-      font-size: 0.95rem;
-      font-weight: 700;
+      font-size: 0.92rem;
+      font-weight: 600;
       outline: none;
       cursor: pointer;
-      font-family: inherit;
     }
 
-    .status-dropdown option {
-      background: #141824;
+    .status-picker-select option {
+      background: #1a2030;
       color: #fff;
-      padding: 8px;
     }
 
-    /* 4-KPI QUICK HIGHLIGHT TILES */
-    .kpi-strip-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-    }
-
-    @media (max-width: 900px) {
-      .kpi-strip-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 520px) {
-      .kpi-strip-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .kpi-tile {
-      background: rgba(255, 255, 255, 0.025);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      border-radius: var(--radius-md);
-      padding: 16px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .kpi-tile:hover {
-      background: rgba(255, 255, 255, 0.045);
-      border-color: rgba(255, 255, 255, 0.14);
-      transform: translateY(-1px);
-    }
-
-    .kpi-label {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: var(--text-muted);
-      letter-spacing: 0.06em;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .kpi-val {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #fff;
-      word-break: break-word;
-    }
-
-    /* SLOVAK LICENCE PLATE BADGE */
-    .sk-plate-badge {
-      display: inline-flex;
-      align-items: center;
-      background: #fff;
-      color: #0b0e14;
-      border-radius: 6px;
-      font-family: 'Space Mono', monospace;
-      font-weight: 700;
-      font-size: 0.95rem;
-      border: 1.5px solid #cbd5e1;
-      overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      width: fit-content;
-    }
-
-    .sk-plate-flag {
-      background: #003399;
-      color: #fff;
-      font-size: 0.65rem;
-      font-weight: 800;
-      padding: 4px 6px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      line-height: 1;
-      letter-spacing: -0.05em;
-    }
-
-    .sk-plate-text {
-      padding: 3px 8px;
-      letter-spacing: 0.08em;
-    }
-
-    /* 2-COLUMN SECTION GRID */
-    .sections-grid {
+    /* 2-COLUMN GRID */
+    .grid-2col {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
     }
 
-    @media (max-width: 820px) {
-      .sections-grid {
+    @media (max-width: 768px) {
+      .grid-2col {
         grid-template-columns: 1fr;
       }
     }
@@ -387,72 +171,48 @@
     .section-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius);
       padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
-      position: relative;
+      gap: 18px;
     }
 
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-      padding-bottom: 14px;
-    }
-
-    .card-title-wrap {
+    .card-title-row {
       display: flex;
       align-items: center;
       gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
     }
 
-    .card-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-    }
-
-    .card-title {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 0.98rem;
+    .card-title-text {
+      font-size: 0.92rem;
       font-weight: 700;
       color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
-    /* KEY VALUE ROWS */
-    .field-list {
+    /* Key-Value Pair Box */
+    .kv-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
-    .field-row {
+    .kv-row {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 4px;
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid rgba(255, 255, 255, 0.04);
-      padding: 12px 16px;
-      border-radius: var(--radius-sm);
-      transition: background 0.15s;
+      padding: 10px 14px;
+      border-radius: 8px;
     }
 
-    .field-row:hover {
-      background: rgba(255, 255, 255, 0.035);
-    }
-
-    .field-label {
+    .kv-label {
       font-size: 0.72rem;
       text-transform: uppercase;
       font-weight: 700;
@@ -460,148 +220,75 @@
       letter-spacing: 0.05em;
     }
 
-    .field-val {
+    .kv-val {
       font-size: 0.96rem;
       color: #fff;
       font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
     }
 
-    .field-val a {
+    .kv-val a {
       color: var(--accent);
       text-decoration: none;
-      transition: color 0.15s;
     }
 
-    .field-val a:hover {
+    .kv-val a:hover {
       text-decoration: underline;
-      color: #7dd3fc;
     }
 
-    /* DATE & TIME INLINE PICKER */
-    .datetime-inline-box {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #161c2b;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 8px;
-      padding: 4px 10px;
-    }
-
-    .inline-date-input, .inline-time-select {
-      background: transparent;
-      border: none;
-      color: #fff;
-      font-family: inherit;
-      font-size: 0.9rem;
-      font-weight: 600;
-      outline: none;
-      cursor: pointer;
-    }
-
-    .inline-time-select {
-      font-family: 'Space Mono', monospace;
-      font-weight: 700;
-      color: var(--accent);
-    }
-
-    .inline-time-select option {
-      background: #141824;
-      color: #fff;
-    }
-
-    /* SYMPTOM PILLS */
-    .symptom-tags-grid {
+    /* Symptoms & Description */
+    .symptom-tag-list {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
     }
 
-    .symptom-pill {
-      background: #1a2233;
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      color: #e2e8f0;
-      font-size: 0.86rem;
+    .symptom-tag {
+      background: var(--card-elevated);
+      border: 1px solid var(--card-border-strong);
+      color: #fff;
+      font-size: 0.84rem;
       font-weight: 500;
       padding: 6px 14px;
-      border-radius: 100px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      border-radius: 8px;
     }
 
-    .symptom-pill::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-    }
-
-    /* QUOTE DESCRIPTION BOX */
-    .client-quote-box {
-      background: #131826;
+    .quote-box {
+      background: var(--card-elevated);
       border-left: 4px solid var(--accent);
-      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      border-radius: 0 10px 10px 0;
       padding: 16px 20px;
-      font-size: 0.94rem;
+      font-size: 0.95rem;
       color: #f1f5f9;
       line-height: 1.6;
-      font-style: italic;
     }
 
-    /* TECHNICIAN NOTES / PROTOCOL TEXTAREA */
-    .tech-notes-area {
-      width: 100%;
-      min-height: 100px;
-      background: #131826;
-      border: 1px solid var(--card-border-strong);
-      border-radius: var(--radius-sm);
-      padding: 12px 16px;
-      color: #fff;
-      font-family: inherit;
-      font-size: 0.9rem;
-      line-height: 1.5;
-      outline: none;
-      resize: vertical;
-      transition: all 0.2s;
-    }
-
-    .tech-notes-area:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    .tech-notes-area::placeholder {
-      color: var(--text-muted);
-    }
-
-    /* AUDIO PLAYER COMPONENT */
+    /* Audio Player */
     .audio-player-card {
-      background: #141a29;
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      border-radius: var(--radius-sm);
+      background: var(--card-elevated);
+      border: 1px solid var(--card-border-strong);
+      border-radius: 10px;
       padding: 18px 22px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      flex-wrap: wrap;
+    }
+
+    .audio-meta-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
 
     .sound-bars-anim {
       display: flex;
       align-items: flex-end;
-      gap: 4px;
-      height: 26px;
+      gap: 3px;
+      height: 24px;
     }
 
     .sound-bar-item {
-      width: 4px;
+      width: 3px;
       height: 6px;
       background: var(--accent);
       border-radius: 2px;
@@ -616,16 +303,17 @@
 
     @keyframes barDance {
       0% { height: 4px; }
-      100% { height: 26px; }
+      100% { height: 24px; }
     }
 
-    .audio-play-btn {
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    .audio-btn {
+      background: #2563eb;
+      background-image: linear-gradient(180deg, #38bdf8 0%, #2563eb 100%);
       color: #fff;
-      border: 1px solid var(--accent);
-      border-radius: var(--radius-sm);
+      border: none;
+      border-radius: 8px;
       padding: 10px 22px;
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
@@ -634,97 +322,111 @@
       transition: all 0.2s;
     }
 
-    .audio-play-btn:hover {
-      box-shadow: 0 0 16px var(--accent-glow);
-      transform: translateY(-1px);
+    .audio-btn:hover {
+      opacity: 0.95;
     }
 
-    /* PHOTOS GRID */
-    .photos-gallery-grid {
+    /* Photo Gallery */
+    .photos-grid-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 16px;
     }
 
-    .photo-thumbnail-card {
+    .photo-card {
       position: relative;
-      border-radius: var(--radius-sm);
+      border-radius: 10px;
       overflow: hidden;
       border: 1.5px solid var(--card-border-strong);
       cursor: pointer;
-      background: #090c14;
-      aspect-ratio: 16 / 10;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.2s;
+      background: #0f172a;
     }
 
-    .photo-thumbnail-card:hover {
+    .photo-card:hover {
       border-color: var(--accent);
-      transform: scale(1.02);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
     }
 
-    .photo-thumb-img {
+    .photo-img {
       width: 100%;
-      height: 100%;
+      height: 160px;
       object-fit: cover;
       display: block;
     }
 
-    .photo-hover-overlay {
+    .photo-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.5);
       color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       font-weight: 700;
       opacity: 0;
       transition: opacity 0.2s;
-      gap: 6px;
     }
 
-    .photo-thumbnail-card:hover .photo-hover-overlay {
+    .photo-card:hover .photo-overlay {
       opacity: 1;
     }
 
-    /* FOOTER BAR */
-    .order-footer-bar {
+    /* Bottom Actions Bar */
+    .footer-actions {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
       padding-top: 10px;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
-    .btn-danger-outline {
+    .btn-delete {
       background: transparent;
-      border: 1px solid rgba(244, 63, 94, 0.4);
-      color: var(--cancelled);
-      padding: 10px 20px;
-      border-radius: var(--radius-sm);
-      font-size: 0.88rem;
+      border: 1px solid var(--card-border);
+      color: var(--danger);
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.15s;
     }
 
-    .btn-danger-outline:hover {
-      background: rgba(244, 63, 94, 0.12);
-      border-color: var(--cancelled);
-      color: #fff;
+    .btn-delete:hover {
+      background: rgba(248, 113, 113, 0.1);
+      border-color: var(--danger);
     }
 
-    /* LIGHTBOX MODAL */
+    .btn-print {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border-strong);
+      color: #fff;
+      padding: 9px 22px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+
+    .btn-print:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: #fff;
+    }
+
+    /* Lightbox Modal */
     .lightbox-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(5, 7, 12, 0.94);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      z-index: 1000;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 999;
       display: none;
       align-items: center;
       justify-content: center;
@@ -740,7 +442,6 @@
       max-height: 85vh;
       border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.9);
     }
 
     .lightbox-close {
@@ -750,132 +451,292 @@
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.25);
       color: #fff;
-      width: 44px;
-      height: 44px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 1.4rem;
-      transition: all 0.2s;
+      font-size: 1.3rem;
     }
 
     .lightbox-close:hover {
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.3);
     }
 
-    /* TOAST NOTIFICATION */
-    .toast-popup {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: #111827;
-      border: 1px solid var(--accent);
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-      font-size: 0.88rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 10000;
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    /* HIDDEN IN WEB VIEW, USED ONLY FOR PROFESSIONAL PRINT */
+    .print-only-container {
+      display: none;
     }
 
-    .toast-popup.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    /* ========================================================= */
-    /* PRINT OPTIMIZATION — OFFICIAL WORK ORDER DOCUMENT (A4)   */
-    /* ========================================================= */
+    /* ========================================================================== */
+    /* PROFESIONÁLNY TLAČOVÝ ZÁKAZKOVÝ LIST PRE TLAČIAREŇ (A4 ČIERNOBIELY DOKUMENT) */
+    /* ========================================================================== */
     @media print {
-      body {
-        background: #fff !important;
-        color: #000 !important;
-        font-size: 12px !important;
-        padding-bottom: 0 !important;
+      @page {
+        size: A4 portrait;
+        margin: 12mm 15mm;
       }
 
+      body {
+        background: #ffffff !important;
+        color: #111827 !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, Arial, sans-serif !important;
+        font-size: 11pt !important;
+        line-height: 1.4 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Skryť kompletný webový UI layout */
       .top-nav,
-      .top-nav-actions,
-      .order-footer-bar,
-      .audio-player-card button,
+      .page-container,
       .lightbox-overlay {
         display: none !important;
       }
 
-      .page-container {
+      /* Zobraziť štruktúrovaný čistý zákazkový list */
+      .print-only-container {
+        display: block !important;
+        width: 100% !important;
         max-width: 100% !important;
-        margin: 0 !important;
+        margin: 0 auto !important;
         padding: 0 !important;
-        gap: 14px !important;
       }
 
-      .order-hero-banner {
-        background: #fff !important;
-        border: 2px solid #000 !important;
-        box-shadow: none !important;
-        padding: 16px 20px !important;
-        color: #000 !important;
+      .p-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 2px solid #1e293b;
+        padding-bottom: 12px;
+        margin-bottom: 16px;
       }
 
-      .order-hero-banner::before {
-        display: none !important;
+      .p-logo-title {
+        font-size: 18pt;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #0f172a;
+        margin-bottom: 2px;
       }
 
-      .order-id-code, .brand-title, .kpi-val, .field-val, .card-title {
-        color: #000 !important;
+      .p-subbrand {
+        font-size: 9pt;
+        color: #475569;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
 
-      .kpi-tile, .section-card, .field-row {
-        background: #fff !important;
-        border: 1px solid #94a3b8 !important;
-        box-shadow: none !important;
-        color: #000 !important;
+      .p-doc-box {
+        text-align: right;
       }
 
-      .sk-plate-badge {
-        border: 2px solid #000 !important;
+      .p-doc-title {
+        font-size: 14pt;
+        font-weight: 800;
+        color: #0f172a;
+        text-transform: uppercase;
       }
 
-      .sk-plate-flag {
-        background: #000 !important;
-        color: #fff !important;
+      .p-doc-num {
+        font-family: 'Space Mono', monospace;
+        font-size: 13pt;
+        font-weight: 700;
+        color: #0369a1;
       }
 
-      .client-quote-box, .tech-notes-area {
-        border-left: 4px solid #000 !important;
-        background: #f8fafc !important;
-        color: #000 !important;
+      .p-meta-date {
+        font-size: 8.5pt;
+        color: #64748b;
+        margin-top: 2px;
       }
 
-      .print-signatures-row {
-        display: flex !important;
-        justify-content: space-between !important;
-        margin-top: 40px !important;
-        padding-top: 20px !important;
-        border-top: 1px dashed #64748b !important;
+      .p-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 14px;
       }
 
-      .sign-box {
-        width: 45% !important;
-        text-align: center !important;
-        border-top: 1px solid #000 !important;
-        padding-top: 8px !important;
-        font-size: 0.85rem !important;
-        font-weight: 600 !important;
+      .p-box {
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 10px 14px;
+        background: #f8fafc;
       }
-    }
 
-    .print-signatures-row {
-      display: none;
+      .p-box-title {
+        font-size: 8.5pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #475569;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 4px;
+        margin-bottom: 8px;
+      }
+
+      .p-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-size: 9.5pt;
+      }
+
+      .p-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .p-lbl {
+        color: #64748b;
+        font-weight: 500;
+      }
+
+      .p-val {
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .p-plate-val {
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 10.5pt;
+        background: #ffffff;
+        border: 1px solid #94a3b8;
+        padding: 1px 6px;
+        border-radius: 4px;
+      }
+
+      .p-section {
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        margin-bottom: 14px;
+        overflow: hidden;
+      }
+
+      .p-sec-head {
+        background: #f1f5f9;
+        font-size: 8.5pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #334155;
+        padding: 6px 12px;
+        border-bottom: 1px solid #cbd5e1;
+      }
+
+      .p-sec-body {
+        padding: 10px 12px;
+        font-size: 9.5pt;
+      }
+
+      .p-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 4px;
+      }
+
+      .p-table th {
+        background: #f8fafc;
+        font-size: 8pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #475569;
+        text-align: left;
+        padding: 6px 8px;
+        border-bottom: 1px solid #cbd5e1;
+      }
+
+      .p-table td {
+        padding: 8px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 9.5pt;
+      }
+
+      .p-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .p-desc-text {
+        font-style: italic;
+        color: #334155;
+        background: #f8fafc;
+        padding: 8px 12px;
+        border-left: 3px solid #64748b;
+        margin-top: 4px;
+        border-radius: 0 4px 4px 0;
+      }
+
+      .p-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+
+      .p-tag {
+        border: 1px solid #94a3b8;
+        background: #ffffff;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 8.5pt;
+        font-weight: 600;
+      }
+
+      .p-work-lines {
+        height: 65px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 4px;
+        margin-top: 6px;
+        padding: 6px;
+        color: #94a3b8;
+        font-size: 8.5pt;
+      }
+
+      .p-price-total-box {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 12px;
+        background: #f8fafc;
+        border-top: 1px solid #cbd5e1;
+        font-size: 10.5pt;
+        font-weight: 700;
+      }
+
+      .p-signatures {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin-top: 28px;
+        padding-top: 10px;
+      }
+
+      .p-sign-col {
+        text-align: center;
+      }
+
+      .p-sign-line {
+        border-top: 1px solid #334155;
+        margin-top: 40px;
+        padding-top: 4px;
+        font-size: 8.5pt;
+        font-weight: 600;
+        color: #334155;
+      }
+
+      .p-footer-legal {
+        margin-top: 20px;
+        font-size: 7.5pt;
+        color: #94a3b8;
+        text-align: center;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 6px;
+      }
     }
   </style>
 </head>
@@ -883,27 +744,20 @@
 
   <!-- Top bar -->
   <header class="top-nav">
-    <div class="top-nav-left">
-      <a href="admin.html" class="back-btn" aria-label="Návrat späť do zoznamu zákaziek">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-        <span>Späť do administrácie</span>
-      </a>
-      <div class="brand-title">
-        <span class="brand-dot"></span>
-        <span>JK Garáž &bull; Servisný list</span>
-      </div>
-    </div>
-
-    <div class="top-nav-actions" id="top-nav-actions">
-      <!-- Dynamically filled buttons -->
-    </div>
+    <a href="admin.html" class="back-btn" aria-label="Návrat späť do zoznamu zákaziek">
+      <span>Späť do zoznamu zákaziek</span>
+    </a>
+    <span style="font-weight: 700; font-size: 0.92rem; color: #fff;">JK Garáž Servisný list</span>
   </header>
 
   <main class="page-container" id="main-content">
-    <!-- Rendered dynamically -->
+    <!-- Rendered dynamically for web screen -->
   </main>
+
+  <!-- DEDICATED CLEAN PRINT SHEET (Rendered dynamically, visible only when printing) -->
+  <div class="print-only-container" id="print-sheet-content">
+    <!-- Rendered dynamically for printer -->
+  </div>
 
   <!-- Lightbox -->
   <div class="lightbox-overlay" id="lightbox-overlay" role="dialog" aria-modal="true" aria-label="Náhľad fotografie">
@@ -911,17 +765,12 @@
     <img src="" class="lightbox-img" id="lightbox-img" alt="Zväčšená fotografia">
   </div>
 
-  <div class="toast-popup" id="toast-popup">
-    <span id="toast-icon">✅</span>
-    <span id="toast-msg">Zákazka bola úspešne uložená</span>
-  </div>
-
   <script>
     (function() {
       const STORAGE_KEY = 'automek_bookings';
 
       const mainContent = document.getElementById('main-content');
-      const topNavActions = document.getElementById('top-nav-actions');
+      const printSheetContent = document.getElementById('print-sheet-content');
       const lightboxOverlay = document.getElementById('lightbox-overlay');
       const lightboxImg = document.getElementById('lightbox-img');
       const lightboxClose = document.getElementById('lightbox-close');
@@ -990,249 +839,103 @@
         return `${y}-${m}-${day}`;
       }
 
-      function showToast(msg, icon = '✅') {
-        const toast = document.getElementById('toast-popup');
-        const toastMsg = document.getElementById('toast-msg');
-        const toastIcon = document.getElementById('toast-icon');
-        if (!toast) return;
-        toastMsg.textContent = msg;
-        toastIcon.textContent = icon;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2500);
+      let booking = null;
+      if (targetId) {
+        booking = bookings.find(b => {
+          const bClean = String(b.id || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+          const tClean = targetId.toUpperCase().replace(/[^A-Z0-9]/g, '');
+          return bClean === tClean || bClean.includes(tClean) || tClean.includes(bClean);
+        });
       }
 
-      async function syncWithBackend(booking) {
-        const token = sessionStorage.getItem('jk_admin_jwt');
-        if (token) {
-          try {
-            await fetch('/api/bookings', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-              },
-              body: JSON.stringify(booking)
-            });
-          } catch (e) {
-            console.warn('Backend offline sync:', e);
-          }
-        }
+      if (!booking && bookings.length > 0) {
+        booking = bookings[0];
       }
 
-      async function init() {
-        // Try fetching latest data from backend first
-        const token = sessionStorage.getItem('jk_admin_jwt');
-        if (token) {
-          try {
-            const res = await fetch('/api/bookings', {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-              const data = await res.json();
-              if (Array.isArray(data) && data.length > 0) {
-                bookings = data;
-                saveAllBookings(bookings);
-              }
-            }
-          } catch (e) {}
-        }
-
-        let booking = null;
-        if (targetId) {
-          booking = bookings.find(b => {
-            const bClean = String(b.id || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-            const tClean = targetId.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            return bClean === tClean || bClean.includes(tClean) || tClean.includes(bClean);
-          });
-        }
-
-        if (!booking && bookings.length > 0) {
-          booking = bookings[0];
-        }
-
-        if (!booking) {
-          document.title = 'Zákazka nenájdená — JK Garáž';
-          mainContent.innerHTML = `
-            <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius-lg); padding:56px 24px; text-align:center; max-width:600px; margin:40px auto; box-shadow:0 12px 40px rgba(0,0,0,0.5);">
-              <div style="font-size:3rem; margin-bottom:16px;">📋</div>
-              <h2 style="color:#fff; font-size:1.5rem; font-weight:800; margin-bottom:10px; font-family:'Plus Jakarta Sans', sans-serif;">Zákazka nebola nájdená</h2>
-              <p style="color:var(--text-secondary); font-size:0.95rem; line-height:1.6; margin-bottom:28px;">Zvolená zákazka neexistuje alebo bola odstránená zo systému. Prejdite do administrácie a vyberte aktívnu zákazku.</p>
-              <a href="admin.html" class="btn-action btn-action-primary" style="padding:10px 24px; font-size:0.92rem;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-                <span>Späť do administrácie</span>
-              </a>
-            </div>
-          `;
-          return;
-        }
-
-        document.title = `Zákazka #${booking.id} — ${booking.customer || 'Zákazník'} | JK Garáž`;
-        renderOrderPage(booking);
+      if (!booking) {
+        document.title = 'Zákazka nenájdená — JK Garáž';
+        mainContent.innerHTML = `
+          <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:48px 24px; text-align:center; max-width:600px; margin:40px auto;">
+            <div style="font-size:2.5rem; margin-bottom:16px;">📋</div>
+            <h2 style="color:#fff; font-size:1.4rem; font-weight:700; margin-bottom:8px;">Zákazka nebola nájdená</h2>
+            <p style="color:var(--text-muted); font-size:0.92rem; line-height:1.6; margin-bottom:24px;">Zvolená zákazka neexistuje alebo bola odstránená. Prejdite do administrácie a vyberte aktívnu zákazku.</p>
+            <a href="admin.html" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; background:#2563eb; color:#fff; padding:9px 18px; border-radius:8px; font-weight:600;">
+              <span>Späť do administrácie</span>
+            </a>
+          </div>
+        `;
+        return;
       }
+
+      document.title = 'Zákazka #' + booking.id + ' — ' + (booking.customer || '');
+      renderOrderPage(booking);
+      renderPrintSheet(booking);
 
       function renderOrderPage(b) {
         const symptomsHtml = (b.symptoms && b.symptoms.length > 0)
-          ? b.symptoms.map(s => `<span class="symptom-pill">${escapeHtml(s)}</span>`).join('')
-          : '<span style="color:var(--text-muted); font-style:italic;">Žiadne špecifické symptómy neboli vybrané</span>';
+          ? b.symptoms.map(s => '<span class="symptom-tag">' + escapeHtml(s) + '</span>').join('')
+          : '<span style="color:var(--text-muted);">Bez špecifikácie</span>';
 
         const hasAudio = b.hasAudio && b.audioData;
         const hasPhotos = b.photos && b.photos.length > 0;
-        const plateClean = formatPlate(b.plate);
-
-        // Top bar quick actions
-        topNavActions.innerHTML = `
-          ${b.phone ? `
-            <a href="tel:${escapeHtml(b.phone)}" class="btn-action" aria-label="Zavolať zákazníkovi">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-              </svg>
-              <span>Zavolať</span>
-            </a>
-          ` : ''}
-          <button type="button" class="btn-action" id="top-export-ics-btn" aria-label="Pridať do kalendára">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-            <span>Kalendár (.ICS)</span>
-          </button>
-          <button type="button" class="btn-action btn-action-primary" onclick="window.print()" aria-label="Vytlačiť zákazkový list">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6 9 6 2 18 2 18 9"></polyline>
-              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-              <rect x="6" y="14" width="12" height="8"></rect>
-            </svg>
-            <span>Tlačiť protokol</span>
-          </button>
-        `;
 
         mainContent.innerHTML = `
-          <!-- HERO WORK ORDER CARD -->
-          <div class="order-hero-banner">
-            <div class="hero-top-row">
-              <div class="hero-title-group">
-                <span class="order-id-code">#${escapeHtml(b.id)}</span>
-                <span class="order-type-badge">${escapeHtml(b.partCode || 'P')} &bull; ${escapeHtml(b.partName || 'Servisný úkon')}</span>
+          <!-- HEADER BANNER -->
+          <div class="header-banner">
+            <div>
+              <div class="order-id-title">
+                <span class="order-id-badge">#${escapeHtml(b.id)}</span>
               </div>
-
-              <!-- Live Status Selector -->
-              <div class="status-select-wrap status-${b.status || 'pending'}" id="status-badge-wrap">
-                <span class="status-indicator-dot"></span>
-                <select class="status-dropdown" id="order-status-select" aria-label="Zmeniť stav zákazky">
-                  <option value="pending" ${b.status === 'pending' ? 'selected' : ''}>Nová (Čaká)</option>
-                  <option value="confirmed" ${b.status === 'confirmed' ? 'selected' : ''}>Schválená</option>
-                  <option value="in_progress" ${b.status === 'in_progress' ? 'selected' : ''}>V servise</option>
-                  <option value="completed" ${b.status === 'completed' ? 'selected' : ''}>Dokončená</option>
-                  <option value="cancelled" ${b.status === 'cancelled' ? 'selected' : ''}>Zrušená</option>
-                </select>
+              <div class="order-submeta">
+                Prijaté: <strong>${escapeHtml(b.date || '-')} o ${escapeHtml(b.time || '-')}</strong> &bull; Pridelený technik: <strong>${escapeHtml(b.mechanic || 'Dispečing')}</strong>
               </div>
             </div>
 
-            <!-- 4-KPI QUICK GLANCE STRIP -->
-            <div class="kpi-strip-grid">
-              <div class="kpi-tile">
-                <span class="kpi-label">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="1" y="3" width="22" height="13" rx="2" ry="2"></rect>
-                    <line x1="8" y1="21" x2="16" y2="21"></line>
-                    <line x1="12" y1="17" x2="12" y2="21"></line>
-                  </svg>
-                  EČV Vozidla
-                </span>
-                <div class="kpi-val">
-                  <div class="sk-plate-badge">
-                    <div class="sk-plate-flag">
-                      <span>★</span>
-                      <span>SK</span>
-                    </div>
-                    <div class="sk-plate-text">${escapeHtml(plateClean)}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="kpi-tile">
-                <span class="kpi-label">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                  Zákazník
-                </span>
-                <div class="kpi-val" style="font-size:1.02rem;">
-                  ${escapeHtml(b.customer || 'Nezadaný')}
-                </div>
-              </div>
-
-              <div class="kpi-tile">
-                <span class="kpi-label">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                  </svg>
-                  Termín pristavenia
-                </span>
-                <div class="kpi-val" style="color:var(--accent); font-size:1rem; font-family:'Space Mono', monospace;">
-                  ${escapeHtml(b.date || '-')} &bull; ${escapeHtml(b.time || '-')}
-                </div>
-              </div>
-
-              <div class="kpi-tile">
-                <span class="kpi-label">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                  </svg>
-                  Odhadovaná cena
-                </span>
-                <div class="kpi-val" style="color:var(--completed); font-size:1.25rem;">
-                  ${escapeHtml(b.price || '-')}
-                </div>
-              </div>
+            <div class="status-picker-box">
+              <span class="status-picker-label">Stav zákazky:</span>
+              <select class="status-picker-select" id="order-status-select" aria-label="Zmeniť stav zákazky">
+                <option value="pending" ${b.status === 'pending' ? 'selected' : ''}>Nová (Čaká)</option>
+                <option value="confirmed" ${b.status === 'confirmed' ? 'selected' : ''}>Potvrdená</option>
+                <option value="in_progress" ${b.status === 'in_progress' ? 'selected' : ''}>Prebieha</option>
+                <option value="completed" ${b.status === 'completed' ? 'selected' : ''}>Dokončená</option>
+                <option value="cancelled" ${b.status === 'cancelled' ? 'selected' : ''}>Zrušená</option>
+              </select>
             </div>
           </div>
 
-          <!-- 2-COLUMN DETAILS GRID -->
-          <div class="sections-grid">
+          <!-- 2-COLUMN DETAILS -->
+          <div class="grid-2col">
 
             <!-- KARTA 1: KLIENT & VOZIDLO -->
             <div class="section-card">
-              <div class="card-header">
-                <div class="card-title-wrap">
-                  <div class="card-icon">👤</div>
-                  <span class="card-title">Informácie o klientovi a vozidle</span>
-                </div>
+              <div class="card-title-row">
+                <span class="card-title-text">Informácie o zákazníkovi a vozidle</span>
               </div>
-
-              <div class="field-list">
-                <div class="field-row">
-                  <span class="field-label">Meno a priezvisko zákazníka</span>
-                  <span class="field-val">${escapeHtml(b.customer || '-')}</span>
+              <div class="kv-list">
+                <div class="kv-row">
+                  <span class="kv-label">Meno a priezvisko</span>
+                  <span class="kv-val">${escapeHtml(b.customer || '-')}</span>
                 </div>
-
-                <div class="field-row">
-                  <span class="field-label">Telefónne číslo</span>
-                  <span class="field-val">
-                    ${b.phone ? `<a href="tel:${escapeHtml(b.phone)}">📞 ${escapeHtml(b.phone)}</a>` : '<span style="color:var(--text-muted);">-</span>'}
+                <div class="kv-row">
+                  <span class="kv-label">Telefónny kontakt</span>
+                  <span class="kv-val">
+                    ${b.phone ? `<a href="tel:${escapeHtml(b.phone)}">${escapeHtml(b.phone)}</a>` : '-'}
                   </span>
                 </div>
-
-                <div class="field-row">
-                  <span class="field-label">E-mailová adresa</span>
-                  <span class="field-val">
-                    ${b.email ? `<a href="mailto:${escapeHtml(b.email)}">✉️ ${escapeHtml(b.email)}</a>` : '<span style="color:var(--text-muted);">-</span>'}
+                <div class="kv-row">
+                  <span class="kv-label">E-mail</span>
+                  <span class="kv-val">
+                    ${b.email ? `<a href="mailto:${escapeHtml(b.email)}">${escapeHtml(b.email)}</a>` : '-'}
                   </span>
                 </div>
-
-                <div class="field-row">
-                  <span class="field-label">Urgencia závady</span>
-                  <span class="field-val">
-                    <span style="display:inline-flex; align-items:center; gap:6px; font-size:0.85rem; font-weight:700; color:${b.urgency === 'critical' ? 'var(--cancelled)' : b.urgency === 'moderate' ? 'var(--pending)' : 'var(--completed)'};">
-                      ● ${b.urgency === 'critical' ? 'Kritická (Ihneď)' : b.urgency === 'moderate' ? 'Stredná' : 'Bežná údržba'}
-                    </span>
+                <div class="kv-row">
+                  <span class="kv-label">EČV / ŠPZ Vozidla</span>
+                  <span class="kv-val" style="font-family:'Space Mono', monospace; font-weight:700;">${escapeHtml(formatPlate(b.plate))}</span>
+                </div>
+                <div class="kv-row">
+                  <span class="kv-label">Stupeň naliehavosti</span>
+                  <span class="kv-val" style="color:${b.urgency === 'critical' ? 'var(--danger)' : b.urgency === 'moderate' ? '#fbbf24' : 'var(--success)'}; font-weight:700;">
+                    ${b.urgency === 'critical' ? 'Kritická (Ihneď)' : b.urgency === 'moderate' ? 'Stredná' : 'Bežná údržba'}
                   </span>
                 </div>
               </div>
@@ -1240,66 +943,51 @@
 
             <!-- KARTA 2: SERVISNÝ PLÁN -->
             <div class="section-card">
-              <div class="card-header">
-                <div class="card-title-wrap">
-                  <div class="card-icon">⚙️</div>
-                  <span class="card-title">Servisný plán & Termín</span>
-                </div>
+              <div class="card-title-row">
+                <span class="card-title-text">Servisný plán a náklady</span>
               </div>
-
-              <div class="field-list">
-                <div class="field-row">
-                  <span class="field-label">Servisovaný komponent</span>
-                  <span class="field-val" style="color:var(--accent);">
-                    <strong>[${escapeHtml(b.partCode || 'P')}]</strong> ${escapeHtml(b.partName || '-')}
+              <div class="kv-list">
+                <div class="kv-row">
+                  <span class="kv-label">Servisovaný komponent</span>
+                  <span class="kv-val" style="color:var(--accent);">[${escapeHtml(b.partCode || 'P')}] ${escapeHtml(b.partName || '-')}</span>
+                </div>
+                <div class="kv-row">
+                  <span class="kv-label">Termín pristavenia vozidla</span>
+                  <span class="kv-val" style="display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <input type="date" id="order-date-input" value="${parseBookingToIso(b)}" aria-label="Zmeniť dátum rezervácie" style="background:#181c27; border:1px solid rgba(255,255,255,0.15); color:#fff; font-family:inherit; font-size:0.85rem; font-weight:600; padding:2px 8px; border-radius:6px; outline:none; cursor:pointer;">
+                    <span>o</span>
+                    <select id="order-time-select" aria-label="Zmeniť čas rezervácie" style="background:#181c27; border:1px solid rgba(255,255,255,0.15); color:#fff; font-family:'Space Mono', monospace; font-size:0.85rem; font-weight:700; padding:2px 8px; border-radius:6px; outline:none; cursor:pointer;">
+                      ${['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'].map(t => `<option value="${t}" ${b.time === t ? 'selected' : ''}>${t}</option>`).join('')}
+                    </select>
                   </span>
                 </div>
-
-                <div class="field-row">
-                  <span class="field-label">Plánovaný termín a čas</span>
-                  <div class="field-val">
-                    <div class="datetime-inline-box">
-                      <input type="date" class="inline-date-input" id="order-date-input" value="${parseBookingToIso(b)}" aria-label="Zmeniť dátum rezervácie">
-                      <span style="color:var(--text-muted);">o</span>
-                      <select class="inline-time-select" id="order-time-select" aria-label="Zmeniť čas rezervácie">
-                        ${['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'].map(t => `<option value="${t}" ${b.time === t ? 'selected' : ''}>${t}</option>`).join('')}
-                      </select>
-                    </div>
-                  </div>
+                <div class="kv-row">
+                  <span class="kv-label">Pridelený mechanik</span>
+                  <span class="kv-val">${escapeHtml(b.mechanic || 'Dispečing servisu')}</span>
                 </div>
-
-                <div class="field-row">
-                  <span class="field-label">Pridelený technik</span>
-                  <span class="field-val">👨‍🔧 ${escapeHtml(b.mechanic || 'Dispečing servisu')}</span>
-                </div>
-
-                <div class="field-row">
-                  <span class="field-label">Predbežná kalkulácia</span>
-                  <span class="field-val" style="color:var(--completed); font-size:1.15rem;">${escapeHtml(b.price || '-')}</span>
+                <div class="kv-row">
+                  <span class="kv-label">Predbežná odhadovaná cena</span>
+                  <span class="kv-val" style="color:var(--success); font-size:1.1rem;">${escapeHtml(b.price || '-')}</span>
                 </div>
               </div>
             </div>
 
           </div>
 
-          <!-- KARTA 3: DIAGNOSTIKA & POPIS PROBLÉMU -->
+          <!-- KARTA 3: DIAGNOSTIKA & POPIS -->
           <div class="section-card">
-            <div class="card-header">
-              <div class="card-title-wrap">
-                <div class="card-icon">🔍</div>
-                <span class="card-title">Hlásené symptómy a popis problému</span>
-              </div>
+            <div class="card-title-row">
+              <span class="card-title-text">Diagnostika a hlásené prejavy</span>
             </div>
 
-            <div style="display:flex; flex-direction:column; gap:16px;">
+            <div style="display:flex; flex-direction:column; gap:14px;">
               <div>
-                <span class="field-label" style="display:block; margin-bottom:8px;">Identifikované symptómy:</span>
-                <div class="symptom-tags-grid">${symptomsHtml}</div>
+                <span class="kv-label" style="display:block; margin-bottom:8px;">Identifikované symptómy závady:</span>
+                <div class="symptom-tag-list">${symptomsHtml}</div>
               </div>
-
               <div>
-                <span class="field-label" style="display:block; margin-bottom:8px;">Slovný popis od klienta:</span>
-                <div class="client-quote-box">"${escapeHtml(b.problemDesc || 'Zákazník nezadal žiadny doplňujúci slovný popis.')}"</div>
+                <span class="kv-label" style="display:block; margin-bottom:8px;">Slovný popis problému od klienta:</span>
+                <div class="quote-box">${escapeHtml(b.problemDesc || 'Zákazník nezadal žiadny dodatočný popis.')}</div>
               </div>
             </div>
           </div>
@@ -1307,14 +995,11 @@
           <!-- KARTA 4: ZVUKOVÝ ZÁZNAM (AK EXISTUJE) -->
           ${hasAudio ? `
             <div class="section-card">
-              <div class="card-header">
-                <div class="card-title-wrap">
-                  <div class="card-icon">🎙️</div>
-                  <span class="card-title">Zvuková nahrávka závady z mikrofónu</span>
-                </div>
+              <div class="card-title-row">
+                <span class="card-title-text">Zvukový záznam závady z mikrofónu</span>
               </div>
               <div class="audio-player-card" id="audio-player-card">
-                <div style="display:flex; align-items:center; gap:16px;">
+                <div class="audio-meta-left">
                   <div class="sound-bars-anim">
                     <div class="sound-bar-item"></div>
                     <div class="sound-bar-item"></div>
@@ -1323,79 +1008,48 @@
                     <div class="sound-bar-item"></div>
                   </div>
                   <div>
-                    <span style="font-weight:700; color:#fff; display:block; font-size:0.95rem;">Zvukový záznam klienta</span>
-                    <span style="font-size:0.8rem; color:var(--text-secondary);" id="audio-time-label">0:00 / 0:03.5 &bull; Kliknite pre prehratie</span>
+                    <span style="font-weight:700; color:#fff; display:block; font-size:0.95rem;">Hluk motora / klepanie závady</span>
+                    <span style="font-size:0.8rem; color:var(--text-secondary);" id="audio-time-label">0:00 / 0:03.5 &bull; Záznam klienta pri diagnostike</span>
                   </div>
                 </div>
-                <button type="button" class="audio-play-btn" id="audio-play-btn" aria-label="Prehrať zvukový záznam">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                  </svg>
+                <button type="button" class="audio-btn" id="audio-play-btn" aria-label="Prehrať alebo pozastaviť zvukový záznam">
                   <span>Prehrať zvuk</span>
                 </button>
               </div>
             </div>
           ` : ''}
 
-          <!-- KARTA 5: FOTODOKUMENTÁCIA (AK EXISTUJÚ FOTKY) -->
+          <!-- KARTA 5: FOTOGRAFIE (AK EXISTUJÚ) -->
           ${hasPhotos ? `
             <div class="section-card">
-              <div class="card-header">
-                <div class="card-title-wrap">
-                  <div class="card-icon">📷</div>
-                  <span class="card-title">Fotodokumentácia závady (${b.photos.length})</span>
-                </div>
+              <div class="card-title-row">
+                <span class="card-title-text">Priložené fotografie závady (${b.photos.length})</span>
               </div>
-              <div class="photos-gallery-grid">
+              <div class="photos-grid-list">
                 ${b.photos.map((p, idx) => `
-                  <div class="photo-thumbnail-card" data-src="${p}" role="button" tabindex="0" aria-label="Zväčšiť fotografiu #${idx+1}">
-                    <img src="${p}" class="photo-thumb-img" alt="Foto #${idx+1}">
-                    <div class="photo-hover-overlay">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        <line x1="11" y1="8" x2="11" y2="14"></line>
-                        <line x1="8" y1="11" x2="14" y2="11"></line>
-                      </svg>
-                      <span>Zväčšiť</span>
-                    </div>
+                  <div class="photo-card" data-src="${p}" role="button" tabindex="0" aria-label="Zväčšiť fotografiu #${idx+1}">
+                    <img src="${p}" class="photo-img" alt="Foto závady #${idx+1}">
+                    <div class="photo-overlay">Zväčšiť fotografiu</div>
                   </div>
                 `).join('')}
               </div>
             </div>
           ` : ''}
 
-          <!-- KARTA 6: INTERNÉ POZNÁMKY TECHNIKA -->
-          <div class="section-card">
-            <div class="card-header">
-              <div class="card-title-wrap">
-                <div class="card-icon">📝</div>
-                <span class="card-title">Interné servisné poznámky technika</span>
-              </div>
-              <span style="font-size:0.75rem; color:var(--text-muted);">Automaticky sa ukladá</span>
-            </div>
-            <div>
-              <textarea class="tech-notes-area" id="tech-notes-input" placeholder="Sem môžete zapísať výsledky vstupnej prehliadky, zistené poškodenia, spotrebovaný materiál alebo poznámky pre zákazníka...">${escapeHtml(b.techNotes || '')}</textarea>
-            </div>
-          </div>
-
           <!-- FOOTER ACTIONS -->
-          <div class="order-footer-bar">
-            <button type="button" class="btn-danger-outline" id="delete-order-btn" aria-label="Zmazať túto zákazku">
-              🗑️ Zmazať túto zákazku
-            </button>
-
-            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-              <button type="button" class="btn-action" id="bottom-export-ics-btn">
+          <div class="footer-actions">
+            <button type="button" class="btn-delete" id="delete-order-btn" aria-label="Zmazať túto zákazku">Zmazať túto zákazku</button>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <button type="button" class="btn-print" id="export-single-ics-btn" aria-label="Pridať termín do kalendára (.ICS)" style="background:#1e293b; border:1px solid rgba(56,189,248,0.4); color:var(--accent); display:inline-flex; align-items:center; gap:6px;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                   <line x1="16" y1="2" x2="16" y2="6"></line>
                   <line x1="8" y1="2" x2="8" y2="6"></line>
                   <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
-                <span>Exportovať do kalendára (.ICS)</span>
+                <span>Pridať do kalendára (.ICS)</span>
               </button>
-              <button type="button" class="btn-action btn-action-primary" onclick="window.print()">
+              <button type="button" class="btn-print" onclick="window.print()" aria-label="Vytlačiť zákazkový list" style="background:#0284c7; color:#fff; border-color:#38bdf8;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="6 9 6 2 18 2 18 9"></polyline>
                   <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
@@ -1405,71 +1059,19 @@
               </button>
             </div>
           </div>
-
-          <!-- PRINT ONLY SIGNATURE PROTOCOL BLOCK -->
-          <div class="print-signatures-row">
-            <div class="sign-box">
-              Podpis prijímacieho technika (JK Garáž)
-            </div>
-            <div class="sign-box">
-              Podpis zákazníka / splnomocnenej osoby
-            </div>
-          </div>
         `;
 
-        // STATUS CHANGE HANDLER
+        // Zmena stavu
         const statusSelect = document.getElementById('order-status-select');
-        const statusBadgeWrap = document.getElementById('status-badge-wrap');
-        if (statusSelect && statusBadgeWrap) {
+        if (statusSelect) {
           statusSelect.addEventListener('change', (e) => {
             b.status = e.target.value;
-            statusBadgeWrap.className = `status-select-wrap status-${b.status}`;
             saveAllBookings(bookings);
-            syncWithBackend(b);
-            showToast(`Stav zmenený na: ${statusSelect.options[statusSelect.selectedIndex].text}`);
+            renderPrintSheet(b);
           });
         }
 
-        // DATE & TIME PICKER HANDLERS
-        const timeSelect = document.getElementById('order-time-select');
-        if (timeSelect) {
-          timeSelect.addEventListener('change', (e) => {
-            b.time = e.target.value;
-            saveAllBookings(bookings);
-            syncWithBackend(b);
-            showToast(`Čas zmenený na ${b.time}`);
-          });
-        }
-
-        const dateInput = document.getElementById('order-date-input');
-        if (dateInput) {
-          dateInput.addEventListener('change', (e) => {
-            if (!e.target.value) return;
-            const [y, m, d] = e.target.value.split('-').map(Number);
-            const newDateObj = new Date(y, m - 1, d);
-            b.date = formatDateForBooking(newDateObj);
-            saveAllBookings(bookings);
-            syncWithBackend(b);
-            showToast(`Termín zmenený na ${b.date}`);
-          });
-        }
-
-        // TECHNICIAN NOTES AUTO-SAVE
-        const techNotesInput = document.getElementById('tech-notes-input');
-        if (techNotesInput) {
-          let notesTimer = null;
-          techNotesInput.addEventListener('input', (e) => {
-            b.techNotes = e.target.value;
-            clearTimeout(notesTimer);
-            notesTimer = setTimeout(() => {
-              saveAllBookings(bookings);
-              syncWithBackend(b);
-              showToast('Poznámky uložené');
-            }, 600);
-          });
-        }
-
-        // AUDIO PLAYER LOGIC
+        // Audio
         if (hasAudio) {
           const playBtn = document.getElementById('audio-play-btn');
           const audioCard = document.getElementById('audio-player-card');
@@ -1488,43 +1090,27 @@
           playBtn.addEventListener('click', () => {
             if (audio.paused) {
               audio.play().then(() => {
-                playBtn.innerHTML = `
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="6" y="4" width="4" height="16"></rect>
-                    <rect x="14" y="4" width="4" height="16"></rect>
-                  </svg>
-                  <span>Pozastaviť</span>
-                `;
+                playBtn.textContent = 'Pozastaviť';
                 audioCard.classList.add('playing');
               }).catch(err => {
                 console.warn('Audio play fallback:', err);
               });
             } else {
               audio.pause();
-              playBtn.innerHTML = `
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-                <span>Prehrať zvuk</span>
-              `;
+              playBtn.textContent = 'Prehrať zvuk';
               audioCard.classList.remove('playing');
             }
           });
 
           audio.onended = () => {
-            playBtn.innerHTML = `
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
-              <span>Prehrať zvuk</span>
-            `;
+            playBtn.textContent = 'Prehrať zvuk';
             audioCard.classList.remove('playing');
             audio.currentTime = 0;
           };
         }
 
-        // LIGHTBOX PHOTO HANDLERS
-        document.querySelectorAll('.photo-thumbnail-card').forEach(card => {
+        // Lightbox
+        document.querySelectorAll('.photo-card').forEach(card => {
           const openPhoto = () => {
             const src = card.getAttribute('data-src');
             lightboxImg.src = src;
@@ -1539,87 +1125,235 @@
           });
         });
 
-        // ICS EXPORT LOGIC
-        const triggerIcsExport = () => {
-          const dateObj = parseBookingToDateObj(b);
-          const y = dateObj.getFullYear();
-          const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-          const d = String(dateObj.getDate()).padStart(2, '0');
-          let hh = '10', mm = '00';
-          if (b.time && b.time.includes(':')) {
-            const p = b.time.split(':');
-            hh = String(p[0]).padStart(2, '0');
-            mm = String(p[1]).padStart(2, '0');
-          }
-          const startIso = `${y}${m}${d}T${hh}${mm}00`;
-          const endD = new Date(y, dateObj.getMonth(), parseInt(d, 10), parseInt(hh, 10) + 1, parseInt(mm, 10));
-          const endIso = `${endD.getFullYear()}${String(endD.getMonth()+1).padStart(2,'0')}${String(endD.getDate()).padStart(2,'0')}T${String(endD.getHours()).padStart(2,'0')}${String(endD.getMinutes()).padStart(2,'0')}00`;
-
-          const stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-          const plateClean = formatPlate(b.plate);
-          const summary = `Servis JK Garáž: ${b.customer || 'Zákazník'} (${plateClean})`;
-          const desc = `Zákazka: #${b.id}\nZákazník: ${b.customer || '-'}\nTelefón: ${b.phone || '-'}\nEČV: ${plateClean}\nDiel: ${b.partName || '-'}\nCena: ${b.price || '-'}\nPopis: ${b.problemDesc || '-'}`;
-
-          const icsText = [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0',
-            'PRODID:-//JK Garaz//Servisny List//SK',
-            'CALSCALE:GREGORIAN',
-            'METHOD:PUBLISH',
-            'BEGIN:VEVENT',
-            `UID:${b.id}@jk-garaz.sk`,
-            `DTSTAMP:${stamp}`,
-            `DTSTART:${startIso}`,
-            `DTEND:${endIso}`,
-            `SUMMARY:${summary.replace(/,/g, '\\,')}`,
-            `DESCRIPTION:${desc.replace(/\n/g, '\\n').replace(/,/g, '\\,')}`,
-            'LOCATION:JK Garáž Servis',
-            'STATUS:CONFIRMED',
-            'END:VEVENT',
-            'END:VCALENDAR'
-          ].join('\r\n');
-
-          const blob = new Blob([icsText], { type: 'text/calendar;charset=utf-8' });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', `servis_${b.id}_${(b.customer || 'zakazka').replace(/\s+/g, '_')}.ics`);
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-          showToast('Kalendár (.ICS) stiahnutý');
-        };
-
-        const topIcsBtn = document.getElementById('top-export-ics-btn');
-        if (topIcsBtn) topIcsBtn.addEventListener('click', triggerIcsExport);
-
-        const bottomIcsBtn = document.getElementById('bottom-export-ics-btn');
-        if (bottomIcsBtn) bottomIcsBtn.addEventListener('click', triggerIcsExport);
-
-        // DELETE ORDER
-        const deleteBtn = document.getElementById('delete-order-btn');
-        if (deleteBtn) {
-          deleteBtn.addEventListener('click', async () => {
-            if (confirm(`Naozaj chcete natrvalo zmazať zákazku #${b.id} (${b.customer || ''})?`)) {
-              bookings = bookings.filter(item => item.id !== b.id);
-              saveAllBookings(bookings);
-              
-              const token = sessionStorage.getItem('jk_admin_jwt');
-              if (token) {
-                try {
-                  await fetch(`/api/bookings/${encodeURIComponent(b.id)}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                  });
-                } catch (e) {}
-              }
-
-              alert('✅ Zákazka bola úspešne vymazaná.');
-              window.location.href = 'admin.html';
-            }
+        // Zmena času a dátumu
+        const timeSelect = document.getElementById('order-time-select');
+        if (timeSelect) {
+          timeSelect.addEventListener('change', (e) => {
+            b.time = e.target.value;
+            saveAllBookings(bookings);
+            renderPrintSheet(b);
           });
         }
+
+        const dateInput = document.getElementById('order-date-input');
+        if (dateInput) {
+          dateInput.addEventListener('change', (e) => {
+            if (!e.target.value) return;
+            const [y, m, d] = e.target.value.split('-').map(Number);
+            const newDateObj = new Date(y, m - 1, d);
+            b.date = formatDateForBooking(newDateObj);
+            saveAllBookings(bookings);
+            renderPrintSheet(b);
+          });
+        }
+
+        // Pridať termín do kalendára (ICS)
+        const exportSingleIcsBtn = document.getElementById('export-single-ics-btn');
+        if (exportSingleIcsBtn) {
+          exportSingleIcsBtn.addEventListener('click', () => {
+            const dateObj = parseBookingToDateObj(b);
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            let hh = '10', mm = '00';
+            if (b.time && b.time.includes(':')) {
+              const p = b.time.split(':');
+              hh = String(p[0]).padStart(2, '0');
+              mm = String(p[1]).padStart(2, '0');
+            }
+            const startIso = `${y}${m}${d}T${hh}${mm}00`;
+            const endD = new Date(y, dateObj.getMonth(), parseInt(d, 10), parseInt(hh, 10) + 1, parseInt(mm, 10));
+            const endIso = `${endD.getFullYear()}${String(endD.getMonth()+1).padStart(2,'0')}${String(endD.getDate()).padStart(2,'0')}T${String(endD.getHours()).padStart(2,'0')}${String(endD.getMinutes()).padStart(2,'0')}00`;
+
+            const stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            const plateClean = formatPlate(b.plate);
+            const summary = `Servis JK Garáž: ${b.customer || 'Zákazník'} (${plateClean})`;
+            const desc = `Zákazka: #${b.id}\nZákazník: ${b.customer || '-'}\nTelefón: ${b.phone || '-'}\nEČV: ${plateClean}\nDiel: ${b.partName || '-'}\nCena: ${b.price || '-'}\nPopis: ${b.problemDesc || '-'}`;
+
+            const icsText = [
+              'BEGIN:VCALENDAR',
+              'VERSION:2.0',
+              'PRODID:-//AutoMek JK Garaz//Servisny Kalendar//SK',
+              'CALSCALE:GREGORIAN',
+              'METHOD:PUBLISH',
+              'BEGIN:VEVENT',
+              `UID:${b.id}@jk-garaz.sk`,
+              `DTSTAMP:${stamp}`,
+              `DTSTART:${startIso}`,
+              `DTEND:${endIso}`,
+              `SUMMARY:${summary.replace(/,/g, '\\,')}`,
+              `DESCRIPTION:${desc.replace(/\n/g, '\\n').replace(/,/g, '\\,')}`,
+              'LOCATION:JK Garáž Servis',
+              'STATUS:CONFIRMED',
+              'END:VEVENT',
+              'END:VCALENDAR'
+            ].join('\r\n');
+
+            const blob = new Blob([icsText], { type: 'text/calendar;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `servis_${b.id}_${(b.customer || 'zakazka').replace(/\s+/g, '_')}.ics`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          });
+        }
+
+        // Zmazanie
+        document.getElementById('delete-order-btn').addEventListener('click', () => {
+          if (confirm('Naozaj chcete zmazať zákazku #' + b.id + '?')) {
+            bookings = bookings.filter(item => item.id !== b.id);
+            saveAllBookings(bookings);
+            alert('Zákazka bola vymazaná.');
+            window.location.href = 'admin.html';
+          }
+        });
+      }
+
+      /* TLAČOVÝ PROTOKOL PRE TLAČIARNE (A4) */
+      function renderPrintSheet(b) {
+        const symptomsList = (b.symptoms && b.symptoms.length > 0)
+          ? b.symptoms.map(s => `<span class="p-tag">${escapeHtml(s)}</span>`).join('')
+          : '<span style="color:#64748b; font-style:italic;">Bez špecifických symptómov</span>';
+
+        const todayFormatted = new Date().toLocaleDateString('sk-SK', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        printSheetContent.innerHTML = `
+          <!-- TLAČOVÁ HLAVIČKA -->
+          <div class="p-header">
+            <div>
+              <div class="p-logo-title">JK GARÁŽ AUTOSERVIS</div>
+              <div class="p-subbrand">Profesionálna diagnostika & servis vozidiel &bull; Tel: +421 900 000 000</div>
+            </div>
+            <div class="p-doc-box">
+              <div class="p-doc-title">Zákazkový list</div>
+              <div class="p-doc-num">#${escapeHtml(b.id)}</div>
+              <div class="p-meta-date">Vytlačené: ${todayFormatted}</div>
+            </div>
+          </div>
+
+          <!-- 2-STĹPCOVÝ BLOK (ZÁKAZNÍK + VOZIDLO A TERMÍN) -->
+          <div class="p-grid-2">
+            <div class="p-box">
+              <div class="p-box-title">Údaje o zákazníkovi</div>
+              <div class="p-row">
+                <span class="p-lbl">Meno a priezvisko:</span>
+                <span class="p-val">${escapeHtml(b.customer || '-')}</span>
+              </div>
+              <div class="p-row">
+                <span class="p-lbl">Telefónne číslo:</span>
+                <span class="p-val">${escapeHtml(b.phone || '-')}</span>
+              </div>
+              <div class="p-row">
+                <span class="p-lbl">E-mail:</span>
+                <span class="p-val">${escapeHtml(b.email || '-')}</span>
+              </div>
+            </div>
+
+            <div class="p-box">
+              <div class="p-box-title">Údaje o vozidle & Servise</div>
+              <div class="p-row">
+                <span class="p-lbl">EČV / ŠPZ vozidla:</span>
+                <span class="p-plate-val">${escapeHtml(formatPlate(b.plate))}</span>
+              </div>
+              <div class="p-row">
+                <span class="p-lbl">Plánovaný termín:</span>
+                <span class="p-val">${escapeHtml(b.date || '-')} o ${escapeHtml(b.time || '-')}</span>
+              </div>
+              <div class="p-row">
+                <span class="p-lbl">Prijímací technik:</span>
+                <span class="p-val">${escapeHtml(b.mechanic || 'Dispečing')}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PREDMET ZÁKAZKY A POPIS ZÁVADY -->
+          <div class="p-section">
+            <div class="p-sec-head">Požadovaný servisný úkon & Diagnostika závady</div>
+            <div class="p-sec-body">
+              <div style="margin-bottom: 8px;">
+                <span style="font-weight:700; color:#0f172a;">Servisovaná skupina:</span>
+                <span style="color:#0369a1; font-weight:700;">[${escapeHtml(b.partCode || 'P')}] ${escapeHtml(b.partName || '-')}</span>
+                <span style="margin-left: 12px; font-size:8.5pt; color:#475569;">(Naliehavosť: <strong>${b.urgency === 'critical' ? 'Kritická' : b.urgency === 'moderate' ? 'Stredná' : 'Bežná'}</strong>)</span>
+              </div>
+              <div style="margin-bottom: 6px;">
+                <span style="font-weight:700; font-size:8.5pt; color:#475569; display:block; margin-bottom:3px;">Identifikované symptómy:</span>
+                <div class="p-tags">${symptomsList}</div>
+              </div>
+              <div>
+                <span style="font-weight:700; font-size:8.5pt; color:#475569; display:block; margin-bottom:2px;">Popis problému zadaný klientom:</span>
+                <div class="p-desc-text">"${escapeHtml(b.problemDesc || 'Bez doplňujúceho popisu.')}"</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PRACOVNÝ PROTOKOL A SPOTREBOVANÝ MATERIÁL (TABUĽKA) -->
+          <div class="p-section">
+            <div class="p-sec-head">Pracovný protokol technika & Náhradné diely</div>
+            <div class="p-sec-body" style="padding:0;">
+              <table class="p-table">
+                <thead>
+                  <tr>
+                    <th style="width:5%;">#</th>
+                    <th style="width:55%;">Popis vykonaného úkonu / Použitý materiál</th>
+                    <th style="width:15%; text-align:center;">Množstvo</th>
+                    <th style="width:25%; text-align:right;">Cena s DPH</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1.</td>
+                    <td><strong>${escapeHtml(b.partName || 'Servisná prehliadka a oprava')}</strong> — diagnostika a základný úkon</td>
+                    <td style="text-align:center;">1 ks</td>
+                    <td style="text-align:right; font-weight:700;">${escapeHtml(b.price || '-')}</td>
+                  </tr>
+                  <tr>
+                    <td>2.</td>
+                    <td style="color:#94a3b8; font-style:italic;">Doplnkový materiál / drobný servisný materiál</td>
+                    <td style="text-align:center; color:#94a3b8;">—</td>
+                    <td style="text-align:right; color:#94a3b8;">—</td>
+                  </tr>
+                  <tr>
+                    <td>3.</td>
+                    <td style="color:#94a3b8; font-style:italic;">Ekologická likvidácia a réžia</td>
+                    <td style="text-align:center; color:#94a3b8;">—</td>
+                    <td style="text-align:right; color:#94a3b8;">—</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="p-price-total-box">
+                <span style="color:#475569; font-weight:600;">Predbežná dohodnutá suma:</span>
+                <span style="font-size:12pt; color:#0f172a;">${escapeHtml(b.price || '0 €')}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- POZNÁMKY PRI PREBERANÍ -->
+          <div style="margin-bottom: 12px;">
+            <span style="font-size:8pt; font-weight:700; text-transform:uppercase; color:#64748b;">Záznam technika o stave vozidla pri prevzatí:</span>
+            <div class="p-work-lines">
+              Stav km: ..................... / Stav paliva: ..................... / Viditeľné poškodenia karosérie: ..............................................................
+            </div>
+          </div>
+
+          <!-- PODPISY -->
+          <div class="p-signatures">
+            <div class="p-sign-col">
+              <div class="p-sign-line">Podpis prijímacieho technika (JK Garáž)</div>
+            </div>
+            <div class="p-sign-col">
+              <div class="p-sign-line">Podpis zákazníka / Preberajúcej osoby</div>
+            </div>
+          </div>
+
+          <!-- PRÁVNA PÄTIČKA -->
+          <div class="p-footer-legal">
+            Zákazník svojím podpisom potvrdzuje správnosť uvedených údajov, súhlas s vykonaním servisných prác a oboznámenie sa so všeobecnými obchodnými podmienkami JK Garáž.
+          </div>
+        `;
       }
 
       lightboxClose.addEventListener('click', () => {
@@ -1654,8 +1388,6 @@
         if (!str) return '';
         return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
       }
-
-      init();
     })();
   </script>
 </body>

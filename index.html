@@ -1973,6 +1973,9 @@
           </div>
 
           <div class="contact-inputs-grid">
+            <input type="text" id="cust-website" name="website" autocomplete="off"
+                   tabindex="-1" style="position:absolute; left:-9999px;
+                   width:1px; height:1px; opacity:0;" aria-hidden="true" />
             <div class="form-group">
               <label class="form-label" for="cust-name" data-i18n="step4_name_label">Meno a priezvisko *</label>
               <input type="text" id="cust-name" class="input-field" placeholder="Meno a priezvisko" required autocomplete="name" />
@@ -2673,9 +2676,21 @@
 
       function persistBookings() {
         try {
+          if (activeBookings.length > 200) {
+            activeBookings.length = 200;
+          }
           localStorage.setItem('automek_bookings', JSON.stringify(activeBookings));
-        } catch (e) {
-          console.warn('LocalStorage save error:', e);
+        } catch (err) {
+          console.warn('LocalStorage save failed, attempting quota recovery:', err);
+          try {
+            // Ak zlyhá kvóta, odstránime najstaršiu polovicu záznamov a uložíme znova
+            if (activeBookings.length > 1) {
+              activeBookings.splice(Math.floor(activeBookings.length / 2));
+              localStorage.setItem('automek_bookings', JSON.stringify(activeBookings));
+            }
+          } catch (err2) {
+            console.error('LocalStorage quota critically exceeded:', err2);
+          }
         }
       }
 
@@ -3257,6 +3272,11 @@
       // =========================================================
       // BOOKIO-STYLE RESERVATION MODAL LOGIC
       // =========================================================
+      let uploadedPhotosBytes = 0;
+      const MAX_SINGLE_PHOTO_BYTES = 8 * 1024 * 1024; // 8 MB
+      const MAX_TOTAL_PHOTOS_BYTES = 25 * 1024 * 1024; // 25 MB
+      const MAX_PHOTOS_COUNT = 6;
+
       function openBookingModal(part) {
         lastFocusedElement = document.activeElement;
         currentSelectedPart = part;
@@ -3267,10 +3287,24 @@
         document.getElementById('cust-phone').value = '';
         document.getElementById('cust-email').value = '';
         document.getElementById('cust-plate').value = '';
+        const honeypot = document.getElementById('cust-website');
+        if (honeypot) honeypot.value = '';
+
         uploadedPhotos = [];
+        uploadedPhotosBytes = 0;
         photoPreviews.innerHTML = '';
         resetAudioRecorder();
         successScreen.classList.remove('active');
+
+        // Reset stavu odosielacieho tlačidla pre novú rezerváciu
+        if (submitBookingBtn) {
+          submitBookingBtn.disabled = false;
+          submitBookingBtn.removeAttribute('data-submitting');
+          const confirmBtnSpan = submitBookingBtn.querySelector('span');
+          if (confirmBtnSpan) {
+            confirmBtnSpan.textContent = TRANSLATIONS[currentLang].modal_confirm_btn;
+          }
+        }
 
         // Dočasne vypnúť normalizeScroll, aby GSAP neblokoval prirodzený scroll v modále
         if (typeof ScrollTrigger !== 'undefined' && ScrollTrigger.normalizeScroll) {
@@ -3356,9 +3390,50 @@
       }, { passive: false });
 
       photoInput.addEventListener('change', (e) => {
-        const files = Array.from(e.target.files);
-        files.forEach(file => {
-          if (!file.type.startsWith('image/')) return;
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+
+        let countLimitShown = false;
+        let singleLimitShown = false;
+        let totalLimitShown = false;
+
+        for (const file of files) {
+          if (!file.type.startsWith('image/')) continue;
+
+          // Kontrola max. 6 fotiek
+          if (uploadedPhotos.length >= MAX_PHOTOS_COUNT) {
+            if (!countLimitShown) {
+              alert(currentLang === 'sk'
+                ? 'Môžete nahrať maximálne 6 fotografií.'
+                : 'You can upload a maximum of 6 photos.');
+              countLimitShown = true;
+            }
+            break;
+          }
+
+          // Kontrola max. 8 MB pre jeden súbor
+          if (file.size > MAX_SINGLE_PHOTO_BYTES) {
+            if (!singleLimitShown) {
+              alert(currentLang === 'sk'
+                ? `Fotografia "${file.name}" prekračuje maximálnu povolenú veľkosť 8 MB.`
+                : `Photo "${file.name}" exceeds the maximum allowed size of 8 MB.`);
+              singleLimitShown = true;
+            }
+            continue;
+          }
+
+          // Priebežná kontrola celkovej veľkosti (max. 25 MB)
+          if (uploadedPhotosBytes + file.size > MAX_TOTAL_PHOTOS_BYTES) {
+            if (!totalLimitShown) {
+              alert(currentLang === 'sk'
+                ? 'Celková veľkosť nahraných fotografií nesmie prekročiť 25 MB.'
+                : 'Total size of uploaded photos must not exceed 25 MB.');
+              totalLimitShown = true;
+            }
+            break;
+          }
+
+          uploadedPhotosBytes += file.size;
           const reader = new FileReader();
           reader.onload = (evt) => {
             uploadedPhotos.push(evt.target.result);
@@ -3368,7 +3443,9 @@
             photoPreviews.appendChild(img);
           };
           reader.readAsDataURL(file);
-        });
+        }
+
+        photoInput.value = '';
       });
 
       function resetAudioRecorder() {
@@ -3781,6 +3858,28 @@
       }
 
       submitBookingBtn.addEventListener('click', () => {
+        // 1. Ochrana proti duplicitnému kliknutiu / odosielaniu
+        if (submitBookingBtn.disabled || submitBookingBtn.dataset.submitting === 'true') {
+          return;
+        }
+
+        // 2. Honeypot ochrana proti automatizovaným spambotom (tiché ignorovanie)
+        const honeypot = document.getElementById('cust-website');
+        if (honeypot && honeypot.value.trim() !== '') {
+          console.warn('Honeypot triggered');
+          return;
+        }
+
+        // 3. Client-side Rate-Limit (min. 15 sekúnd medzi rezerváciami)
+        const lastBookingTs = parseInt(localStorage.getItem('automek_last_booking_ts') || '0', 10);
+        const now = Date.now();
+        if (now - lastBookingTs < 15000) {
+          alert(currentLang === 'sk'
+            ? 'Počkajte prosím chvíľu pred ďalšou rezerváciou.'
+            : 'Please wait a moment before making another booking.');
+          return;
+        }
+
         const nameInput = document.getElementById('cust-name');
         const phoneInput = document.getElementById('cust-phone');
         const emailInput = document.getElementById('cust-email');
@@ -3810,6 +3909,14 @@
         }
 
         if (hasError) return;
+
+        // Po úspešnej validácii okamžite zablokujeme tlačidlo a zobrazíme loading stav
+        submitBookingBtn.disabled = true;
+        submitBookingBtn.dataset.submitting = 'true';
+        const confirmBtnSpan = submitBookingBtn.querySelector('span');
+        if (confirmBtnSpan) {
+          confirmBtnSpan.textContent = currentLang === 'sk' ? 'Odosielam rezerváciu...' : 'Submitting booking...';
+        }
 
         const selectedSymptoms = [];
         const bookingId = `JK-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -3844,6 +3951,9 @@
           activeBookings.unshift(newBooking);
           persistBookings();
           updateActiveBookingsUI();
+
+          // Uloženie timestampu pre rate-limit
+          localStorage.setItem('automek_last_booking_ts', String(Date.now()));
 
           // Automatické odoslanie rezervácie na backend a spustenie emailovej notifikácie
           fetch('/api/bookings', {

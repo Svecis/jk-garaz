@@ -435,6 +435,34 @@ function dispatchNotification(recipient, booking) {
   return sendEmailGeneric(recipient, subject, buildBookingEmailHtml(booking));
 }
 
+// Build the HTML body for the customer-facing booking confirmation e-mail.
+// Intentionally has no link back into the admin system (order.html) — that
+// button is only for the internal shop notification in buildBookingEmailHtml.
+function buildCustomerConfirmationEmailHtml(booking) {
+  const plateFormatted = (booking.plate || '-').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+
+  return `
+      <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; padding:20px; border:1px solid #e2e8f0; border-radius:10px; background:#ffffff;">
+        <h2 style="color:#0f172a; margin-top:0;">Rezervácia prijatá — #${booking.id}</h2>
+        <p style="color:#64748b; font-size:14px;">Dobrý deň${booking.customer ? ', ' + booking.customer : ''}, vaša rezervácia servisného úkonu bola úspešne prijatá. Nižšie nájdete zhrnutie termínu:</p>
+        <hr style="border:none; border-top:1px solid #e2e8f0; margin:16px 0;" />
+        <table style="width:100%; font-size:14px; border-collapse:collapse;">
+          <tr><td style="padding:6px 0; color:#64748b; width:140px;"><strong>Diel:</strong></td><td style="color:#2563eb; font-weight:bold;">[${booking.partCode || 'P'}] ${booking.partName || '-'}</td></tr>
+          <tr><td style="padding:6px 0; color:#64748b;"><strong>Termín:</strong></td><td style="color:#0f172a;">${booking.date || '-'} o ${booking.time || '-'}</td></tr>
+          <tr><td style="padding:6px 0; color:#64748b;"><strong>EČV Vozidla:</strong></td><td style="color:#0f172a; font-family:monospace; font-weight:bold;">${plateFormatted}</td></tr>
+          <tr><td style="padding:6px 0; color:#64748b;"><strong>Odhadovaná cena:</strong></td><td style="color:#10b981; font-weight:bold;">${booking.price || '-'}</td></tr>
+        </table>
+        <p style="color:#64748b; font-size:13px; margin-top:20px;">V prípade otázok alebo ak potrebujete zmeniť termín, kontaktujte nás prosím priamo. Tešíme sa na vás!</p>
+      </div>
+    `;
+}
+
+// Customer-facing confirmation (best-effort, never blocks the booking flow)
+function dispatchCustomerConfirmation(booking) {
+  const subject = 'Potvrdenie rezervácie #' + booking.id + ' — AutoMek';
+  return sendEmailGeneric(booking.email, subject, buildCustomerConfirmationEmailHtml(booking));
+}
+
 const server = http.createServer((req, res) => {
   const parsedUrl = new URL(req.url, 'http://localhost:' + PORT);
   const pathname = parsedUrl.pathname;
@@ -858,6 +886,12 @@ const server = http.createServer((req, res) => {
           dispatchNotification(targetEmail, booking).catch(err => {
             console.warn('[BOOKING] Email notifikácia zlyhala:', err.message);
           });
+
+          if (booking.email && booking.email.includes('@')) {
+            dispatchCustomerConfirmation(booking).catch(err => {
+              console.warn('[BOOKING] Potvrdzovací email zákazníkovi zlyhal:', err.message);
+            });
+          }
         }
 
         res.writeHead(200, { 'Content-Type': 'application/json' });

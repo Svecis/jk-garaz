@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moja rezervácia — JK Garáž</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --card-bg: #141824;
+      --card-elevated: #1a2030;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border-strong: rgba(255, 255, 255, 0.15);
+      --text-main: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+      --success: #34d399;
+      --danger: #f87171;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      background-image: radial-gradient(circle at 50% -20%, rgba(56, 189, 248, 0.08) 0%, transparent 60%);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    .page-container {
+      max-width: 640px;
+      width: 100%;
+      margin: 40px auto;
+      padding: 0 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .brand {
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+    .brand span { color: var(--accent); }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .muted { color: var(--text-muted); font-size: 0.85rem; }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-top: 10px;
+    }
+    .status-pending { background: rgba(56, 189, 248, 0.12); color: var(--accent); border: 1px solid rgba(56, 189, 248, 0.3); }
+    .status-confirmed { background: rgba(52, 211, 153, 0.12); color: var(--success); border: 1px solid rgba(52, 211, 153, 0.3); }
+    .status-in_progress { background: rgba(251, 191, 36, 0.12); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+    .status-completed { background: rgba(148, 163, 184, 0.12); color: var(--text-secondary); border: 1px solid rgba(148, 163, 184, 0.3); }
+    .status-cancelled { background: rgba(248, 113, 113, 0.12); color: var(--danger); border: 1px solid rgba(248, 113, 113, 0.3); }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--card-border);
+      font-size: 0.88rem;
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row span:first-child { color: var(--text-muted); }
+    .detail-row strong { font-weight: 600; }
+    .actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .btn-danger { background: rgba(248, 113, 113, 0.12); color: var(--danger); border: 1px solid rgba(248, 113, 113, 0.3); }
+    .btn-danger:hover { background: rgba(248, 113, 113, 0.2); }
+    .btn-primary { background: var(--accent); color: #06131c; }
+    .btn-primary:hover { background: #5fc9fb; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .msg {
+      font-size: 0.85rem;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-top: 14px;
+      display: none;
+    }
+    .msg.show { display: block; }
+    .msg-error { background: rgba(248, 113, 113, 0.12); border: 1px solid rgba(248, 113, 113, 0.3); color: var(--danger); }
+    .msg-success { background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.3); color: var(--success); }
+
+    .cal-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .cal-nav-btn {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: var(--card-elevated); border: 1px solid var(--card-border);
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .cal-month-title { font-size: 0.92rem; font-weight: 700; text-transform: capitalize; }
+    .cal-weekdays-row {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      text-align: center; font-size: 0.68rem; font-weight: 600;
+      color: var(--text-muted); margin-bottom: 6px;
+    }
+    .cal-days-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+    .cal-day-cell {
+      aspect-ratio: 1; border-radius: 8px; background: transparent;
+      border: 1px solid transparent; color: #e2e8f0; font-size: 0.8rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .cal-day-cell:hover:not(.disabled):not(.empty) { background: rgba(255,255,255,0.08); border-color: rgba(56,189,248,0.3); }
+    .cal-day-cell.today { border-color: rgba(56,189,248,0.4); font-weight: 700; }
+    .cal-day-cell.selected { background: var(--accent); border-color: var(--accent); color: #06131c; font-weight: 800; }
+    .cal-day-cell.disabled { opacity: 0.25; cursor: not-allowed; }
+    .cal-day-cell.empty { cursor: default; }
+
+    .time-slot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+    .time-slot-btn {
+      background: var(--card-elevated); border: 1px solid var(--card-border);
+      border-radius: 8px; padding: 8px 4px; color: #fff; font-family: 'Space Mono', monospace;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .time-slot-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .time-slot-btn.selected { background: var(--accent); color: #06131c; border-color: var(--accent); }
+    .time-slot-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .hidden { display: none !important; }
+    .spinner { text-align: center; padding: 60px 0; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <div class="brand">JK <span>Garáž</span></div>
+    <div id="content">
+      <div class="spinner">Načítavam rezerváciu…</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const bookingId = (urlParams.get('id') || '').trim();
+      const token = (urlParams.get('token') || '').trim();
+      const content = document.getElementById('content');
+
+      const STATUS_LABELS = {
+        pending: 'Čaká na potvrdenie',
+        confirmed: 'Potvrdená',
+        in_progress: 'V servise',
+        completed: 'Dokončená',
+        cancelled: 'Zrušená'
+      };
+
+      const MONTHS_SK = ['Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún', 'Júl', 'August', 'September', 'Október', 'November', 'December'];
+      const WEEKDAYS_FULL_SK = ['Nedeľa', 'Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota'];
+      const WEEKDAYS_SHORT_SK = ['Po', 'Ut', 'St', 'Št', 'Pi', 'So', 'Ne'];
+      const ALL_SLOTS = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+
+      function formatIso(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+
+      function formatDisplay(d) {
+        return `${WEEKDAYS_FULL_SK[d.getDay()]}, ${d.getDate()}. ${MONTHS_SK[d.getMonth()]} ${d.getFullYear()}`;
+      }
+
+      function escapeHtml(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+      }
+
+      if (!bookingId || !token) {
+        content.innerHTML = `
+          <div class="card">
+            <h2>Neplatný odkaz</h2>
+            <p class="muted" style="margin-top:8px;">Tento odkaz na správu rezervácie nie je platný. Skontrolujte, či ste ho skopírovali celý z e-mailu.</p>
+          </div>`;
+        return;
+      }
+
+      fetch(`/api/my-booking?id=${encodeURIComponent(bookingId)}&token=${encodeURIComponent(token)}`)
+        .then(r => r.json().then(data => ({ ok: r.ok, data })))
+        .then(({ ok, data }) => {
+          if (!ok) {
+            content.innerHTML = `
+              <div class="card">
+                <h2>Rezervácia nenájdená</h2>
+                <p class="muted" style="margin-top:8px;">${escapeHtml(data.error || 'Odkaz už nie je platný.')}</p>
+              </div>`;
+            return;
+          }
+          renderBooking(data);
+        })
+        .catch(() => {
+          content.innerHTML = `
+            <div class="card">
+              <h2>Nastala chyba</h2>
+              <p class="muted" style="margin-top:8px;">Rezerváciu sa nepodarilo načítať. Skúste to prosím neskôr.</p>
+            </div>`;
+        });
+
+      function renderBooking(b) {
+        const statusClass = 'status-' + (b.status || 'pending');
+        const statusLabel = STATUS_LABELS[b.status] || b.status;
+        const isFinal = b.status === 'cancelled' || b.status === 'completed';
+        const plate = (b.plate && b.plate !== 'Nezadané') ? b.plate.replace(/-/g, ' ').replace(/\s+/g, ' ').trim() : '-';
+
+        content.innerHTML = `
+          <div class="card">
+            <h2>Zákazka #${escapeHtml(b.id)}</h2>
+            <p class="muted">[${escapeHtml(b.partCode || 'P')}] ${escapeHtml(b.partName || '-')}</p>
+            <span class="status-badge ${statusClass}">${escapeHtml(statusLabel)}</span>
+
+            <div style="margin-top:18px;">
+              <div class="detail-row"><span>Termín</span><strong id="detail-term">${escapeHtml(b.date || '-')} o ${escapeHtml(b.time || '-')}</strong></div>
+              <div class="detail-row"><span>EČV vozidla</span><strong>${escapeHtml(plate)}</strong></div>
+              <div class="detail-row"><span>Odhadovaná cena</span><strong>${escapeHtml(b.price || '-')}</strong></div>
+            </div>
+
+            ${isFinal ? '' : `
+              <div class="actions">
+                <button class="btn btn-danger" id="cancel-btn">Zrušiť rezerváciu</button>
+                <button class="btn btn-primary" id="reschedule-toggle-btn">Zmeniť termín</button>
+              </div>
+            `}
+
+            <div id="action-msg" class="msg"></div>
+          </div>
+
+          <div class="card hidden" id="reschedule-card">
+            <h2>Zmena termínu</h2>
+            <p class="muted" style="margin-bottom:16px;">Vyberte nový dátum a čas. Zobrazujeme len skutočne voľné termíny.</p>
+            <div class="cal-header-row">
+              <button type="button" class="cal-nav-btn" id="cal-prev">&#8249;</button>
+              <div class="cal-month-title" id="cal-month-title"></div>
+              <button type="button" class="cal-nav-btn" id="cal-next">&#8250;</button>
+            </div>
+            <div class="cal-weekdays-row">${WEEKDAYS_SHORT_SK.map(d => `<span>${d}</span>`).join('')}</div>
+            <div class="cal-days-grid" id="cal-days"></div>
+            <div class="time-slot-grid" id="time-slots"></div>
+            <div class="actions">
+              <button class="btn btn-primary" id="confirm-reschedule-btn" disabled>Potvrdiť zmenu termínu</button>
+            </div>
+            <div id="reschedule-msg" class="msg"></div>
+          </div>
+        `;
+
+        wireActions(b);
+      }
+
+      function showMsg(el, text, isError) {
+        el.textContent = text;
+        el.className = 'msg show ' + (isError ? 'msg-error' : 'msg-success');
+      }
+
+      function wireActions(booking) {
+        const cancelBtn = document.getElementById('cancel-btn');
+        const rescheduleToggleBtn = document.getElementById('reschedule-toggle-btn');
+        const rescheduleCard = document.getElementById('reschedule-card');
+        const actionMsg = document.getElementById('action-msg');
+
+        if (cancelBtn) {
+          cancelBtn.addEventListener('click', () => {
+            if (!confirm('Naozaj chcete zrušiť rezerváciu #' + booking.id + '?')) return;
+            cancelBtn.disabled = true;
+            fetch('/api/my-booking/cancel', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: bookingId, token })
+            })
+              .then(r => r.json().then(data => ({ ok: r.ok, data })))
+              .then(({ ok, data }) => {
+                if (ok) {
+                  renderBooking(data.booking);
+                } else {
+                  cancelBtn.disabled = false;
+                  showMsg(actionMsg, data.error || 'Zrušenie sa nepodarilo.', true);
+                }
+              })
+              .catch(() => {
+                cancelBtn.disabled = false;
+                showMsg(actionMsg, 'Nastala chyba, skúste to prosím znova.', true);
+              });
+          });
+        }
+
+        if (rescheduleToggleBtn) {
+          rescheduleToggleBtn.addEventListener('click', () => {
+            rescheduleCard.classList.toggle('hidden');
+            if (!rescheduleCard.classList.contains('hidden')) {
+              initCalendar(booking);
+              rescheduleCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          });
+        }
+      }
+
+      function initCalendar(booking) {
+        const calPrev = document.getElementById('cal-prev');
+        const calNext = document.getElementById('cal-next');
+        const calMonthTitle = document.getElementById('cal-month-title');
+        const calDays = document.getElementById('cal-days');
+        const timeSlotsEl = document.getElementById('time-slots');
+        const confirmBtn = document.getElementById('confirm-reschedule-btn');
+        const rescheduleMsg = document.getElementById('reschedule-msg');
+
+        let today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let calYear = today.getFullYear();
+        let calMonth = today.getMonth();
+        let selectedDate = null; // Date obj, midnight
+        let selectedTime = null;
+
+        function renderCalendar() {
+          calMonthTitle.textContent = `${MONTHS_SK[calMonth]} ${calYear}`;
+          calDays.innerHTML = '';
+          timeSlotsEl.innerHTML = '';
+          confirmBtn.disabled = true;
+          selectedTime = null;
+
+          const firstDay = new Date(calYear, calMonth, 1);
+          const lastDay = new Date(calYear, calMonth + 1, 0);
+          const totalDays = lastDay.getDate();
+          const startOffset = (firstDay.getDay() + 6) % 7; // Monday-first
+
+          for (let i = 0; i < startOffset; i++) {
+            const empty = document.createElement('div');
+            empty.className = 'cal-day-cell empty';
+            calDays.appendChild(empty);
+          }
+
+          for (let day = 1; day <= totalDays; day++) {
+            const cellDate = new Date(calYear, calMonth, day);
+            const dow = cellDate.getDay();
+            const isWeekend = dow === 0 || dow === 6;
+            const isPast = cellDate < today;
+            const isToday = cellDate.getTime() === today.getTime();
+            const isSelected = selectedDate && cellDate.getTime() === selectedDate.getTime();
+
+            const cell = document.createElement('button');
+            cell.type = 'button';
+            cell.className = 'cal-day-cell';
+            cell.textContent = day;
+            if (isToday) cell.classList.add('today');
+            if (isSelected) cell.classList.add('selected');
+
+            if (isPast || isWeekend) {
+              cell.classList.add('disabled');
+            } else {
+              cell.addEventListener('click', () => {
+                selectedDate = cellDate;
+                renderCalendar();
+                loadTimeSlots(cellDate);
+              });
+            }
+            calDays.appendChild(cell);
+          }
+        }
+
+        function loadTimeSlots(dateObj) {
+          const displayDate = formatDisplay(dateObj);
+          timeSlotsEl.innerHTML = '<span class="muted">Načítavam dostupné časy…</span>';
+
+          fetch('/api/availability?date=' + encodeURIComponent(displayDate))
+            .then(r => r.json())
+            .then(({ bookedTimes }) => {
+              timeSlotsEl.innerHTML = '';
+              const isToday = dateObj.getTime() === today.getTime();
+              const now = new Date();
+
+              ALL_SLOTS.forEach(slot => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'time-slot-btn';
+                btn.textContent = slot;
+
+                const isBooked = (bookedTimes || []).includes(slot);
+                let isPastTime = false;
+                if (isToday) {
+                  const [h, m] = slot.split(':').map(Number);
+                  const slotTime = new Date(dateObj);
+                  slotTime.setHours(h, m, 0, 0);
+                  isPastTime = slotTime <= now;
+                }
+
+                if (isBooked || isPastTime) {
+                  btn.disabled = true;
+                } else {
+                  btn.addEventListener('click', () => {
+                    timeSlotsEl.querySelectorAll('.time-slot-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedTime = slot;
+                    confirmBtn.disabled = false;
+                  });
+                }
+                timeSlotsEl.appendChild(btn);
+              });
+            })
+            .catch(() => {
+              timeSlotsEl.innerHTML = '<span class="muted">Časy sa nepodarilo načítať.</span>';
+            });
+        }
+
+        calPrev.addEventListener('click', () => {
+          calMonth--;
+          if (calMonth < 0) { calMonth = 11; calYear--; }
+          selectedDate = null;
+          renderCalendar();
+        });
+        calNext.addEventListener('click', () => {
+          calMonth++;
+          if (calMonth > 11) { calMonth = 0; calYear++; }
+          selectedDate = null;
+          renderCalendar();
+        });
+
+        confirmBtn.addEventListener('click', () => {
+          if (!selectedDate || !selectedTime) return;
+          confirmBtn.disabled = true;
+          fetch('/api/my-booking/reschedule', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: bookingId,
+              token,
+              dateIso: formatIso(selectedDate),
+              date: formatDisplay(selectedDate),
+              time: selectedTime
+            })
+          })
+            .then(r => r.json().then(data => ({ ok: r.ok, data })))
+            .then(({ ok, data }) => {
+              if (ok) {
+                renderBooking(data.booking);
+              } else {
+                confirmBtn.disabled = false;
+                showMsg(rescheduleMsg, data.error || 'Zmenu sa nepodarilo uložiť.', true);
+              }
+            })
+            .catch(() => {
+              confirmBtn.disabled = false;
+              showMsg(rescheduleMsg, 'Nastala chyba, skúste to prosím znova.', true);
+            });
+        });
+
+        renderCalendar();
+      }
+    })();
+  </script>
+</body>
+</html>

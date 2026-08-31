@@ -477,8 +477,11 @@ function dispatchNotification(recipient, booking) {
 // Build the HTML body for the customer-facing booking confirmation e-mail.
 // Intentionally has no link back into the admin system (order.html) — that
 // button is only for the internal shop notification in buildBookingEmailHtml.
+// The manage link below is a separate, customer-scoped page gated by a random
+// per-booking token, not the admin order card.
 function buildCustomerConfirmationEmailHtml(booking) {
   const plateFormatted = (booking.plate || '-').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+  const manageUrl = PUBLIC_BASE_URL + '/moja-rezervacia.html?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.manageToken || '');
 
   return `
       <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; padding:20px; border:1px solid #e2e8f0; border-radius:10px; background:#ffffff;">
@@ -491,7 +494,10 @@ function buildCustomerConfirmationEmailHtml(booking) {
           <tr><td style="padding:6px 0; color:#64748b;"><strong>EČV Vozidla:</strong></td><td style="color:#0f172a; font-family:monospace; font-weight:bold;">${plateFormatted}</td></tr>
           <tr><td style="padding:6px 0; color:#64748b;"><strong>Odhadovaná cena:</strong></td><td style="color:#10b981; font-weight:bold;">${booking.price || '-'}</td></tr>
         </table>
-        <p style="color:#64748b; font-size:13px; margin-top:20px;">V prípade otázok alebo ak potrebujete zmeniť termín, kontaktujte nás prosím priamo. Tešíme sa na vás!</p>
+        <div style="margin-top:24px; text-align:center;">
+          <a href="${manageUrl}" style="background:#2563eb; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:6px; font-weight:bold; font-size:14px; display:inline-block;">Spravovať moju rezerváciu</a>
+        </div>
+        <p style="color:#64748b; font-size:13px; margin-top:20px;">Cez odkaz vyššie si viete termín zrušiť alebo presunúť na iný voľný dátum a čas. V prípade otázok nás môžete aj priamo kontaktovať. Tešíme sa na vás!</p>
       </div>
     `;
 }
@@ -899,6 +905,21 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // API ROUTE: Which times are already taken on a given day (public — no customer
+  // details, just the occupied time strings, so the booking/reschedule calendars
+  // can show real availability instead of guess-and-fail).
+  if (pathname === '/api/availability' && req.method === 'GET') {
+    const date = parsedUrl.searchParams.get('date') || '';
+    const bookings = loadBookings();
+    const bookedTimes = bookings
+      .filter(b => b.date === date && b.status !== 'cancelled')
+      .map(b => b.time)
+      .filter(Boolean);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ bookedTimes }));
+    return;
+  }
+
   // API ROUTE: Create or upsert a booking (public — used by the customer-facing booking form)
   if (pathname === '/api/bookings' && req.method === 'POST') {
     let body = '';
@@ -920,6 +941,9 @@ const server = http.createServer((req, res) => {
 
         if (isNew) {
           booking.createdAt = booking.createdAt || new Date().toISOString();
+          // Lets the customer manage (view/cancel/reschedule) their own booking later
+          // via a link that doesn't require an admin login — see /api/my-booking*.
+          booking.manageToken = crypto.randomBytes(24).toString('hex');
           bookings.push(booking);
         } else {
           bookings[idx] = { ...bookings[idx], ...booking };
@@ -980,6 +1004,122 @@ const server = http.createServer((req, res) => {
         saveBookings(bookings);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(bookings[idx]));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
+  // =========================================================
+  // CUSTOMER SELF-SERVICE ROUTES (public, gated by id + per-booking manageToken —
+  // not admin auth). Lets a customer view/cancel/reschedule only their own booking
+  // via the link sent in the confirmation e-mail.
+  // =========================================================
+
+  function findOwnBooking(bookings, id, token) {
+    if (!id || !token) return -1;
+    return bookings.findIndex(b => b.id === id && b.manageToken && b.manageToken === token);
+  }
+
+  if (pathname === '/api/my-booking' && req.method === 'GET') {
+    const id = parsedUrl.searchParams.get('id');
+    const token = parsedUrl.searchParams.get('token');
+    const bookings = loadBookings();
+    const idx = findOwnBooking(bookings, id, token);
+    if (idx === -1) {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Zákazka nenájdená.' }));
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(bookings[idx]));
+    return;
+  }
+
+  if (pathname === '/api/my-booking/cancel' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const { id, token } = JSON.parse(body || '{}');
+        const bookings = loadBookings();
+        const idx = findOwnBooking(bookings, id, token);
+        if (idx === -1) {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Zákazka nenájdená.' }));
+          return;
+        }
+        if (bookings[idx].status === 'cancelled' || bookings[idx].status === 'completed') {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Túto zákazku už nie je možné zrušiť.' }));
+          return;
+        }
+        bookings[idx].status = 'cancelled';
+        saveBookings(bookings);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, booking: bookings[idx] }));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
+  if (pathname === '/api/my-booking/reschedule' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const { id, token, dateIso, date, time } = JSON.parse(body || '{}');
+        const bookings = loadBookings();
+        const idx = findOwnBooking(bookings, id, token);
+        if (idx === -1) {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Zákazka nenájdená.' }));
+          return;
+        }
+        if (bookings[idx].status === 'cancelled' || bookings[idx].status === 'completed') {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Termín tejto zákazky už nie je možné zmeniť.' }));
+          return;
+        }
+        if (!dateIso || !date || !time || !/^\d{4}-\d{2}-\d{2}$/.test(dateIso) || !/^\d{2}:\d{2}$/.test(time)) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Neplatný dátum alebo čas.' }));
+          return;
+        }
+
+        const [h, m] = time.split(':').map(Number);
+        const target = new Date(dateIso + 'T00:00:00');
+        target.setHours(h, m, 0, 0);
+
+        if (isNaN(target.getTime()) || target <= new Date()) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Zvolený termín už uplynul.' }));
+          return;
+        }
+        const dow = target.getDay();
+        if (dow === 0 || dow === 6) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Cez víkend máme zatvorené, zvoľte prosím pracovný deň.' }));
+          return;
+        }
+
+        const conflict = bookings.some((b, i) => i !== idx && b.status !== 'cancelled' && b.date === date && b.time === time);
+        if (conflict) {
+          res.writeHead(409, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Tento termín je už obsadený, zvoľte prosím iný.' }));
+          return;
+        }
+
+        bookings[idx].date = date;
+        bookings[idx].time = time;
+        saveBookings(bookings);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, booking: bookings[idx] }));
       } catch (err) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: err.message }));

@@ -9,6 +9,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
+      --accent-cyan: #00e5ff;
+      --accent-green: #00e676;
+      --glass-bg: rgba(14, 18, 26, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
       --bg: #090b10;
       --card-bg: #12151e;
       --card-elevated: #181c27;
@@ -938,187 +943,726 @@
       animation: slideUpToast 0.25s ease-out;
     }
 
-    /* ADD ORDER MODAL STYLES */
-    .add-order-modal-card {
-      background: #121622;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 16px;
-      max-width: 720px;
+        /* =========================================================
+       BOOKIO-STYLE MECHANIC DIAGNOSTIC & RESERVATION MODAL
+       ========================================================= */
+    body.modal-open {
+      overflow: hidden !important;
+    }
+
+    #booking-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(6, 8, 11, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+      overscroll-behavior: contain;
+    }
+
+    #booking-modal.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-container {
+      background: #11141c;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow), 0 0 50px rgba(0, 229, 255, 0.15);
+      border-radius: 24px;
       width: 100%;
+      max-width: 820px;
       max-height: 90vh;
+      height: 90vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), 0 0 40px rgba(56, 189, 248, 0.1);
       overflow: hidden;
+      transform: scale(0.95) translateY(20px);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      overscroll-behavior: contain;
     }
 
-    .add-order-body {
-      padding: 20px 24px;
-      overflow-y: auto;
-      flex: 1 1 auto;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+    #booking-modal.open .modal-container {
+      transform: scale(1) translateY(0);
     }
 
-    .add-order-section {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .add-order-section-title {
-      font-size: 0.86rem;
-      font-weight: 700;
-      color: #fff;
+    /* Modal Header */
+    .modal-header {
+      flex: 0 0 auto;
+      padding: 24px 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      background: rgba(18, 22, 31, 0.6);
     }
 
-    .parts-choice-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-
-    @media (max-width: 600px) {
-      .parts-choice-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    .part-choice-btn {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      padding: 10px;
-      cursor: pointer;
+    .modal-part-info {
       display: flex;
       align-items: center;
-      gap: 10px;
-      text-align: left;
-      transition: all 0.15s ease;
-      color: #fff;
+      gap: 16px;
     }
 
-    .part-choice-btn:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(56, 189, 248, 0.4);
-    }
-
-    .part-choice-btn.selected {
-      background: rgba(56, 189, 248, 0.12);
-      border-color: var(--accent);
-      box-shadow: 0 0 12px var(--accent-glow);
-    }
-
-    .part-choice-badge {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: rgba(56, 189, 248, 0.2);
-      border: 1px solid var(--accent);
+    .modal-part-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(0, 229, 255, 0.12);
+      border: 1.5px solid var(--accent);
       color: var(--accent);
       font-family: 'Space Mono', monospace;
+      font-size: 1.25rem;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.95rem;
-      flex-shrink: 0;
+      box-shadow: 0 0 20px var(--accent-glow);
     }
 
-    .part-choice-info h6 {
-      font-size: 0.82rem;
+    .modal-part-title-group h2 {
+      font-size: 1.35rem;
       font-weight: 700;
-      color: #fff;
-      margin: 0;
+      letter-spacing: -0.02em;
+      margin-bottom: 2px;
     }
 
-    .part-choice-info span {
+    .modal-part-title-group span {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .modal-close-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-close-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.08);
+    }
+
+    /* Modal Body & Scrollable Sections */
+    .modal-body {
+      padding: 28px 32px;
+      overflow-y: auto !important;
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+    }
+
+    .form-section {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 18px;
+      padding: 22px;
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+
+    .section-title svg {
+      color: var(--accent);
+    }
+
+    /* Common Symptom Pills */
+    .symptom-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .symptom-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 100px;
+      padding: 7px 14px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .symptom-chip:hover {
+      background: rgba(255, 255, 255, 0.09);
+      color: #fff;
+    }
+    .symptom-chip.selected {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Textarea */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .form-textarea {
+      width: 100%;
+      height: 90px;
+      background: rgba(8, 10, 15, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* MEDIA ATTACHMENTS (PHOTO + AUDIO SOUND RECORDER) */
+    .media-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Photo Dropzone */
+    .upload-box {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      padding: 20px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(8, 10, 15, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 130px;
+      position: relative;
+    }
+    .upload-box:hover {
+      border-color: var(--accent);
+      background: rgba(0, 229, 255, 0.03);
+    }
+    .upload-box input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .upload-icon {
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .upload-title {
+      font-size: 0.84rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .upload-sub {
       font-size: 0.72rem;
       color: var(--text-muted);
     }
 
-    .form-grid-2 {
+    .photo-preview-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .photo-thumb {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+    }
+
+    /* Audio Noise Recorder */
+    .audio-record-box {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 16px;
+      background: rgba(8, 10, 15, 0.5);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 130px;
+    }
+
+    .record-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .record-title {
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .record-timer {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--accent);
+    }
+
+    .waveform-visualizer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      height: 36px;
+      margin: 10px 0;
+    }
+
+    .wave-bar {
+      width: 3px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      transition: height 0.1s ease;
+    }
+
+    .recording .wave-bar {
+      background: var(--accent-warm);
+      animation: waveAnim 0.8s ease-in-out infinite alternate;
+    }
+
+    @keyframes waveAnim {
+      0% { height: 4px; }
+      100% { height: 32px; }
+    }
+
+    .record-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mic-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mic-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .mic-btn.is-recording {
+      background: rgba(255, 107, 53, 0.25);
+      border-color: var(--accent-warm);
+      color: var(--accent-warm);
+    }
+
+    .audio-playback-btn {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    /* 3. INTERACTIVE BOOQME CALENDAR & TIME SLOTS */
+    .booqme-booking-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 640px) {
+      .booqme-booking-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+    }
+
+    .booqme-cal-card, .booqme-slots-card {
+      background: rgba(8, 10, 15, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .cal-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .cal-month-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: capitalize;
+    }
+
+    .cal-nav-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cal-nav-btn:hover {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .cal-weekdays-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .cal-days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .cal-day-cell {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: #e2e8f0;
+      font-size: 0.82rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .cal-day-cell:hover:not(.disabled):not(.empty) {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(0, 229, 255, 0.3);
+      color: var(--accent);
+    }
+    .cal-day-cell.today {
+      border-color: rgba(0, 229, 255, 0.4);
+      font-weight: 700;
+    }
+    .cal-day-cell.selected {
+      background: var(--accent) !important;
+      border-color: var(--accent) !important;
+      color: #090a0c !important;
+      font-weight: 800 !important;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+    .cal-day-cell.disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+      color: var(--text-muted);
+    }
+    .cal-day-cell.empty {
+      cursor: default;
+    }
+
+    /* Slots Card */
+    .slots-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .slots-header-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .slots-header-date {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .slots-sub-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+
+    /* Time Slots */
+    .time-slot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .time-slot-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .time-slot-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+    .time-slot-btn.selected {
+      background: var(--accent);
+      color: #06080b;
+      font-weight: 700;
+      border-color: var(--accent);
+    }
+
+    /* MECHANIC SPECIALIST SELECTOR */
+    .mechanic-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .mechanic-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mechanic-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .mechanic-card.selected {
+      border-color: var(--accent);
+      background: rgba(0, 229, 255, 0.1);
+    }
+
+    .mechanic-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1e293b, #334155);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 0.85rem;
+    }
+
+    .mechanic-info h5 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .mechanic-info p {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    /* CUSTOMER CONTACT FIELDS */
+    .contact-inputs-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
 
-    @media (max-width: 540px) {
-      .form-grid-2 {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .photo-preview-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 8px;
-    }
-
-    .photo-preview-item {
-      position: relative;
-      width: 64px;
-      height: 64px;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .photo-preview-item img {
+    .input-field {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      background: rgba(8, 10, 15, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.85rem;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: var(--accent);
     }
 
-    .photo-preview-remove {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: rgba(0, 0, 0, 0.75);
+    /* Modal Footer */
+    .modal-footer {
+      flex: 0 0 auto;
+      padding: 20px 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(18, 22, 31, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pricing-est {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pricing-est span {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .pricing-est strong {
+      font-size: 1.15rem;
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .confirm-booking-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--accent) 0%, #0077ff 100%);
+      color: #06080b;
+      font-weight: 700;
+      font-size: 0.92rem;
+      padding: 12px 28px;
+      border-radius: 100px;
       border: none;
-      color: #f87171;
-      font-size: 11px;
-      font-weight: bold;
       cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0, 229, 255, 0.35);
+      transition: all 0.2s;
+    }
+    .confirm-booking-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(0, 229, 255, 0.5);
+    }
+
+    /* SUCCESS CONFIRMATION MODAL */
+    #success-screen {
+      position: absolute;
+      inset: 0;
+      background: #11141c;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      text-align: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    #success-screen.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .success-icon-wrap {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(0, 230, 118, 0.15);
+      border: 2px solid var(--accent-green);
+      color: var(--accent-green);
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-bottom: 20px;
+      box-shadow: 0 0 30px rgba(0, 230, 118, 0.3);
+      animation: pulse 2s infinite;
     }
 
-    .audio-recording-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--danger);
-      font-weight: 600;
-      font-size: 0.8rem;
+    .booking-ref-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px 28px;
+      margin: 20px 0 28px;
+      max-width: 480px;
+      width: 100%;
+      text-align: left;
     }
 
-    .audio-pulse-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--danger);
-      animation: pulseAnim 1s infinite alternate;
+    .ref-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
     }
+    .ref-row span { color: var(--text-muted); }
+    .ref-row strong { color: #fff; font-family: 'Space Mono', monospace; }
 
-    @keyframes pulseAnim {
-      from { opacity: 0.4; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1.2); }
-    }
+    
+
 
     /* ADMIN AUTH 2-STEP (PASSWORD + 2FA) OVERLAY */
     #admin-auth-overlay {
@@ -1993,22 +2537,261 @@
           </div>
         </div>
 
-  <!-- Add Order (Manual Booking) Modal -->
-  <div class="modal-overlay" id="add-order-modal">
-    <div class="add-order-modal-card">
+    <div id="booking-modal">
+    <div class="modal-container">
       
-      <!-- Modal Header -->
-      <div class="modal-header" style="padding: 20px 24px;">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <div style="width:36px; height:36px; border-radius:8px; background:rgba(56,189,248,0.15); border:1px solid var(--accent); color:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.1rem;">
-            +
+      <!-- SUCCESS OVERLAY -->
+      <div id="success-screen">
+        <div class="success-icon-wrap">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h2 style="font-size: 1.8rem; margin-bottom: 8px;" data-i18n="success_title">Rezervácia úspešne potvrdená!</h2>
+        <p style="color: var(--text-secondary); max-width: 420px; font-size: 0.9rem;" data-i18n="success_sub">
+          Váš termín bol zaevidovaný. K vašej zákazke bol priradený certifikovaný servisný technik.
+        </p>
+
+        <div class="booking-ref-card" id="booking-receipt-details">
+          <!-- Filled dynamically -->
+        </div>
+
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+          <button class="confirm-booking-btn" id="add-cal-btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;" data-i18n="success_add_cal">
+            Pridať do kalendára (.ics)
+          </button>
+          <button class="confirm-booking-btn" id="finish-booking-btn" data-i18n="success_done">
+            Hotovo &bull; Návrat k rozloženému pohľadu
+          </button>
+        </div>
+      </div>
+
+            <!-- MODAL HEADER -->
+      <div class="modal-header">
+        <div class="modal-part-info">
+          <div class="modal-part-badge" id="modal-badge">E</div>
+          <div class="modal-part-title-group">
+            <h2 id="modal-part-name">Motor &amp; Prevodovka</h2>
+            <span id="modal-part-category">POHON &bull; 2.0 TFSI</span>
           </div>
-          <div>
-            <div class="modal-title">Nová servisná zákazka</div>
-            <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">
-              Zaevidovanie novej zákazky a rezervácie termínu do systému
+        </div>
+
+        <!-- Part Quick Switcher for Admin -->
+        <div class="admin-part-selector" id="admin-part-pills" style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+          <button type="button" class="part-pill active" data-part="E" style="padding:5px 10px; border-radius:8px; background:rgba(0,229,255,0.15); border:1px solid #00e5ff; color:#00e5ff; font-family:'Space Mono',monospace; font-weight:700; font-size:0.75rem; cursor:pointer;">[E] Motor</button>
+          <button type="button" class="part-pill" data-part="S" style="padding:5px 10px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#94a3b8; font-family:'Space Mono',monospace; font-weight:700; font-size:0.75rem; cursor:pointer;">[S] Podvozok</button>
+          <button type="button" class="part-pill" data-part="X" style="padding:5px 10px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#94a3b8; font-family:'Space Mono',monospace; font-weight:700; font-size:0.75rem; cursor:pointer;">[X] Výfuk</button>
+          <button type="button" class="part-pill" data-part="W" style="padding:5px 10px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#94a3b8; font-family:'Space Mono',monospace; font-weight:700; font-size:0.75rem; cursor:pointer;">[W] Kolesá</button>
+          <button type="button" class="part-pill" data-part="B" style="padding:5px 10px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#94a3b8; font-family:'Space Mono',monospace; font-weight:700; font-size:0.75rem; cursor:pointer;">[B] Karoséria</button>
+          <button type="button" class="part-pill" data-part="I" style="padding:5px 10px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#94a3b8; font-family:'Space Mono',monospace; font-weight:700; font-size:0.75rem; cursor:pointer;">[I] Interiér</button>
+        </div>
+
+        <button class="modal-close-btn" id="modal-close-btn" title="Zatvoriť">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+        <button class="modal-close-btn" id="modal-close-btn" title="Zatvoriť">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- MODAL BODY -->
+      <div class="modal-body">
+        
+        <!-- 1. ISSUE DESCRIPTION ONLY -->
+        <div class="form-section">
+          <div class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+            </svg>
+            <span data-i18n="step1_title">Krok 1: Opísanie problému</span>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="problem-description" data-i18n="step1_desc_label">Opíšte závadu alebo požadovaný servis:</label>
+            <textarea id="problem-description" class="form-textarea" rows="4" data-i18n-placeholder="step1_desc_placeholder" placeholder="Podrobne popíšte závadu (napr. klepanie v motore pri 2 500 ot/min, svieti kontrolka motora, trasenie pri brzdení, kontrola podvozku...)"></textarea>
+          </div>
+        </div>
+
+        <!-- 2. PHOTO UPLOAD & AUDIO NOISE RECORDER -->
+        <div class="form-section">
+          <div class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            <span data-i18n="step2_title">Krok 2: Priložte fotografie &amp; Nahrajte zvuk závady</span>
+          </div>
+
+          <div class="media-grid">
+            <!-- Photo Upload Dropzone -->
+            <div>
+              <div class="upload-box" id="photo-dropzone">
+                <input type="file" id="photo-input" accept="image/*" multiple />
+                <svg class="upload-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <div class="upload-title" data-i18n="step2_photo_title">Pretiahnite fotografiu dielu / budíkov</div>
+                <div class="upload-sub" data-i18n="step2_photo_sub">PNG, JPG do 15MB</div>
+              </div>
+              <div class="photo-preview-list" id="photo-previews"></div>
+            </div>
+
+            <!-- Audio / Engine Noise Recorder -->
+            <div class="audio-record-box" id="audio-box">
+              <div class="record-header">
+                <span class="record-title" data-i18n="step2_audio_title">Nahrať zvuk závady</span>
+                <span class="record-timer" id="record-timer">00:00</span>
+              </div>
+
+              <!-- Animated Sound Waveform -->
+              <div class="waveform-visualizer" id="waveform-bars">
+                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+              </div>
+
+              <div class="record-controls">
+                <button type="button" class="mic-btn" id="record-btn">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="10"></circle>
+                  </svg>
+                  <span id="record-btn-text" data-i18n="step2_record_start">Nahrať zvukový záznam</span>
+                </button>
+                <button type="button" class="audio-playback-btn" id="audio-play-btn" data-i18n="step2_play">
+                  ▶ Prehrať
+                </button>
+              </div>
             </div>
           </div>
+        </div>
+
+        <!-- 3. DATE & TIME SELECTION (BOOQME-STYLE CALENDAR) -->
+        <div class="form-section">
+          <div class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span data-i18n="step3_title">Krok 3: Výber termínu a času</span>
+          </div>
+
+          <div class="booqme-booking-grid">
+            <!-- Left Column: Interactive Month Calendar -->
+            <div class="booqme-cal-card">
+              <div class="cal-header-row">
+                <button type="button" class="cal-nav-btn" id="modal-cal-prev" title="Predchádzajúci mesiac">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <div class="cal-month-title" id="modal-cal-month-title">August 2026</div>
+                <button type="button" class="cal-nav-btn" id="modal-cal-next" title="Nasledujúci mesiac">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+              </div>
+
+              <!-- Weekdays Row -->
+              <div class="cal-weekdays-row" id="modal-cal-weekdays">
+                <span>Po</span><span>Ut</span><span>St</span><span>Št</span><span>Pi</span><span>So</span><span>Ne</span>
+              </div>
+
+              <!-- Month Days Grid -->
+              <div class="cal-days-grid" id="modal-cal-days-container">
+                <!-- Injected dynamically by JS -->
+              </div>
+            </div>
+
+            <!-- Right Column: Available Time Slots for Selected Date -->
+            <div class="booqme-slots-card">
+              <div class="slots-header">
+                <span class="slots-header-title" data-i18n="step3_selected_date_label">Vybraný termín:</span>
+                <span class="slots-header-date" id="modal-selected-date-badge">Po, 31. Aug 2026</span>
+              </div>
+              <div class="slots-sub-label" data-i18n="step3_choose_time_label">Dostupné časy:</div>
+              <div class="time-slot-grid" id="time-slots-container">
+                <!-- Slots generated by JS -->
+              </div>
+            </div>
+          </div>
+
+          <label class="form-label" style="margin-top: 18px;" data-i18n="step3_specialist_label">Priradený špecializovaný mechanik:</label>
+          <div class="mechanic-grid" id="mechanic-selector-container">
+            <div class="mechanic-card selected" data-mech="Markus Vance">
+              <div class="mechanic-avatar">MV</div>
+              <div class="mechanic-info">
+                <h5>Markus Vance</h5>
+                <p data-i18n="mech1_role">Hlavný mechanik pre motory &amp; prevodovky &bull; 4.9 / 5</p>
+              </div>
+            </div>
+            <div class="mechanic-card" data-mech="Elena Rostova">
+              <div class="mechanic-avatar">ER</div>
+              <div class="mechanic-info">
+                <h5>Elena Rostova</h5>
+                <p data-i18n="mech2_role">Špecialistka na podvozky &amp; diagnostiku &bull; 5.0 / 5</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. CUSTOMER CONTACT & VEHICLE DETAILS -->
+        <div class="form-section">
+          <div class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span data-i18n="step4_title">Krok 4: Kontaktné údaje &amp; Informácie o vozidle</span>
+          </div>
+
+          <div class="contact-inputs-grid">
+            <div class="form-group">
+              <label class="form-label" for="cust-name" data-i18n="step4_name_label">Meno a priezvisko *</label>
+              <input type="text" id="cust-name" class="input-field" placeholder="Meno a priezvisko" required autocomplete="name" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cust-phone" data-i18n="step4_phone_label">Telefón (pre SMS notifikácie) *</label>
+              <input type="tel" id="cust-phone" class="input-field" placeholder="+421 9XX XXX XXX" required autocomplete="tel" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cust-email" data-i18n="step4_email_label">E-mailová adresa</label>
+              <input type="email" id="cust-email" class="input-field" placeholder="meno@domena.sk" autocomplete="email" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cust-plate" data-i18n="step4_plate_label">EČV / Model vozidla</label>
+              <input type="text" id="cust-plate" class="input-field" placeholder="EČV / Model (napr. BA 123 AB)" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MODAL FOOTER -->
+      <div class="modal-footer">
+        <div class="pricing-est">
+          <span data-i18n="modal_fee_label">Poplatok za vstupnú diagnostiku</span>
+          <strong id="modal-price-est">€45.00 <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;" data-i18n="modal_free_with_repair">(Zadarmo pri realizácii opravy)</span></strong>
+        </div>
+        <button class="confirm-booking-btn" id="submit-booking-btn">
+          <span data-i18n="modal_confirm_btn">Potvrdiť rezerváciu termínu</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
         </div>
         <button type="button" class="modal-close" id="add-order-close">&times;</button>
       </div>
@@ -3503,365 +4286,613 @@
         thStatusFilter.addEventListener('change', renderTable);
       }
 
+      
       // =========================================================
-      // ADD NEW ORDER (MANUAL BOOKING MODAL CONTROLLER)
+      // CAR PARTS DEFINITION & BOOKIO-STYLE RESERVATION MODAL
       // =========================================================
-      const addOrderModal = document.getElementById('add-order-modal');
-      const addOrderClose = document.getElementById('add-order-close');
-      const btnCancelAddOrder = document.getElementById('btn-cancel-add-order');
-      const btnSubmitAddOrder = document.getElementById('btn-submit-add-order');
-      const addOrderPartsGrid = document.getElementById('add-order-parts-grid');
-      const addOrderDesc = document.getElementById('add-order-desc');
-      const addOrderDate = document.getElementById('add-order-date');
-      const addOrderTime = document.getElementById('add-order-time');
-      const addOrderMechanic = document.getElementById('add-order-mechanic');
-      const addOrderPrice = document.getElementById('add-order-price');
-      const addOrderCustName = document.getElementById('add-order-cust-name');
-      const addOrderCustPhone = document.getElementById('add-order-cust-phone');
-      const addOrderCustEmail = document.getElementById('add-order-cust-email');
-      const addOrderCustPlate = document.getElementById('add-order-cust-plate');
-      const addOrderStatus = document.getElementById('add-order-status');
-      const addOrderStatusMsg = document.getElementById('add-order-status-msg');
-      const btnAddOrderDateToday = document.getElementById('add-order-date-today');
-      const btnAddOrderDateTomorrow = document.getElementById('add-order-date-tomorrow');
-      const addOrderQuickTimes = document.getElementById('add-order-quick-times');
+      const CAR_PARTS = [
+        {
+          code: 'E',
+          price: '€45.00',
+          sk: { name: 'Motor & Prevodovka', subCategory: 'POHON • 2.0 TFSI' },
+          en: { name: 'Engine & Transmission', subCategory: 'DRIVETRAIN • 2.0 TFSI' }
+        },
+        {
+          code: 'S',
+          price: '€35.00',
+          sk: { name: 'Podvozok & Brzdy', subCategory: 'NÁPRAVA • Tlmiče & Kotúče' },
+          en: { name: 'Suspension & Brakes', subCategory: 'CHASSIS • Dampers & Discs' }
+        },
+        {
+          code: 'X',
+          price: '€25.00',
+          sk: { name: 'Výfukový systém', subCategory: 'EMISIE • Katalyzátor & Klapky' },
+          en: { name: 'Exhaust System', subCategory: 'EMISSIONS • Cat & Valves' }
+        },
+        {
+          code: 'W',
+          price: '€20.00',
+          sk: { name: 'Kolesá & Disky', subCategory: 'PNEU • 19" Kované disky' },
+          en: { name: 'Wheels & Rims', subCategory: 'TYRES • 19" Forged Rims' }
+        },
+        {
+          code: 'B',
+          price: '€30.00',
+          sk: { name: 'Karoséria & Svetlá', subCategory: 'EXTERIÉR • Matrix LED & Panely' },
+          en: { name: 'Body & Lighting', subCategory: 'EXTERIOR • Matrix LED & Panels' }
+        },
+        {
+          code: 'I',
+          price: '€30.00',
+          sk: { name: 'Interiér & Elektronika', subCategory: 'PALUBOVKA • Virtuálny kokpit' },
+          en: { name: 'Interior & Electronics', subCategory: 'CABIN • Virtual Cockpit' }
+        }
+      ];
+
+      let currentSelectedPart = CAR_PARTS[0];
+      let selectedDateStr = 'Pondelok, 31. August 2026';
+      let selectedTimeSlot = '09:00';
+      let selectedMechanic = 'Markus Vance';
+
+      // Modal Elements
+      const bookingModal = document.getElementById('booking-modal');
+      const modalBadge = document.getElementById('modal-badge');
+      const modalPartName = document.getElementById('modal-part-name');
+      const modalPartCategory = document.getElementById('modal-part-category');
+      const modalPriceEst = document.getElementById('modal-price-est');
+      const modalCloseBtn = document.getElementById('modal-close-btn');
+      const submitBookingBtn = document.getElementById('submit-booking-btn');
+      const successScreen = document.getElementById('success-screen');
+      const finishBookingBtn = document.getElementById('finish-booking-btn');
+      const addCalBtn = document.getElementById('add-cal-btn');
+      const bookingReceiptDetails = document.getElementById('booking-receipt-details');
 
       // Photo upload elements
-      const btnAddOrderPhoto = document.getElementById('btn-add-order-photo');
-      const addOrderPhotoInput = document.getElementById('add-order-photo-input');
-      const addOrderPhotoPreviews = document.getElementById('add-order-photo-previews');
+      const photoDropzone = document.getElementById('photo-dropzone');
+      const photoInput = document.getElementById('photo-input');
+      const photoPreviews = document.getElementById('photo-previews');
+      let uploadedPhotos = [];
 
       // Audio recording elements
-      const btnAddOrderAudioRec = document.getElementById('btn-add-order-audio-rec');
-      const addOrderAudioRecText = document.getElementById('add-order-audio-rec-text');
-      const btnAddOrderAudioPlay = document.getElementById('btn-add-order-audio-play');
-      const addOrderAudioStatus = document.getElementById('add-order-audio-status');
+      const recordBtn = document.getElementById('record-btn');
+      const recordBtnText = document.getElementById('record-btn-text');
+      const recordTimer = document.getElementById('record-timer');
+      const waveformBars = document.getElementById('waveform-bars');
+      const audioPlayBtn = document.getElementById('audio-play-btn');
+      const problemDescInput = document.getElementById('problem-description');
+      const mechanicCards = document.querySelectorAll('.mechanic-card');
 
-      let selectedNewOrderPart = { code: 'E', name: 'Motor & Prevodovka', price: '€45.00' };
-      let newOrderPhotos = [];
-      let newOrderAudioData = null;
-      let newOrderMediaRecorder = null;
-      let newOrderAudioChunks = [];
-      let isRecordingNewOrderAudio = false;
-      let newOrderAudioTimer = null;
-      let newOrderAudioSeconds = 0;
-      let newOrderAudioAudioEl = null;
+      let isRecording = false;
+      let recordInterval = null;
+      let recordSeconds = 0;
+      let audioStream = null;
+      let mediaRecorder = null;
+      let audioChunks = [];
+      let recordedAudioBlob = null;
+      let recordedAudioUrl = null;
+      let currentAudioPlayer = null;
+      let audioVisualizerFrame = null;
 
-      function formatIsoDate(d) {
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
+      // Calendar state for booking modal
+      let currentCalYear = 2026;
+      let currentCalMonth = new Date().getMonth();
+      let selectedDateObj = new Date();
+      selectedDateObj.setDate(selectedDateObj.getDate() + 1);
+
+      const modalCalPrev = document.getElementById('modal-cal-prev');
+      const modalCalNext = document.getElementById('modal-cal-next');
+      const modalCalMonthTitle = document.getElementById('modal-cal-month-title');
+      const modalCalDaysContainer = document.getElementById('modal-cal-days-container');
+      const modalSelectedDateBadge = document.getElementById('modal-selected-date-badge');
+      const modalCalWeekdays = document.getElementById('modal-cal-weekdays');
+      const modalTimeSlotsContainer = document.getElementById('time-slots-container');
+
+      function openBookingModal(part) {
+        currentSelectedPart = part || CAR_PARTS[0];
+        updateModalPartView();
+
+        if (problemDescInput) problemDescInput.value = '';
+        const nameInp = document.getElementById('cust-name');
+        const phoneInp = document.getElementById('cust-phone');
+        const emailInp = document.getElementById('cust-email');
+        const plateInp = document.getElementById('cust-plate');
+
+        if (nameInp) nameInp.value = '';
+        if (phoneInp) phoneInp.value = '';
+        if (emailInp) emailInp.value = '';
+        if (plateInp) plateInp.value = '';
+
+        uploadedPhotos = [];
+        if (photoPreviews) photoPreviews.innerHTML = '';
+        resetAudioRecorder();
+        if (successScreen) successScreen.classList.remove('active');
+
+        document.body.classList.add('modal-open');
+        if (bookingModal) bookingModal.classList.add('open');
+
+        const mb = bookingModal.querySelector('.modal-body');
+        if (mb) mb.scrollTop = 0;
       }
 
-      function resetAddOrderForm() {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
+      function updateModalPartView() {
+        if (!currentSelectedPart) return;
+        const loc = currentSelectedPart.sk;
 
-        addOrderDate.value = formatIsoDate(tomorrow);
-        addOrderTime.value = '09:00';
-        addOrderDesc.value = '';
-        addOrderCustName.value = '';
-        addOrderCustPhone.value = '';
-        addOrderCustEmail.value = '';
-        addOrderCustPlate.value = '';
-        addOrderStatus.value = 'confirmed';
-        addOrderStatusMsg.style.display = 'none';
-
-        // Reset part selection to Engine
-        selectedNewOrderPart = { code: 'E', name: 'Motor & Prevodovka', price: '€45.00' };
-        addOrderPrice.value = '€45.00';
-        if (addOrderPartsGrid) {
-          addOrderPartsGrid.querySelectorAll('.part-choice-btn').forEach(btn => {
-            btn.classList.toggle('selected', btn.dataset.code === 'E');
-          });
+        if (modalBadge) modalBadge.textContent = currentSelectedPart.code;
+        if (modalPartName) modalPartName.textContent = loc.name;
+        if (modalPartCategory) modalPartCategory.innerHTML = loc.subCategory;
+        if (modalPriceEst) {
+          modalPriceEst.innerHTML = `${currentSelectedPart.price} <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">(Zadarmo pri realizácii opravy)</span>`;
         }
 
-        // Reset quick time buttons
-        if (addOrderQuickTimes) {
-          addOrderQuickTimes.querySelectorAll('.time-slot-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.textContent.trim() === '09:00');
-          });
-        }
+        // Update pills
+        const pills = document.querySelectorAll('#admin-part-pills .part-pill');
+        pills.forEach(p => {
+          const isActive = p.dataset.part === currentSelectedPart.code;
+          p.classList.toggle('active', isActive);
+          p.style.background = isActive ? 'rgba(0,229,255,0.15)' : 'rgba(255,255,255,0.05)';
+          p.style.borderColor = isActive ? '#00e5ff' : 'rgba(255,255,255,0.1)';
+          p.style.color = isActive ? '#00e5ff' : '#94a3b8';
+        });
 
-        // Reset photos
-        newOrderPhotos = [];
-        renderNewOrderPhotos();
-
-        // Reset audio
-        stopNewOrderRecording();
-        newOrderAudioData = null;
-        if (btnAddOrderAudioPlay) btnAddOrderAudioPlay.style.display = 'none';
-        if (addOrderAudioStatus) addOrderAudioStatus.textContent = '';
-        if (addOrderAudioRecText) addOrderAudioRecText.textContent = 'Nahrať zvuk mikrofónom';
+        updateSelectedDateBadge();
+        renderInteractiveCalendar();
       }
 
-      function openAddOrderModal() {
-        resetAddOrderForm();
-        if (addOrderModal) addOrderModal.classList.add('open');
+      // Wire part selector pills
+      document.querySelectorAll('#admin-part-pills .part-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const match = CAR_PARTS.find(p => p.code === btn.dataset.part);
+          if (match) {
+            currentSelectedPart = match;
+            updateModalPartView();
+          }
+        });
+      });
+
+      function closeModal() {
+        document.body.classList.remove('modal-open');
+        if (bookingModal) bookingModal.classList.remove('open');
+        if (successScreen) successScreen.classList.remove('active');
+        stopAudioRecording();
       }
 
-      function closeAddOrderModal() {
-        stopNewOrderRecording();
-        if (addOrderModal) addOrderModal.classList.remove('open');
-      }
-
-      // Open on "+ Pridať zákazku" button
-      addTestBtn.addEventListener('click', openAddOrderModal);
-
-      // Close modal events
-      if (addOrderClose) addOrderClose.addEventListener('click', closeAddOrderModal);
-      if (btnCancelAddOrder) btnCancelAddOrder.addEventListener('click', closeAddOrderModal);
-      if (addOrderModal) {
-        addOrderModal.addEventListener('click', (e) => {
-          if (e.target === addOrderModal) closeAddOrderModal();
+      if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
+      if (bookingModal) {
+        bookingModal.addEventListener('click', (e) => {
+          if (e.target === bookingModal) closeModal();
         });
       }
 
-      // Part selection
-      if (addOrderPartsGrid) {
-        addOrderPartsGrid.querySelectorAll('.part-choice-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            addOrderPartsGrid.querySelectorAll('.part-choice-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            selectedNewOrderPart = {
-              code: btn.dataset.code,
-              name: btn.dataset.name,
-              price: btn.dataset.price
-            };
-            addOrderPrice.value = btn.dataset.price;
-          });
-        });
-      }
+      // Wire "+ Pridať zákazku" in top bar
+      addTestBtn.addEventListener('click', () => {
+        openBookingModal(CAR_PARTS[0]);
+      });
 
-      // Quick date buttons
-      if (btnAddOrderDateToday) {
-        btnAddOrderDateToday.addEventListener('click', () => {
-          addOrderDate.value = formatIsoDate(new Date());
-        });
-      }
-      if (btnAddOrderDateTomorrow) {
-        btnAddOrderDateTomorrow.addEventListener('click', () => {
-          const tom = new Date();
-          tom.setDate(tom.getDate() + 1);
-          addOrderDate.value = formatIsoDate(tom);
-        });
-      }
-
-      // Quick time slots
-      if (addOrderQuickTimes) {
-        addOrderQuickTimes.querySelectorAll('.time-slot-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            addOrderQuickTimes.querySelectorAll('.time-slot-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            addOrderTime.value = btn.textContent.trim();
-          });
-        });
-      }
-
-      // Photos upload
-      if (btnAddOrderPhoto && addOrderPhotoInput) {
-        btnAddOrderPhoto.addEventListener('click', () => addOrderPhotoInput.click());
-        addOrderPhotoInput.addEventListener('change', (e) => {
+      // Photo upload
+      if (photoInput) {
+        photoInput.addEventListener('change', (e) => {
           const files = Array.from(e.target.files);
           files.forEach(file => {
             if (!file.type.startsWith('image/')) return;
-            if (newOrderPhotos.length >= 5) return;
             const reader = new FileReader();
             reader.onload = (evt) => {
-              newOrderPhotos.push(evt.target.result);
-              renderNewOrderPhotos();
+              uploadedPhotos.push(evt.target.result);
+              const img = document.createElement('img');
+              img.src = evt.target.result;
+              img.className = 'photo-thumb';
+              if (photoPreviews) photoPreviews.appendChild(img);
             };
             reader.readAsDataURL(file);
           });
-          addOrderPhotoInput.value = '';
         });
       }
 
-      function renderNewOrderPhotos() {
-        if (!addOrderPhotoPreviews) return;
-        addOrderPhotoPreviews.innerHTML = '';
-        newOrderPhotos.forEach((src, idx) => {
-          const item = document.createElement('div');
-          item.className = 'photo-preview-item';
-          item.innerHTML = `
-            <img src="${src}" alt="Náhľad ${idx + 1}">
-            <button type="button" class="photo-preview-remove" title="Odstrániť">&times;</button>
-          `;
-          item.querySelector('.photo-preview-remove').addEventListener('click', (e) => {
-            e.stopPropagation();
-            newOrderPhotos.splice(idx, 1);
-            renderNewOrderPhotos();
-          });
-          addOrderPhotoPreviews.appendChild(item);
-        });
+      // Audio recorder
+      function resetAudioRecorder() {
+        stopAudioRecording();
+        if (currentAudioPlayer) {
+          currentAudioPlayer.pause();
+          currentAudioPlayer = null;
+        }
+        if (recordedAudioUrl) {
+          URL.revokeObjectURL(recordedAudioUrl);
+          recordedAudioUrl = null;
+        }
+        recordedAudioBlob = null;
+        if (recordTimer) recordTimer.textContent = '00:00';
+        if (recordBtn) recordBtn.classList.remove('is-recording');
+        if (recordBtnText) recordBtnText.textContent = 'Nahrať zvukový záznam';
+        if (waveformBars) waveformBars.classList.remove('recording');
+        if (audioPlayBtn) {
+          audioPlayBtn.style.display = 'none';
+          audioPlayBtn.textContent = '▶ Prehrať';
+        }
+        if (waveformBars) {
+          const bars = waveformBars.querySelectorAll('.wave-bar');
+          bars.forEach(b => { b.style.height = ''; });
+        }
       }
 
-      // Audio recording logic
-      if (btnAddOrderAudioRec) {
-        btnAddOrderAudioRec.addEventListener('click', async () => {
-          if (!isRecordingNewOrderAudio) {
-            startNewOrderRecording();
-          } else {
-            stopNewOrderRecording();
-          }
-        });
-      }
+      async function startAudioRecording() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          alert('Váš prehliadač nepodporuje priame nahrávanie zvuku cez mikrofón.');
+          return;
+        }
 
-      async function startNewOrderRecording() {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          newOrderAudioChunks = [];
-          newOrderMediaRecorder = new MediaRecorder(stream);
-
-          newOrderMediaRecorder.ondataavailable = (e) => {
-            if (e.data && e.data.size > 0) {
-              newOrderAudioChunks.push(e.data);
-            }
-          };
-
-          newOrderMediaRecorder.onstop = () => {
-            const blob = new Blob(newOrderAudioChunks, { type: 'audio/webm' });
-            const reader = new FileReader();
-            reader.onload = () => {
-              newOrderAudioData = reader.result;
-              if (addOrderAudioStatus) {
-                addOrderAudioStatus.innerHTML = `<span style="color:#34d399; font-weight:600;">✓ Zvuk úspešne nahraný (${newOrderAudioSeconds}s)</span>`;
-              }
-              if (btnAddOrderAudioPlay) btnAddOrderAudioPlay.style.display = 'inline-block';
-            };
-            reader.readAsDataURL(blob);
-
-            // Stop mic tracks
-            stream.getTracks().forEach(t => t.stop());
-          };
-
-          newOrderMediaRecorder.start();
-          isRecordingNewOrderAudio = true;
-          newOrderAudioSeconds = 0;
-          if (addOrderAudioRecText) addOrderAudioRecText.textContent = '⏹ Zastaviť nahrávanie';
-          if (addOrderAudioStatus) {
-            addOrderAudioStatus.innerHTML = `<span class="audio-recording-indicator"><span class="audio-pulse-dot"></span> Nahrávam zvuk... 00:00</span>`;
-          }
-
-          clearInterval(newOrderAudioTimer);
-          newOrderAudioTimer = setInterval(() => {
-            newOrderAudioSeconds++;
-            const s = String(newOrderAudioSeconds % 60).padStart(2, '0');
-            const m = String(Math.floor(newOrderAudioSeconds / 60)).padStart(2, '0');
-            if (addOrderAudioStatus && isRecordingNewOrderAudio) {
-              addOrderAudioStatus.innerHTML = `<span class="audio-recording-indicator"><span class="audio-pulse-dot"></span> Nahrávam zvuk... ${m}:${s}</span>`;
-            }
-            if (newOrderAudioSeconds >= 30) {
-              stopNewOrderRecording();
-            }
-          }, 1000);
-
+          audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         } catch (err) {
-          console.warn('Microphone error:', err);
-          if (addOrderAudioStatus) {
-            addOrderAudioStatus.innerHTML = `<span style="color:#f87171;">Mikrofón nie je dostupný (${err.message})</span>`;
+          console.warn('Microphone access denied:', err);
+          alert('Prístup k mikrofónu bol zamietnutý.');
+          return;
+        }
+
+        audioChunks = [];
+        let options = {};
+        if (typeof MediaRecorder !== 'undefined') {
+          if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+            options = { mimeType: 'audio/webm;codecs=opus' };
+          } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+            options = { mimeType: 'audio/mp4' };
+          } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+            options = { mimeType: 'audio/ogg' };
           }
+        }
+
+        try {
+          mediaRecorder = new MediaRecorder(audioStream, options);
+        } catch (e) {
+          mediaRecorder = new MediaRecorder(audioStream);
+        }
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data && event.data.size > 0) {
+            audioChunks.push(event.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          if (audioChunks.length > 0) {
+            recordedAudioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+            if (recordedAudioUrl) {
+              URL.revokeObjectURL(recordedAudioUrl);
+            }
+            recordedAudioUrl = URL.createObjectURL(recordedAudioBlob);
+            if (audioPlayBtn) {
+              audioPlayBtn.style.display = 'inline-flex';
+              audioPlayBtn.textContent = '▶ Prehrať';
+            }
+          }
+        };
+
+        setupAudioVisualizer(audioStream);
+
+        mediaRecorder.start(100);
+        isRecording = true;
+        recordSeconds = 0;
+        if (recordBtn) recordBtn.classList.add('is-recording');
+        if (recordBtnText) recordBtnText.textContent = 'Zastaviť nahrávanie';
+        if (waveformBars) waveformBars.classList.add('recording');
+        if (audioPlayBtn) audioPlayBtn.style.display = 'none';
+
+        recordInterval = setInterval(() => {
+          recordSeconds++;
+          const mins = String(Math.floor(recordSeconds / 60)).padStart(2, '0');
+          const secs = String(recordSeconds % 60).padStart(2, '0');
+          if (recordTimer) recordTimer.textContent = `${mins}:${secs}`;
+          if (recordSeconds >= 60) {
+            stopAudioRecording();
+          }
+        }, 1000);
+      }
+
+      function setupAudioVisualizer(stream) {
+        try {
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const source = audioCtx.createMediaStreamSource(stream);
+          const analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 64;
+          source.connect(analyser);
+
+          const dataArray = new Uint8Array(analyser.frequencyBinCount);
+          const bars = waveformBars ? waveformBars.querySelectorAll('.wave-bar') : [];
+
+          function drawBars() {
+            if (!isRecording) return;
+            audioVisualizerFrame = requestAnimationFrame(drawBars);
+            analyser.getByteFrequencyData(dataArray);
+
+            bars.forEach((bar, index) => {
+              const val = dataArray[index % dataArray.length] || 0;
+              const heightPercent = Math.max(12, Math.min(100, (val / 200) * 100));
+              bar.style.height = `${heightPercent}%`;
+            });
+          }
+          drawBars();
+        } catch (e) {
+          console.warn('AudioContext visualizer error:', e);
         }
       }
 
-      function stopNewOrderRecording() {
-        clearInterval(newOrderAudioTimer);
-        if (newOrderMediaRecorder && newOrderMediaRecorder.state !== 'inactive') {
-          newOrderMediaRecorder.stop();
+      function stopAudioRecording() {
+        if (!isRecording) return;
+        isRecording = false;
+
+        if (recordInterval) {
+          clearInterval(recordInterval);
+          recordInterval = null;
         }
-        isRecordingNewOrderAudio = false;
-        if (addOrderAudioRecText) {
-          addOrderAudioRecText.textContent = newOrderAudioData ? 'Nahrať znova' : 'Nahrať zvuk mikrofónom';
+
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+
+        if (audioStream) {
+          audioStream.getTracks().forEach(track => track.stop());
+          audioStream = null;
+        }
+
+        if (audioVisualizerFrame) {
+          cancelAnimationFrame(audioVisualizerFrame);
+          audioVisualizerFrame = null;
+        }
+
+        if (recordBtn) recordBtn.classList.remove('is-recording');
+        if (recordBtnText) recordBtnText.textContent = 'Nahrať znova';
+        if (waveformBars) {
+          waveformBars.classList.remove('recording');
+          const bars = waveformBars.querySelectorAll('.wave-bar');
+          bars.forEach(b => { b.style.height = ''; });
         }
       }
 
-      if (btnAddOrderAudioPlay) {
-        btnAddOrderAudioPlay.addEventListener('click', () => {
-          if (!newOrderAudioData) return;
-          if (newOrderAudioAudioEl) {
-            newOrderAudioAudioEl.pause();
-            newOrderAudioAudioEl = null;
-            btnAddOrderAudioPlay.textContent = '▶ Prehrať';
-            return;
+      if (recordBtn) {
+        recordBtn.addEventListener('click', () => {
+          if (isRecording) {
+            stopAudioRecording();
+          } else {
+            startAudioRecording();
           }
-          newOrderAudioAudioEl = new Audio(newOrderAudioData);
-          btnAddOrderAudioPlay.textContent = '⏸ Pauza';
-          newOrderAudioAudioEl.onended = () => {
-            btnAddOrderAudioPlay.textContent = '▶ Prehrať';
-            newOrderAudioAudioEl = null;
-          };
-          newOrderAudioAudioEl.play();
         });
       }
 
-      // Submit and save new manual booking
-      if (btnSubmitAddOrder) {
-        btnSubmitAddOrder.addEventListener('click', () => {
-          const custName = (addOrderCustName.value || '').trim();
-          const custPhone = (addOrderCustPhone.value || '').trim();
-          const custEmail = (addOrderCustEmail.value || '').trim();
-          const custPlate = (addOrderCustPlate.value || '').trim();
-          const custDesc = (addOrderDesc.value || '').trim();
-          const custPrice = (addOrderPrice.value || selectedNewOrderPart.price || '€45.00').trim();
-          const custTime = (addOrderTime.value || '09:00').trim();
-          const custMech = addOrderMechanic.value || 'Markus Vance';
-          const custStatus = addOrderStatus.value || 'confirmed';
+      if (audioPlayBtn) {
+        audioPlayBtn.addEventListener('click', () => {
+          if (!recordedAudioUrl) return;
 
-          if (!custName) {
-            addOrderStatusMsg.className = 'status-msg error';
-            addOrderStatusMsg.textContent = 'Prosím, zadajte meno a priezvisko zákazníka.';
-            addOrderStatusMsg.style.display = 'block';
-            addOrderCustName.focus();
+          if (currentAudioPlayer && !currentAudioPlayer.paused) {
+            currentAudioPlayer.pause();
+            currentAudioPlayer.currentTime = 0;
+            audioPlayBtn.textContent = '▶ Prehrať';
+            if (waveformBars) waveformBars.classList.remove('recording');
             return;
           }
 
-          if (!custPhone) {
-            addOrderStatusMsg.className = 'status-msg error';
-            addOrderStatusMsg.textContent = 'Prosím, zadajte telefónne číslo zákazníka.';
-            addOrderStatusMsg.style.display = 'block';
-            addOrderCustPhone.focus();
-            return;
+          if (!currentAudioPlayer) {
+            currentAudioPlayer = new Audio();
           }
 
-          let targetDateObj = new Date();
-          if (addOrderDate.value) {
-            const [y, m, d] = addOrderDate.value.split('-').map(Number);
-            targetDateObj = new Date(y, m - 1, d);
+          currentAudioPlayer.src = recordedAudioUrl;
+          currentAudioPlayer.play().then(() => {
+            audioPlayBtn.textContent = 'Prehrávam...';
+            if (waveformBars) waveformBars.classList.add('recording');
+          }).catch(err => {
+            console.error('Audio playback error:', err);
+          });
+
+          currentAudioPlayer.onended = () => {
+            audioPlayBtn.textContent = '▶ Prehrať';
+            if (waveformBars) waveformBars.classList.remove('recording');
+          };
+        });
+      }
+
+      function updateSelectedDateBadge() {
+        if (!selectedDateObj) return;
+        const daysSK = ['Nedeľa', 'Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota'];
+        const monthsSK = ['Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún', 'Júl', 'August', 'September', 'Október', 'November', 'December'];
+
+        const dayName = daysSK[selectedDateObj.getDay()];
+        const dayNum = selectedDateObj.getDate();
+        const monthName = monthsSK[selectedDateObj.getMonth()];
+        const yearNum = selectedDateObj.getFullYear();
+
+        selectedDateStr = `${dayName}, ${dayNum}. ${monthName} ${yearNum}`;
+        if (modalSelectedDateBadge) {
+          modalSelectedDateBadge.textContent = selectedDateStr;
+        }
+      }
+
+      function renderInteractiveCalendar() {
+        if (!modalCalMonthTitle || !modalCalDaysContainer) return;
+
+        const months = ['Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún', 'Júl', 'August', 'September', 'Október', 'November', 'December'];
+
+        modalCalMonthTitle.textContent = `${months[currentCalMonth]} ${currentCalYear}`;
+        modalCalDaysContainer.innerHTML = '';
+
+        if (modalCalWeekdays) {
+          modalCalWeekdays.innerHTML = '<span>Po</span><span>Ut</span><span>St</span><span>Št</span><span>Pi</span><span>So</span><span>Ne</span>';
+        }
+
+        const firstDay = new Date(currentCalYear, currentCalMonth, 1);
+        const lastDay = new Date(currentCalYear, currentCalMonth + 1, 0);
+        const totalDays = lastDay.getDate();
+
+        // Monday-first index
+        let startDayOfWeek = (firstDay.getDay() + 6) % 7;
+
+        for (let i = 0; i < startDayOfWeek; i++) {
+          const emptyCell = document.createElement('div');
+          emptyCell.className = 'cal-day-cell empty';
+          modalCalDaysContainer.appendChild(emptyCell);
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        for (let day = 1; day <= totalDays; day++) {
+          const cellDate = new Date(currentCalYear, currentCalMonth, day);
+          const dayOfWeek = cellDate.getDay();
+          const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+          const isPast = (cellDate < today);
+          const isToday = cellDate.getTime() === today.getTime();
+          const isSelected = selectedDateObj && cellDate.toDateString() === selectedDateObj.toDateString();
+
+          const cell = document.createElement('button');
+          cell.type = 'button';
+          cell.className = 'cal-day-cell';
+          cell.textContent = day;
+
+          if (isToday) cell.classList.add('today');
+          if (isSelected) cell.classList.add('selected');
+
+          if (isPast || isWeekend) {
+            cell.classList.add('disabled');
+            if (isWeekend) cell.title = 'Víkend (zatvorené)';
           } else {
-            targetDateObj.setDate(targetDateObj.getDate() + 1);
+            cell.addEventListener('click', () => {
+              selectedDateObj = cellDate;
+              updateSelectedDateBadge();
+              renderInteractiveCalendar();
+              buildTimeSlots();
+            });
           }
 
-          const formattedDate = formatDateForBooking(targetDateObj);
-          const newBookingId = 'JK-' + Math.floor(100000 + Math.random() * 900000);
+          modalCalDaysContainer.appendChild(cell);
+        }
+
+        buildTimeSlots();
+      }
+
+      if (modalCalPrev) {
+        modalCalPrev.addEventListener('click', () => {
+          currentCalMonth--;
+          if (currentCalMonth < 0) {
+            currentCalMonth = 11;
+            currentCalYear--;
+          }
+          renderInteractiveCalendar();
+        });
+      }
+
+      if (modalCalNext) {
+        modalCalNext.addEventListener('click', () => {
+          currentCalMonth++;
+          if (currentCalMonth > 11) {
+            currentCalMonth = 0;
+            currentCalYear++;
+          }
+          renderInteractiveCalendar();
+        });
+      }
+
+      function buildTimeSlots() {
+        if (!modalTimeSlotsContainer || !selectedDateObj) return;
+        const allSlots = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+        modalTimeSlotsContainer.innerHTML = '';
+
+        let firstAvailable = null;
+
+        allSlots.forEach((slot) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'time-slot-btn';
+          btn.textContent = slot;
+
+          if (!firstAvailable) firstAvailable = slot;
+
+          btn.addEventListener('click', () => {
+            modalTimeSlotsContainer.querySelectorAll('.time-slot-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedTimeSlot = slot;
+          });
+
+          modalTimeSlotsContainer.appendChild(btn);
+        });
+
+        if (selectedTimeSlot) {
+          const match = Array.from(modalTimeSlotsContainer.children).find(b => b.textContent.trim() === selectedTimeSlot);
+          if (match) match.classList.add('selected');
+        } else if (firstAvailable) {
+          selectedTimeSlot = firstAvailable;
+          const match = Array.from(modalTimeSlotsContainer.children).find(b => b.textContent.trim() === firstAvailable);
+          if (match) match.classList.add('selected');
+        }
+      }
+
+      mechanicCards.forEach(card => {
+        card.addEventListener('click', () => {
+          mechanicCards.forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          selectedMechanic = card.dataset.mech;
+          buildTimeSlots();
+        });
+      });
+
+      // Submit booking
+      if (submitBookingBtn) {
+        submitBookingBtn.addEventListener('click', () => {
+          const nameInput = document.getElementById('cust-name');
+          const phoneInput = document.getElementById('cust-phone');
+          const emailInput = document.getElementById('cust-email');
+          const plateInput = document.getElementById('cust-plate');
+
+          const custName = (nameInput.value || '').trim();
+          const custPhone = (phoneInput.value || '').trim();
+          const custEmail = (emailInput.value || '').trim();
+          const custPlate = (plateInput.value || '').trim();
+
+          let hasError = false;
+          if (!custName || custName.length < 2) {
+            nameInput.style.borderColor = '#ff5252';
+            nameInput.focus();
+            hasError = true;
+          } else {
+            nameInput.style.borderColor = '';
+          }
+
+          if (!custPhone || custPhone.length < 6) {
+            phoneInput.style.borderColor = '#ff5252';
+            if (!hasError) phoneInput.focus();
+            hasError = true;
+          } else {
+            phoneInput.style.borderColor = '';
+          }
+
+          if (hasError) return;
+
+          const bookingId = `JK-${Math.floor(100000 + Math.random() * 900000)}`;
+          const loc = currentSelectedPart.sk;
 
           const newBooking = {
-            id: newBookingId,
+            id: bookingId,
+            partName: loc.name,
+            partCode: currentSelectedPart.code,
+            date: selectedDateStr,
+            time: selectedTimeSlot,
+            price: currentSelectedPart.price,
+            mechanic: selectedMechanic,
             customer: custName,
             phone: custPhone,
             email: custEmail || (custName.toLowerCase().replace(/\s+/g, '.') + '@gmail.com'),
             plate: custPlate || 'BA 123 XY',
-            partName: selectedNewOrderPart.name,
-            partCode: selectedNewOrderPart.code,
-            date: formattedDate,
-            time: custTime,
-            price: custPrice,
-            mechanic: custMech,
-            problemDesc: custDesc || 'Servisná zákazka zaevidovaná cez dispečing.',
-            symptoms: ['Servisná požiadavka'],
-            hasAudio: !!newOrderAudioData,
-            audioData: newOrderAudioData || null,
-            photos: newOrderPhotos,
-            photosCount: newOrderPhotos.length,
-            status: custStatus,
+            symptoms: ['Servisná diagnostika'],
+            problemDesc: problemDescInput ? problemDescInput.value.trim() : '',
+            photosCount: uploadedPhotos.length,
+            photos: uploadedPhotos.slice(0, 4),
+            hasAudio: !!recordedAudioBlob,
+            audioData: recordedAudioUrl,
+            status: 'confirmed',
             timestamp: new Date().toISOString()
           };
 
-          // Add to top of bookings list
+          // Add to beginning of bookings
           bookings.unshift(newBooking);
           saveData();
 
-          // Refresh both views
+          // Refresh tables & calendar
           renderTable();
           renderCalendar();
 
@@ -3874,11 +4905,77 @@
             }).catch(() => {});
           } catch (e) {}
 
-          // Show confirmation toast and close modal
-          closeAddOrderModal();
-          showRescheduleToast(`✓ Zákazka #${newBookingId} (${custName}) bola úspešne vytvorená a zaevidovaná!`);
+          // Render receipt details in success screen
+          if (bookingReceiptDetails) {
+            bookingReceiptDetails.innerHTML = `
+              <div class="ref-row">
+                <span>Číslo zákazky:</span>
+                <strong>${newBooking.id}</strong>
+              </div>
+              <div class="ref-row">
+                <span>Komponent:</span>
+                <strong>[${newBooking.partCode}] ${newBooking.partName}</strong>
+              </div>
+              <div class="ref-row">
+                <span>Termín servisu:</span>
+                <strong>${newBooking.date} o ${newBooking.time}</strong>
+              </div>
+              <div class="ref-row">
+                <span>Priradený mechanik:</span>
+                <strong>${newBooking.mechanic}</strong>
+              </div>
+              <div class="ref-row">
+                <span>EČV vozidla:</span>
+                <strong>${newBooking.plate}</strong>
+              </div>
+              <div class="ref-row">
+                <span>Zákazník:</span>
+                <strong>${newBooking.customer} (${newBooking.phone})</strong>
+              </div>
+            `;
+          }
+
+          if (successScreen) {
+            successScreen.classList.add('active');
+          }
+
+          showRescheduleToast(`✓ Zákazka #${newBooking.id} (${custName}) bola úspešne zaevidovaná!`);
         });
       }
+
+      if (finishBookingBtn) {
+        finishBookingBtn.addEventListener('click', closeModal);
+      }
+
+      if (addCalBtn) {
+        addCalBtn.addEventListener('click', () => {
+          if (bookings.length > 0) {
+            const b = bookings[0];
+            const icsData = [
+              'BEGIN:VCALENDAR',
+              'VERSION:2.0',
+              'PRODID:-//AutoMek JK Garaz//SK',
+              'CALSCALE:GREGORIAN',
+              'METHOD:PUBLISH',
+              'BEGIN:VEVENT',
+              `SUMMARY:Servis JK Garáž - ${b.partName} (${b.id})`,
+              `DESCRIPTION:Servis u mechanika: ${b.mechanic}\nZákazník: ${b.customer}\nEČV: ${b.plate}`,
+              `LOCATION:JK Garáž, Servisné stredisko`,
+              'STATUS:CONFIRMED',
+              'END:VEVENT',
+              'END:VCALENDAR'
+            ].join('\r\n');
+
+            const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `servis-${b.id}.ics`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+          }
+        });
+      }
+
 
       // Brevo Modal & Settings Dropdown Events
       const settingsMenuToggle = document.getElementById('settings-menu-toggle');

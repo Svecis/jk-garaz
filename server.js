@@ -558,6 +558,52 @@ function dispatchShopChangeNotification(booking, changeLabel) {
   return sendEmailGeneric(targetEmail, subject, buildBookingEmailHtml(booking));
 }
 
+const STATUS_LABELS_SK = {
+  pending: 'Čaká na potvrdenie',
+  confirmed: 'Potvrdená',
+  in_progress: 'V servise',
+  completed: 'Dokončená',
+  cancelled: 'Zrušená'
+};
+
+const STATUS_MESSAGES_SK = {
+  confirmed: 'vaša rezervácia bola potvrdená.',
+  in_progress: 'vaše vozidlo je práve u nás v servise.',
+  completed: 'vaša zákazka bola dokončená, vozidlo si môžete vyzdvihnúť.',
+  cancelled: 'vaša rezervácia bola zrušená.'
+};
+
+// Customer-facing e-mail when the shop changes a booking's status from the admin
+// dashboard (Potvrdená / V servise / Dokončená / Zrušená).
+function buildCustomerStatusUpdateEmailHtml(booking) {
+  if (booking.status === 'cancelled') return buildCustomerCancellationEmailHtml(booking);
+
+  const plateFormatted = (booking.plate || '-').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+  const manageUrl = PUBLIC_BASE_URL + '/moja-rezervacia.html?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.manageToken || '');
+  const statusLabel = STATUS_LABELS_SK[booking.status] || booking.status;
+  const statusMessage = STATUS_MESSAGES_SK[booking.status] || ('stav vašej zákazky sa zmenil na: ' + statusLabel);
+
+  return `
+      <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; padding:20px; border:1px solid #e2e8f0; border-radius:10px; background:#ffffff;">
+        <h2 style="color:#0f172a; margin-top:0;">Stav zákazky zmenený — #${booking.id}</h2>
+        <p style="color:#64748b; font-size:14px;">Dobrý deň${booking.customer ? ', ' + booking.customer : ''}, ${statusMessage}</p>
+        <hr style="border:none; border-top:1px solid #e2e8f0; margin:16px 0;" />
+        <table style="width:100%; font-size:14px; border-collapse:collapse;">
+          <tr><td style="padding:6px 0; color:#64748b; width:140px;"><strong>Diel:</strong></td><td style="color:#2563eb; font-weight:bold;">[${booking.partCode || 'P'}] ${booking.partName || '-'}</td></tr>
+          <tr><td style="padding:6px 0; color:#64748b;"><strong>Termín:</strong></td><td style="color:#0f172a;">${booking.date || '-'} o ${booking.time || '-'}</td></tr>
+          <tr><td style="padding:6px 0; color:#64748b;"><strong>Stav:</strong></td><td style="color:#0f172a; font-weight:bold;">${statusLabel}</td></tr>
+          <tr><td style="padding:6px 0; color:#64748b;"><strong>EČV Vozidla:</strong></td><td style="color:#0f172a; font-family:monospace; font-weight:bold;">${plateFormatted}</td></tr>
+        </table>
+        <p style="color:#64748b; font-size:13px; margin-top:20px;">Termín si viete pozrieť alebo zmeniť tu: <a href="${manageUrl}" style="color:#2563eb;">Spravovať moju rezerváciu</a>.</p>
+      </div>
+    `;
+}
+
+function dispatchCustomerStatusUpdate(booking) {
+  const subject = 'Zákazka #' + booking.id + ': ' + (STATUS_LABELS_SK[booking.status] || booking.status) + ' — AutoMek';
+  return sendEmailGeneric(booking.email, subject, buildCustomerStatusUpdateEmailHtml(booking));
+}
+
 const server = http.createServer((req, res) => {
   const parsedUrl = new URL(req.url, 'http://localhost:' + PORT);
   const pathname = parsedUrl.pathname;
@@ -989,6 +1035,8 @@ const server = http.createServer((req, res) => {
           return;
         }
 
+        const previousStatus = isNew ? null : bookings[idx].status;
+
         if (isNew) {
           booking.createdAt = booking.createdAt || new Date().toISOString();
           // Lets the customer manage (view/cancel/reschedule) their own booking later
@@ -1009,6 +1057,15 @@ const server = http.createServer((req, res) => {
           if (booking.email && booking.email.includes('@')) {
             dispatchCustomerConfirmation(booking).catch(err => {
               console.warn('[BOOKING] Potvrdzovací email zákazníkovi zlyhal:', err.message);
+            });
+          }
+        } else if (booking.status && booking.status !== previousStatus) {
+          // Admin changed the status from the dashboard (e.g. Nová -> Potvrdená -> V servise
+          // -> Dokončená, or Zrušená) — let the customer know, same as the self-service flow.
+          const updated = bookings[idx];
+          if (updated.email && updated.email.includes('@')) {
+            dispatchCustomerStatusUpdate(updated).catch(err => {
+              console.warn('[BOOKING] Email o zmene stavu zákazníkovi zlyhal:', err.message);
             });
           }
         }

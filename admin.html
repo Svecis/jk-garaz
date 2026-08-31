@@ -3413,6 +3413,7 @@
 
           const sel = tr.querySelector('.row-status');
           sel.addEventListener('change', (e) => {
+            const previousStatus = b.status;
             b.status = e.target.value;
             if (b.status === 'completed') {
               b.photos = [];
@@ -3424,18 +3425,25 @@
             renderTable();
             renderCalendar();
 
-            // Sync with backend
-            const token = sessionStorage.getItem('jk_admin_jwt');
-            if (token) {
-              fetch('/api/bookings', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(b)
-              }).catch(() => {});
-            }
+            // Sync with backend — this endpoint is public (also used by the customer
+            // booking form), so it must not be gated on having a session token: if the
+            // token happened to be missing/expired this used to silently skip the sync
+            // entirely, leaving the change saved only in this browser. The next full
+            // reload would then pull the still-old status from the server and it would
+            // look like the change "didn't stick".
+            fetch('/api/bookings', {
+              method: 'POST',
+              headers: getAuthHeaders(),
+              body: JSON.stringify(b)
+            })
+              .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); })
+              .catch(() => {
+                b.status = previousStatus;
+                saveData();
+                renderTable();
+                renderCalendar();
+                alert('Zmenu stavu sa nepodarilo uložiť na server. Skúste to prosím znova.');
+              });
           });
 
           tableBody.appendChild(tr);

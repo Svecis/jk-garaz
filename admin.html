@@ -2436,13 +2436,19 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">2. Brevo prihlasovací email (odosielateľ)</label>
+        <label class="form-label">2. Brevo prihlasovací email (SMTP login)</label>
         <input type="email" id="cfg-brevo-sender" class="form-input" placeholder="b72316001@smtp-brevo.com alebo vas@gmail.com">
-        <span class="form-hint">Prihlasovací Login z Brevo SMTP konfigurácie.</span>
+        <span class="form-hint">Prihlasovací Login z Brevo SMTP konfigurácie (na autentifikáciu, nemusí byť overený).</span>
       </div>
 
       <div class="form-group">
-        <label class="form-label">3. Brevo API / SMTP Kľúč</label>
+        <label class="form-label">3. Overená odosielacia adresa (zobrazí sa v poli "Od:")</label>
+        <input type="email" id="cfg-brevo-from" class="form-input" placeholder="tvoj@overenymail.sk">
+        <span class="form-hint">Musí byť e-mail alebo doména, ktorú si overil/a v Brevo dashboarde pod "Senders". Ak necháš prázdne, použije sa prihlasovací e-mail vyššie (funguje len ak je aj on overený).</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">4. Brevo API / SMTP Kľúč</label>
         <input type="password" id="cfg-brevo-key" class="form-input" placeholder="xsmtpsib-... alebo xkeysib-...">
         <span class="form-hint">Vygenerovaný SMTP alebo API kľúč z Brevo.com.</span>
       </div>
@@ -2981,6 +2987,7 @@
       const closeBrevoBtn = document.getElementById('brevo-close-btn');
       const cfgRecipient = document.getElementById('cfg-recipient');
       const cfgSender = document.getElementById('cfg-brevo-sender');
+      const cfgFromEmail = document.getElementById('cfg-brevo-from');
       const cfgKey = document.getElementById('cfg-brevo-key');
       const modalStatus = document.getElementById('modal-status-msg');
       const btnSaveBrevo = document.getElementById('btn-save-brevo');
@@ -4482,6 +4489,7 @@
           .then(cfg => {
             if (cfg.recipientEmail && cfg.recipientEmail !== 'servis@automek.sk') cfgRecipient.value = cfg.recipientEmail;
             if (cfg.brevoSender) cfgSender.value = cfg.brevoSender;
+            if (cfg.brevoFromEmail) cfgFromEmail.value = cfg.brevoFromEmail;
             if (cfg.brevoKey) cfgKey.value = cfg.brevoKey;
             if (brevoModal) brevoModal.classList.add('open');
           })
@@ -4520,6 +4528,7 @@
         const payload = {
           recipientEmail: cfgRecipient.value.trim(),
           brevoSender: cfgSender.value.trim(),
+          brevoFromEmail: cfgFromEmail.value.trim(),
           brevoKey: cfgKey.value.trim()
         };
 
@@ -4548,6 +4557,7 @@
         const payload = {
           recipientEmail: cfgRecipient.value.trim(),
           brevoSender: cfgSender.value.trim(),
+          brevoFromEmail: cfgFromEmail.value.trim(),
           brevoKey: cfgKey.value.trim()
         };
 

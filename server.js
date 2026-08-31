@@ -259,6 +259,7 @@ let emailConfig = {
   recipientEmail: 'servis@automek.sk',
   brevo: {
     senderEmail: '',
+    fromEmail: '',
     apiKey: ''
   },
   smtp: {
@@ -337,10 +338,10 @@ function buildBookingEmailHtml(booking) {
 }
 
 // Send an arbitrary e-mail via Brevo HTTP API
-function sendViaBrevoApi(apiKey, senderEmail, recipientEmail, subject, htmlContent) {
+function sendViaBrevoApi(apiKey, fromEmail, recipientEmail, subject, htmlContent) {
   return new Promise((resolve, reject) => {
     const payload = JSON.stringify({
-      sender: { name: "AutoMek Servis", email: senderEmail },
+      sender: { name: "AutoMek Servis", email: fromEmail },
       to: [{ email: recipientEmail }],
       subject: subject,
       htmlContent: htmlContent
@@ -384,7 +385,9 @@ function sendViaBrevoApi(apiKey, senderEmail, recipientEmail, subject, htmlConte
 }
 
 // Send an arbitrary e-mail via Brevo SMTP (Nodemailer)
-function sendViaBrevoSmtp(login, key, recipientEmail, subject, htmlContent) {
+// `login` authenticates to the SMTP relay; `fromEmail` is the verified sender shown in the From: header —
+// Brevo treats these as two different things and rejects sends where an unverified address is used as sender.
+function sendViaBrevoSmtp(login, key, fromEmail, recipientEmail, subject, htmlContent) {
   const transporter = nodemailer.createTransport({
     host: 'smtp-relay.brevo.com',
     port: 587,
@@ -396,7 +399,7 @@ function sendViaBrevoSmtp(login, key, recipientEmail, subject, htmlContent) {
   });
 
   return transporter.sendMail({
-    from: '"AutoMek Servis" <' + login + '>',
+    from: '"AutoMek Servis" <' + fromEmail + '>',
     to: recipientEmail,
     subject: subject,
     html: htmlContent
@@ -406,16 +409,18 @@ function sendViaBrevoSmtp(login, key, recipientEmail, subject, htmlContent) {
 // Generic e-mail dispatcher: tries Brevo HTTP API first, falls back to SMTP
 async function sendEmailGeneric(recipient, subject, htmlContent) {
   const brevoKey = (emailConfig.brevo && emailConfig.brevo.apiKey ? emailConfig.brevo.apiKey : (emailConfig.smtp && emailConfig.smtp.auth ? emailConfig.smtp.auth.pass : '')).trim();
-  const brevoSender = (emailConfig.brevo && emailConfig.brevo.senderEmail ? emailConfig.brevo.senderEmail : (emailConfig.smtp && emailConfig.smtp.auth ? emailConfig.smtp.auth.user : '')).trim();
+  const brevoLogin = (emailConfig.brevo && emailConfig.brevo.senderEmail ? emailConfig.brevo.senderEmail : (emailConfig.smtp && emailConfig.smtp.auth ? emailConfig.smtp.auth.user : '')).trim();
+  // The verified "From" address — falls back to the login for accounts where they're the same
+  const fromEmail = ((emailConfig.brevo && emailConfig.brevo.fromEmail) || brevoLogin).trim();
 
-  if (brevoKey && brevoSender) {
+  if (brevoKey && brevoLogin) {
     try {
       // First try Brevo HTTP API (fastest, never blocked by ports)
-      return await sendViaBrevoApi(brevoKey, brevoSender, recipient, subject, htmlContent);
+      return await sendViaBrevoApi(brevoKey, fromEmail, recipient, subject, htmlContent);
     } catch (apiErr) {
       console.warn('[BREVO API error, trying SMTP fallback]:', apiErr.message);
       // Fallback to Brevo SMTP
-      return await sendViaBrevoSmtp(brevoSender, brevoKey, recipient, subject, htmlContent);
+      return await sendViaBrevoSmtp(brevoLogin, brevoKey, fromEmail, recipient, subject, htmlContent);
     }
   } else {
     throw new Error('Neboli zadané prihlasovacie údaje pre Brevo (Email a API/SMTP kľúč).');
@@ -477,6 +482,7 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify({
       recipientEmail: emailConfig.recipientEmail || '',
       brevoSender: (emailConfig.brevo && emailConfig.brevo.senderEmail) || (emailConfig.smtp && emailConfig.smtp.auth && emailConfig.smtp.auth.user) || '',
+      brevoFromEmail: (emailConfig.brevo && emailConfig.brevo.fromEmail) || '',
       brevoKey: (emailConfig.brevo && emailConfig.brevo.apiKey) || (emailConfig.smtp && emailConfig.smtp.auth && emailConfig.smtp.auth.pass) || ''
     }));
     return;
@@ -495,6 +501,7 @@ const server = http.createServer((req, res) => {
 
         emailConfig.brevo = emailConfig.brevo || {};
         if (data.brevoSender) emailConfig.brevo.senderEmail = data.brevoSender.trim();
+        if (data.brevoFromEmail) emailConfig.brevo.fromEmail = data.brevoFromEmail.trim();
         if (data.brevoKey) emailConfig.brevo.apiKey = data.brevoKey.trim();
 
         // Also sync to smtp object for compatibility
@@ -531,6 +538,10 @@ const server = http.createServer((req, res) => {
         if (reqData.brevoSender) {
           emailConfig.brevo = emailConfig.brevo || {};
           emailConfig.brevo.senderEmail = reqData.brevoSender.trim();
+        }
+        if (reqData.brevoFromEmail) {
+          emailConfig.brevo = emailConfig.brevo || {};
+          emailConfig.brevo.fromEmail = reqData.brevoFromEmail.trim();
         }
         if (reqData.brevoKey) {
           emailConfig.brevo = emailConfig.brevo || {};

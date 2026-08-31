@@ -2260,15 +2260,9 @@
     <!-- SECURITY PASSWORD + 2FA LOCK OVERLAY -->
   <div id="admin-auth-overlay">
     <div class="auth-card" id="auth-card">
-      <div class="auth-icon-wrap">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-        </svg>
-      </div>
 
       <!-- STEP 1: PASSWORD -->
       <div id="auth-step-password" class="auth-form-step">
-        <span class="auth-step-badge">1. Krok • Autentifikácia</span>
         <h2 class="auth-title">JK Garáž • Správa</h2>
         <p class="auth-sub">Zadajte administrátorské heslo pre prístup k servisným zákazkám</p>
 
@@ -2297,7 +2291,6 @@
 
       <!-- STEP 2: 2FA VERIFICATION CODE -->
       <div id="auth-step-2fa" class="auth-form-step" style="display: none;">
-        <span class="auth-step-badge" id="twofa-badge-title">2. Krok • 2FA Overenie</span>
         <h2 class="auth-title" id="twofa-step-heading">Dvojfaktorové overenie</h2>
         <p class="auth-sub" id="twofa-step-desc">Zadajte 6-miestny overovací kód z aplikácie Google Authenticator alebo Apple Passwords</p>
 
@@ -2333,7 +2326,6 @@
 
       <!-- STEP 3: INITIAL RECOVERY EMAIL SETUP (PROMPT UPON FIRST LOGIN) -->
       <div id="auth-step-recovery-setup" class="auth-form-step" style="display: none;">
-        <span class="auth-step-badge" style="color:#10b981; border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.1);">Zabezpečenie účtu</span>
         <h2 class="auth-title">E-mail pre resetovanie hesla</h2>
         <p class="auth-sub">Pre prípad, že zabudnete heslo, zadajte svoj e-mail, na ktorý vám pošleme jednorazový overovací kód:</p>
 
@@ -2354,7 +2346,6 @@
 
       <!-- STEP 4: FORGOT PASSWORD RECOVERY (SEND OTP & SET NEW PASSWORD) -->
       <div id="auth-step-forgot" class="auth-form-step" style="display: none;">
-        <span class="auth-step-badge" style="color:#f59e0b; border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.1);">Obnova prístupu</span>
         <h2 class="auth-title">Zabudnuté heslo</h2>
         <p class="auth-sub" id="forgot-step-desc">Pošleme vám 6-miestny overovací kód na váš e-mail pre resetovanie hesla</p>
 

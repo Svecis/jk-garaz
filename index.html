@@ -641,17 +641,6 @@
       border-color: transparent transparent rgba(13, 16, 23, 0.96) transparent;
     }
 
-    .hotspot-hint-callout::after {
-      content: '';
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(calc(-50% - var(--arrow-offset, 0px)));
-      border-width: 6px;
-      border-style: solid;
-      border-color: transparent transparent var(--accent) transparent;
-    }
-
     .part-hotspot:hover .hotspot-tooltip {
       opacity: 1;
       visibility: visible;
@@ -866,36 +855,6 @@
 
     .section-title svg {
       color: var(--accent);
-    }
-
-    /* Common Symptom Pills */
-    .symptom-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .symptom-chip {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 100px;
-      padding: 7px 14px;
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.2s;
-      user-select: none;
-    }
-    .symptom-chip:hover {
-      background: rgba(255, 255, 255, 0.09);
-      color: #fff;
-    }
-    .symptom-chip.selected {
-      background: rgba(0, 229, 255, 0.15);
-      border-color: var(--accent);
-      color: var(--accent);
-      font-weight: 600;
     }
 
     /* Textarea */
@@ -2033,10 +1992,6 @@
     </div>
   </div>
 
-  <!-- BOOKINGS DRAWER (LIST OF CONFIRMED RESERVATIONS) -->
-  
-  </div>
-
   <!-- CORE SCRIPT LOGIC -->
   <script>
     // Register GSAP Plugins
@@ -2645,7 +2600,6 @@
       const modalPartCategory = document.getElementById('modal-part-category');
       const modalPriceEst = document.getElementById('modal-price-est');
       const problemDescInput = document.getElementById('problem-description');
-      const severityOptions = document.querySelectorAll('.severity-option');
       const photoDropzone = document.getElementById('photo-dropzone');
       const photoInput = document.getElementById('photo-input');
       const photoPreviews = document.getElementById('photo-previews');
@@ -2786,15 +2740,12 @@
         buildHotspots();
 
         // 6. Rebuild calendar dates with localized day/month names
-        buildCalendarDates();
+        renderInteractiveCalendar();
 
         // 7. Re-render modal if open
         if (bookingModal.classList.contains('open') && currentSelectedPart) {
           updateModalLanguage();
         }
-
-        // 8. Update bookings drawer
-        updateActiveBookingsUI();
       }
 
       langBtns.forEach(btn => {
@@ -3869,13 +3820,6 @@
           .replace(/'/g, '&#039;');
       }
 
-      // Ochrana súkromia: Maskovanie telefónneho čísla pre verejné zobrazenie na zdieľaných zariadeniach
-      function maskPhone(p) {
-        if (!p || p.length < 6) return '••••••';
-        const clean = p.replace(/\s+/g, '');
-        return clean.slice(0, 4) + ' ••• ••• ' + clean.slice(-2);
-      }
-
       submitBookingBtn.addEventListener('click', () => {
         // 1. Ochrana proti duplicitnému kliknutiu / odosielaniu
         if (submitBookingBtn.disabled || submitBookingBtn.dataset.submitting === 'true') {
@@ -3974,7 +3918,6 @@
         const saveAndRenderBooking = () => {
           activeBookings.unshift(newBooking);
           persistBookings();
-          updateActiveBookingsUI();
 
           // Uloženie timestampu pre rate-limit
           localStorage.setItem('automek_last_booking_ts', String(Date.now()));
@@ -4062,10 +4005,6 @@
         }
       });
 
-      function updateActiveBookingsUI() {
-        // Bookings state synced with localStorage
-      }
-
       // =========================================================
       // INTERAKTÍVNE KLÁVESOVÉ SKRATKY [E, I, B, S, X, W, A / ESC]
       // =========================================================
@@ -4078,8 +4017,6 @@
         if (e.key === 'Escape') {
           if (bookingModal.classList.contains('open')) {
             closeModal();
-          } else if (bookingsDrawer.classList.contains('open')) {
-            bookingsDrawer.classList.remove('open');
           } else if (currentCategoryFilter !== 'all') {
             applyCategoryFilter('all');
           }

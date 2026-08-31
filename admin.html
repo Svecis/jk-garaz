@@ -1758,18 +1758,6 @@
       margin-bottom: 2px;
     }
 
-    .auth-step-badge {
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--accent);
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      padding: 3px 10px;
-      border-radius: 100px;
-    }
-
     .auth-title {
       font-size: 1.25rem;
       font-weight: 700;
@@ -2910,7 +2898,6 @@
               saveData();
               renderTable();
               renderCalendar();
-              updateStats();
               console.log('✅ Loaded', bookings.length, 'bookings from secure encrypted backend.');
             }
           }
@@ -2919,47 +2906,6 @@
         }
       }
       window.syncFromBackend = syncFromBackend;
-
-      async function apiSaveBooking(booking) {
-        try {
-          const res = await fetch('/api/bookings', {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(booking)
-          });
-          if (res.ok) {
-            const saved = await res.json();
-            return saved;
-          }
-        } catch (e) {
-          console.warn('Error saving booking to API:', e);
-        }
-        return null;
-      }
-
-      async function apiUpdateBooking(id, updates) {
-        try {
-          await fetch('/api/bookings/' + encodeURIComponent(id), {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(updates)
-          });
-        } catch (e) {
-          console.warn('Error updating booking on API:', e);
-        }
-      }
-
-      async function apiDeleteBooking(id) {
-        try {
-          await fetch('/api/bookings/' + encodeURIComponent(id), {
-            method: 'DELETE',
-            headers: getAuthHeaders()
-          });
-        } catch (e) {
-          console.warn('Error deleting booking on API:', e);
-        }
-      }
-  
 
       // Switcher
       const tabTable = document.getElementById('tab-table');
@@ -2983,7 +2929,6 @@
 
       // Time Picker Modal Elements
       const timePickerModal = document.getElementById('time-picker-modal');
-      const timeModalTitle = document.getElementById('time-modal-title');
       const timeModalSubtitle = document.getElementById('time-modal-subtitle');
       const timeModalClose = document.getElementById('time-modal-close');
       const timeSlotsContainer = document.getElementById('time-slots-container');
@@ -3016,9 +2961,7 @@
         'Júl', 'August', 'September', 'Október', 'November', 'December'
       ];
       const WEEKDAYS_FULL_SK = ['Nedeľa', 'Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota'];
-      const WEEKDAYS_SHORT_SK = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'];
-      const MONTHS_SHORT_SK = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
-      
+
       const TIME_SLOTS = [
         '08:00', '08:30', '09:00', '09:30',
         '10:00', '10:30', '11:00', '11:30',
@@ -3088,10 +3031,6 @@
         }
 
         return false;
-      }
-
-      function getDefaultDemoBookings() {
-        return [];
       }
 
       function loadData() {
@@ -3861,7 +3800,6 @@
       const bookingReceiptDetails = document.getElementById('booking-receipt-details');
 
       // Photo upload elements
-      const photoDropzone = document.getElementById('photo-dropzone');
       const photoInput = document.getElementById('photo-input');
       const photoPreviews = document.getElementById('photo-previews');
       let uploadedPhotos = [];
@@ -4773,7 +4711,6 @@
     const togglePassBtn = document.getElementById('toggle-pass-visibility');
     const forgotPassBtn = document.getElementById('forgot-pass-btn');
 
-    const twofaBadgeTitle = document.getElementById('twofa-badge-title');
     const twofaStepHeading = document.getElementById('twofa-step-heading');
     const twofaStepDesc = document.getElementById('twofa-step-desc');
     const twofaSetupBox = document.getElementById('twofa-setup-box');
@@ -4851,14 +4788,12 @@
           if (twofaManualSecret && data.setupSecret) {
             twofaManualSecret.textContent = 'Kľúč: ' + data.setupSecret;
           }
-          if (twofaBadgeTitle) twofaBadgeTitle.textContent = '2. Krok • Aktivácia 2FA';
           if (twofaStepHeading) twofaStepHeading.textContent = 'Naskenujte QR kód do aplikácie';
           if (twofaStepDesc) twofaStepDesc.textContent = 'Otvorte Google Authenticator alebo Apple Passwords, naskenujte QR kód a zadajte 6-miestny kód:';
           if (twofaSubmitText) twofaSubmitText.textContent = 'Aktivovať 2FA & Vstúpiť do portálu';
         } else {
           currentSetupSecret = '';
           if (twofaSetupBox) twofaSetupBox.style.display = 'none';
-          if (twofaBadgeTitle) twofaBadgeTitle.textContent = '2. Krok • 2FA Overenie';
           if (twofaStepHeading) twofaStepHeading.textContent = 'Dvojfaktorové overenie';
           if (twofaStepDesc) twofaStepDesc.textContent = 'Zadajte 6-miestny kód z aplikácie Google Authenticator alebo Apple Passwords:';
           if (twofaSubmitText) twofaSubmitText.textContent = 'Overiť a odomknúť portál';

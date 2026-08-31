@@ -1375,7 +1375,7 @@
 
     #booking-modal .cal-days-grid {
       display: grid !important;
-      grid-template-columns: repeat(7, 1fr) !important;
+      grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
       grid-auto-rows: auto !important;
       gap: 4px !important;
       background: transparent !important;
@@ -2094,7 +2094,7 @@
         -webkit-overflow-scrolling: touch;
       }
 
-      .cal-days-grid {
+      .cal-grid-card .cal-days-grid {
         min-width: 720px;
       }
 

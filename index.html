@@ -1235,6 +1235,19 @@
       color: #fca5a5;
     }
 
+    .time-slot-btn.passed {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted, #64748b);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    .time-slot-btn.passed:hover {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted, #64748b);
+    }
+
     /* MECHANIC SPECIALIST SELECTOR */
     .mechanic-grid {
       display: grid;
@@ -3790,10 +3803,12 @@
 
           if (isBooked || isPast) {
             const label = isBooked ? bookedLabel : passedLabel;
-            btn.classList.add('booked');
+            btn.classList.add(isBooked ? 'booked' : 'passed');
             btn.disabled = true;
             btn.title = label;
-            btn.innerHTML = `<span style="color:#fca5a5; font-weight:600;">${slot}</span><span style="display:block; font-size:0.64rem; font-weight:700; color:#ef4444; margin-top:2px; letter-spacing:0.02em;">${label}</span>`;
+            const textColor = isBooked ? '#fca5a5' : 'inherit';
+            const labelColor = isBooked ? '#ef4444' : 'inherit';
+            btn.innerHTML = `<span style="color:${textColor}; font-weight:600;">${slot}</span><span style="display:block; font-size:0.64rem; font-weight:700; color:${labelColor}; margin-top:2px; letter-spacing:0.02em;">${label}</span>`;
           } else {
             if (!firstAvailable) firstAvailable = slot;
             btn.textContent = slot;

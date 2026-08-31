@@ -813,6 +813,14 @@
       cursor: not-allowed;
     }
 
+    .time-slot-btn.passed {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #64748b;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
     .modal-header {
       display: flex;
       align-items: center;
@@ -4268,10 +4276,10 @@
           btn.className = 'time-slot-btn';
 
           if (isPast) {
-            btn.classList.add('booked');
+            btn.classList.add('passed');
             btn.disabled = true;
             btn.title = 'Uplynulo';
-            btn.innerHTML = `<span style="color:#fca5a5; font-weight:600;">${slot}</span><span style="display:block; font-size:0.64rem; font-weight:700; color:#ef4444; margin-top:2px; letter-spacing:0.02em;">Uplynulo</span>`;
+            btn.innerHTML = `<span style="font-weight:600;">${slot}</span><span style="display:block; font-size:0.64rem; font-weight:700; margin-top:2px; letter-spacing:0.02em;">Uplynulo</span>`;
             modalTimeSlotsContainer.appendChild(btn);
             return;
           }

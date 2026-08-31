@@ -3824,11 +3824,16 @@
       let currentAudioPlayer = null;
       let audioVisualizerFrame = null;
 
-      // Calendar state for booking modal
-      let currentCalYear = 2026;
-      let currentCalMonth = new Date().getMonth();
+      // Calendar state for booking modal — defaults to the next bookable day
+      // (tomorrow, or the following Monday if that lands on a weekend).
       let selectedDateObj = new Date();
+      selectedDateObj.setHours(0, 0, 0, 0);
       selectedDateObj.setDate(selectedDateObj.getDate() + 1);
+      while (selectedDateObj.getDay() === 0 || selectedDateObj.getDay() === 6) {
+        selectedDateObj.setDate(selectedDateObj.getDate() + 1);
+      }
+      let currentCalYear = selectedDateObj.getFullYear();
+      let currentCalMonth = selectedDateObj.getMonth();
 
       const modalCalPrev = document.getElementById('modal-cal-prev');
       const modalCalNext = document.getElementById('modal-cal-next');
@@ -3888,6 +3893,7 @@
 
         updateSelectedDateBadge();
         renderInteractiveCalendar();
+        buildTimeSlots();
       }
 
       // Wire part selector pills

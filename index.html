@@ -3307,6 +3307,7 @@
         modalPriceEst.innerHTML = `${currentSelectedPart.price} <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">${dict.modal_free_with_repair}</span>`;
         updateSelectedDateBadge();
         renderInteractiveCalendar();
+        buildTimeSlots();
       }
 
       function closeModal() {
@@ -3610,11 +3611,20 @@
         };
       });
 
-      // Interactive booqme-style calendar state
-      let currentCalYear = 2026;
-      let currentCalMonth = 7; // 0-indexed: 7 = August 2026
-      let selectedDateObj = new Date(2026, 7, 31); // Default Monday Aug 31, 2026
-      selectedDateStr = 'Pondelok, 31. August 2026';
+      // Interactive booqme-style calendar state — defaults to the first bookable
+      // day (today, or the next Monday if today is a weekend), not a fixed date.
+      function getDefaultBookableDate() {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        while (d.getDay() === 0 || d.getDay() === 6) {
+          d.setDate(d.getDate() + 1);
+        }
+        return d;
+      }
+
+      let selectedDateObj = getDefaultBookableDate();
+      let currentCalYear = selectedDateObj.getFullYear();
+      let currentCalMonth = selectedDateObj.getMonth();
 
       const modalCalPrev = document.getElementById('modal-cal-prev');
       const modalCalNext = document.getElementById('modal-cal-next');

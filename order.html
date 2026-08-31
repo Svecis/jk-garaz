@@ -881,7 +881,28 @@
         bookings = [];
       }
       if (!Array.isArray(bookings)) bookings = [];
-      proceedWithBookings();
+
+      // The link in the notification e-mail carries this booking's manageToken (the same
+      // one the customer's self-service page uses) so this card can load fresh from the
+      // server even on a browser/device with no admin.html session or cached data — e.g.
+      // opening the link on a phone. Falls back to whatever's in localStorage if this fails.
+      const manageToken = (urlParams.get('token') || '').trim();
+      if (targetId && manageToken) {
+        fetch('/api/my-booking?id=' + encodeURIComponent(targetId) + '&token=' + encodeURIComponent(manageToken))
+          .then(r => r.ok ? r.json() : null)
+          .then(fresh => {
+            if (fresh && fresh.id) {
+              const idx = bookings.findIndex(b => b.id === fresh.id);
+              if (idx === -1) bookings.unshift(fresh);
+              else bookings[idx] = fresh;
+              try { localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings)); } catch (e) {}
+            }
+            proceedWithBookings();
+          })
+          .catch(() => proceedWithBookings());
+      } else {
+        proceedWithBookings();
+      }
 
       function renderOrderPage(b) {
         const symptomsHtml = (b.symptoms && b.symptoms.length > 0)

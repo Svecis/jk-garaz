@@ -353,7 +353,11 @@ const MIME_TYPES = {
 // Build the HTML body for a new-booking notification e-mail
 function buildBookingEmailHtml(booking) {
   const plateFormatted = (booking.plate || '-').replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
-  const orderUrl = PUBLIC_BASE_URL + '/order.html?id=' + encodeURIComponent(booking.id);
+  // Carries the booking's manageToken so order.html can fetch this exact booking fresh
+  // from the server (via the same public /api/my-booking used by the customer page) when
+  // the admin opens this link on a device that has no admin.html session/cache locally —
+  // e.g. tapping the link on a phone. Falls back to the local cache if that fetch fails.
+  const orderUrl = PUBLIC_BASE_URL + '/order.html?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(booking.manageToken || '');
 
   return `
       <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; padding:20px; border:1px solid #e2e8f0; border-radius:10px; background:#ffffff;">

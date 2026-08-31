@@ -2326,6 +2326,8 @@
           </svg>
         </button>
 
+        <button type="button" class="auth-back-btn" id="twofa-show-qr-btn" style="color:var(--accent); font-weight:600; padding:6px 0; margin-top:2px;">📲 Naskenovať QR kód do Google Authenticator</button>
+
         <button type="button" class="auth-back-btn" id="twofa-back-btn">← Späť na zadanie hesla</button>
       </div>
 
@@ -5593,6 +5595,33 @@
         }
       });
     });
+
+    const twofaShowQrBtn = document.getElementById('twofa-show-qr-btn');
+    if (twofaShowQrBtn) {
+      twofaShowQrBtn.addEventListener('click', async () => {
+        twofaShowQrBtn.textContent = 'Generujem QR kód...';
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              password: tempEnteredPassword,
+              requestNewSetup: true
+            })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            showStep(2, data);
+          } else {
+            twofaErrorMsg.textContent = data.error || 'Chyba pri generovaní QR kódu';
+          }
+        } catch (e) {
+          twofaErrorMsg.textContent = 'Chyba servera pri generovaní QR kódu';
+        } finally {
+          twofaShowQrBtn.textContent = '📲 Naskenovať QR kód do Google Authenticator';
+        }
+      });
+    }
 
     if (twofaSubmitBtn) twofaSubmitBtn.addEventListener('click', verify2FA);
     if (twofaBackBtn) twofaBackBtn.addEventListener('click', () => showStep(1));

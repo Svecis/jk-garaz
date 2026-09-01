@@ -231,7 +231,7 @@
             </div>`;
         });
 
-      function renderBooking(b) {
+      function renderBooking(b, successText) {
         const statusClass = 'status-' + (b.status || 'pending');
         const statusLabel = STATUS_LABELS[b.status] || b.status;
         const isFinal = b.status === 'cancelled' || b.status === 'completed';
@@ -278,6 +278,11 @@
         `;
 
         wireActions(b);
+
+        if (successText) {
+          const actionMsg = document.getElementById('action-msg');
+          showMsg(actionMsg, successText, false);
+        }
       }
 
       function showMsg(el, text, isError) {
@@ -303,7 +308,7 @@
               .then(r => r.json().then(data => ({ ok: r.ok, data })))
               .then(({ ok, data }) => {
                 if (ok) {
-                  renderBooking(data.booking);
+                  renderBooking(data.booking, 'Rezervácia bola úspešne zrušená.');
                 } else {
                   cancelBtn.disabled = false;
                   showMsg(actionMsg, data.error || 'Zrušenie sa nepodarilo.', true);
@@ -448,6 +453,8 @@
 
         confirmBtn.addEventListener('click', () => {
           if (!selectedDate || !selectedTime) return;
+          const confirmText = 'Naozaj chcete zmeniť termín na ' + formatDisplay(selectedDate) + ' o ' + selectedTime + '?';
+          if (!confirm(confirmText)) return;
           confirmBtn.disabled = true;
           fetch('/api/my-booking/reschedule', {
             method: 'POST',
@@ -463,7 +470,7 @@
             .then(r => r.json().then(data => ({ ok: r.ok, data })))
             .then(({ ok, data }) => {
               if (ok) {
-                renderBooking(data.booking);
+                renderBooking(data.booking, 'Termín bol úspešne zmenený na ' + formatDisplay(selectedDate) + ' o ' + selectedTime + '.');
               } else {
                 confirmBtn.disabled = false;
                 showMsg(rescheduleMsg, data.error || 'Zmenu sa nepodarilo uložiť.', true);

@@ -114,7 +114,7 @@
     }
     .msg.show { display: block; }
     .msg-error { background: rgba(248, 113, 113, 0.12); border: 1px solid rgba(248, 113, 113, 0.3); color: var(--danger); }
-    .msg-success { background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.3); color: var(--success); }
+    .msg-success { background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.3); color: var(--success); font-weight: 700; }
 
     .cal-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .cal-nav-btn {
@@ -282,6 +282,7 @@
         if (successText) {
           const actionMsg = document.getElementById('action-msg');
           showMsg(actionMsg, successText, false);
+          actionMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }
 
@@ -308,7 +309,7 @@
               .then(r => r.json().then(data => ({ ok: r.ok, data })))
               .then(({ ok, data }) => {
                 if (ok) {
-                  renderBooking(data.booking, 'Rezervácia bola úspešne zrušená.');
+                  renderBooking(data.booking, '✓ Rezervácia bola úspešne zrušená.');
                 } else {
                   cancelBtn.disabled = false;
                   showMsg(actionMsg, data.error || 'Zrušenie sa nepodarilo.', true);
@@ -470,7 +471,7 @@
             .then(r => r.json().then(data => ({ ok: r.ok, data })))
             .then(({ ok, data }) => {
               if (ok) {
-                renderBooking(data.booking, 'Termín bol úspešne zmenený na ' + formatDisplay(selectedDate) + ' o ' + selectedTime + '.');
+                renderBooking(data.booking, '✓ Rezervácia bola zmenená na ' + formatDisplay(selectedDate) + ' o ' + selectedTime + '.');
               } else {
                 confirmBtn.disabled = false;
                 showMsg(rescheduleMsg, data.error || 'Zmenu sa nepodarilo uložiť.', true);

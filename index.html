@@ -301,6 +301,10 @@
       display: block;
       pointer-events: none;
     }
+    /* Already-cutout transparent PNGs should fit fully rather than being cropped */
+    .car-slide.contain img {
+      object-fit: contain;
+    }
 
     .car-slider-arrow {
       position: absolute;
@@ -1604,7 +1608,7 @@
     <div class="car-slider" id="car-slider">
       <div class="car-slider-viewport">
         <div class="car-slider-track" id="car-slider-track">
-          <div class="car-slide"><img src="assets/slides/slide-1.jpg" alt="Audi A6 Avant — exteriér" draggable="false"></div>
+          <div class="car-slide contain"><img src="assets/slides/slide-1-transparent.png" alt="Audi A6 Avant — exteriér" draggable="false"></div>
           <div class="car-slide"><img src="assets/slides/slide-2.jpg" alt="Audi A6 Avant — podvozok" draggable="false"></div>
           <div class="car-slide"><img src="assets/slides/slide-3.jpg" alt="Audi A6 Avant — interiér" draggable="false"></div>
           <div class="car-slide"><img src="assets/slides/slide-4.jpg" alt="Audi A6 Avant — motor" draggable="false"></div>

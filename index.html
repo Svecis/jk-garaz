@@ -137,6 +137,125 @@
       box-shadow: 0 10px 30px rgba(0, 229, 255, 0.3);
     }
 
+    /* PRELOADER SCREEN */
+    #preloader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: radial-gradient(circle at center, #15181e 0%, #08090b 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
+    }
+
+    #preloader.loaded {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loader-content {
+      text-align: center;
+      max-width: 440px;
+      width: 90%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .loader-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .loader-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      animation: pulse 1.5s infinite;
+    }
+
+    .loader-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      background: linear-gradient(180deg, #fff 30%, rgba(255,255,255,0.6) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .loader-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 36px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #0077ff, var(--accent));
+      box-shadow: 0 0 15px var(--accent-glow);
+      border-radius: 999px;
+      transition: width 0.15s ease-out;
+    }
+
+    .progress-stats {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .progress-percent {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .skip-btn {
+      margin-top: 24px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      text-decoration: underline;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .skip-btn:hover {
+      opacity: 1;
+      color: #fff;
+    }
+
     /* HERO SECTION */
     .hero-section {
       min-height: 100vh;
@@ -247,30 +366,31 @@
       animation: mouseScroll 2s infinite;
     }
 
-    /* EXPLODED VIEW DIAGRAM CONTAINER */
+    /* SEQUENCE PINNED CONTAINER */
     #sequence-container {
       position: relative;
       width: 100%;
-      min-height: 100vh;
+      height: 100vh;
       background: var(--bg-dark);
       overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 90px 20px;
     }
 
     #canvas-wrapper {
-      position: relative;
+      position: absolute;
+      inset: 0;
       width: 100%;
-      max-width: 880px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       z-index: 1;
     }
 
-    #exploded-car-img {
+    canvas#sequence-canvas {
       display: block;
       width: 100%;
-      height: auto;
+      height: 100%;
+      object-fit: contain;
     }
 
     /* SEAMLESS BACKGROUND BLENDS (DARK HERO -> CANVAS -> DARK SPECS) */
@@ -1498,6 +1618,26 @@
     </div>
   </div>
 
+  <!-- PRELOADER OVERLAY -->
+  <div id="preloader">
+    <div class="loader-content">
+      <div class="loader-badge" data-i18n="loader_badge">Inicializácia systému</div>
+      <h2 class="loader-title" data-i18n="loader_title">Načítavanie sekvencie</h2>
+      <p class="loader-subtitle" data-i18n="loader_sub">Načítavam 240 ultra-ostrých 4K snímok animácie</p>
+      
+      <div class="progress-bar-container">
+        <div id="progress-fill" class="progress-bar-fill"></div>
+      </div>
+      
+      <div class="progress-stats">
+        <span id="load-status">Uložené v pamäti: 0 / 240</span>
+        <span id="load-percent" class="progress-percent">0%</span>
+      </div>
+
+      <button type="button" id="skip-load-btn" class="skip-btn" data-i18n="loader_skip" aria-label="Spustiť ihneď s postupným načítavaním">Spustiť ihneď s postupným načítavaním</button>
+    </div>
+  </div>
+
   <!-- HERO SECTION -->
   <header class="hero-section">
     <div class="brand-tag" data-i18n="hero_tag">JK Garáž</div>
@@ -1513,14 +1653,14 @@
     </button>
     <div class="scroll-indicator">
       <div class="mouse-icon"></div>
-      <span data-i18n="hero_scroll">Rolujte nižšie</span>
+      <span data-i18n="hero_scroll">Rolujte pre rozloženie</span>
     </div>
   </header>
 
-  <!-- EXPLODED VIEW DIAGRAM -->
+  <!-- PINNED CANVAS SCROLL SEQUENCE -->
   <section id="sequence-container">
     <div id="canvas-wrapper">
-      <img id="exploded-car-img" src="assets/exploded-car.jpg" width="903" height="768" alt="Rozobraté auto s viditeľnými dielmi na diagnostiku" />
+      <canvas id="sequence-canvas"></canvas>
     </div>
 
     <!-- SEAMLESS BACKGROUND BLEND OVERLAYS -->
@@ -1881,11 +2021,16 @@
       const TRANSLATIONS = {
         sk: {
           nav_bookings: "Rezervácie",
+          loader_badge: "Inicializácia systému",
+          loader_title: "Načítavanie sekvencie",
+          loader_sub: "Načítavam 240 ultra-ostrých 4K snímok animácie",
+          loader_cached: "Uložené v pamäti:",
+          loader_skip: "Spustiť ihneď s postupným načítavaním",
           hero_tag: "JK Garáž",
           hero_title: "Diagnostika, oprava, bezpečnosť.<br />Vaše auto je u nás v bezpečí a zbavíme ho bolesti.",
           hero_desc: "Pred rezerváciou kliknite na problémovú časť auta, nahláste závadu, nahrajte foto alebo zvuk a zarezervujte si termín u certifikovaného mechanika.",
           hero_cta: "Rezervácia online",
-          hero_scroll: "Rolujte nižšie",
+          hero_scroll: "Rolujte pre rozloženie",
           diag_banner_title: "Interaktívny diagnostický režim aktívny",
           diag_banner_desc: "Kliknite na komponent [B, E, I, S, X, W] pre nahlásenie závady a rezerváciu termínu",
           cat_all: "Všetky podsystémy",
@@ -1965,11 +2110,16 @@
         },
         en: {
           nav_bookings: "Reservations",
+          loader_badge: "System Initializing",
+          loader_title: "Preloading Sequence",
+          loader_sub: "Loading 240 ultra-sharp 4K animation frames",
+          loader_cached: "Cached:",
+          loader_skip: "Start anyway with progressive streaming",
           hero_tag: "JK Garage",
           hero_title: "Diagnostics, repair, safety.<br />Your car is safe with us and we'll fix all its pain.",
           hero_desc: "Before booking, click on the problem part of the car, report the issue, upload a photo or sound, and reserve an appointment with a certified mechanic.",
           hero_cta: "Book Online",
-          hero_scroll: "Scroll down",
+          hero_scroll: "Scroll To Deconstruct",
           diag_banner_title: "Interactive Diagnostic Mode Active",
           diag_banner_desc: "Click any component pin [B, E, I, S, X, W] to report issues & book a mechanic",
           cat_all: "All Subsystems",
@@ -2063,8 +2213,8 @@
         {
           id: 'part-engine',
           code: 'E',
-          pctX: 0.22,
-          pctY: 0.49,
+          pctX: 0.50,
+          pctY: 0.56,
           price: '€49.00',
           sk: {
             name: '2.0 TFSI Motor & Prevodovka',
@@ -2097,7 +2247,7 @@
           id: 'part-roof',
           code: 'B',
           pctX: 0.50,
-          pctY: 0.13,
+          pctY: 0.115,
           price: '€35.00',
           sk: {
             name: 'Panoramatická strecha & Akustické sklá',
@@ -2127,8 +2277,8 @@
         {
           id: 'part-cockpit',
           code: 'I',
-          pctX: 0.375,
-          pctY: 0.46,
+          pctX: 0.50,
+          pctY: 0.28,
           price: '€39.00',
           sk: {
             name: 'Virtuálny kokpit & Infotainment',
@@ -2158,8 +2308,8 @@
         {
           id: 'part-seats',
           code: 'I',
-          pctX: 0.61,
-          pctY: 0.47,
+          pctX: 0.66,
+          pctY: 0.44,
           price: '€29.00',
           sk: {
             name: 'Interiér kabíny & Kožené sedadlá',
@@ -2189,8 +2339,8 @@
         {
           id: 'part-doors-left',
           code: 'B',
-          pctX: 0.31,
-          pctY: 0.23,
+          pctX: 0.22,
+          pctY: 0.45,
           price: '€35.00',
           sk: {
             name: 'Ľavé dvere & Spätné zrkadlo',
@@ -2220,8 +2370,8 @@
         {
           id: 'part-doors-right',
           code: 'B',
-          pctX: 0.67,
-          pctY: 0.23,
+          pctX: 0.78,
+          pctY: 0.45,
           price: '€35.00',
           sk: {
             name: 'Pravé dvere & Bezkľúčový vstup',
@@ -2251,8 +2401,8 @@
         {
           id: 'part-exhaust',
           code: 'X',
-          pctX: 0.27,
-          pctY: 0.63,
+          pctX: 0.33,
+          pctY: 0.52,
           price: '€40.00',
           sk: {
             name: 'Duálny výfuk & Katalyzátor',
@@ -2282,8 +2432,8 @@
         {
           id: 'part-shield',
           code: 'X',
-          pctX: 0.48,
-          pctY: 0.63,
+          pctX: 0.69,
+          pctY: 0.61,
           price: '€30.00',
           sk: {
             name: 'Aerodynamické kryty podvozka',
@@ -2311,8 +2461,8 @@
         {
           id: 'part-bumper',
           code: 'B',
-          pctX: 0.13,
-          pctY: 0.29,
+          pctX: 0.50,
+          pctY: 0.83,
           price: '€45.00',
           sk: {
             name: 'Predný nárazník & Matrix LED svetlá',
@@ -2342,8 +2492,8 @@
         {
           id: 'part-susp-left',
           code: 'S',
-          pctX: 0.19,
-          pctY: 0.59,
+          pctX: 0.20,
+          pctY: 0.80,
           price: '€39.00',
           sk: {
             name: 'Predné ľavé 5-prvkové zavesenie & Brzdy',
@@ -2373,8 +2523,8 @@
         {
           id: 'part-susp-right',
           code: 'S',
-          pctX: 0.81,
-          pctY: 0.60,
+          pctX: 0.80,
+          pctY: 0.80,
           price: '€39.00',
           sk: {
             name: 'Predné pravé 5-prvkové zavesenie & Brzdy',
@@ -2404,8 +2554,8 @@
         {
           id: 'part-wheels',
           code: 'W',
-          pctX: 0.18,
-          pctY: 0.65,
+          pctX: 0.10,
+          pctY: 0.62,
           price: '€25.00',
           sk: {
             name: 'Hliníkové disky & Snímače tlaku TPMS',
@@ -2434,9 +2584,20 @@
         }
       ];
 
+      // Configuration
+      const FRAME_COUNT = 240;
+      const FRAME_PAD = 3;
+      const FRAME_PREFIX = 'ezgif-frame-';
+      const FRAME_EXT = '.webp';
+
       // Elements
-      const explodedImg = document.getElementById('exploded-car-img');
-      const sequenceContainer = document.getElementById('sequence-container');
+      const canvas = document.getElementById('sequence-canvas');
+      const ctx = canvas.getContext('2d', { alpha: false });
+      const preloader = document.getElementById('preloader');
+      const progressFill = document.getElementById('progress-fill');
+      const loadStatus = document.getElementById('load-status');
+      const loadPercent = document.getElementById('load-percent');
+      const skipBtn = document.getElementById('skip-load-btn');
       const heroJumpBtn = document.getElementById('hero-jump-btn');
 
       // Top Nav & Language Switcher
@@ -2472,6 +2633,10 @@
       const addCalBtn = document.getElementById('add-cal-btn');
 
       // State
+      const playhead = { frame: 0 };
+      const images = [];
+      let loadedImagesCount = 0;
+      let isPreloaded = false;
       let currentSelectedPart = CAR_PARTS_DATA[0];
       let selectedSeverity = 'minor';
       let selectedDateStr = '';
@@ -2486,6 +2651,8 @@
       let currentAudioPlayer = null;
       let audioVisualizerFrame = null;
       let isRecording = false;
+      let offCanvas = null;
+      let offCtx = null;
       let recordInterval = null;
       let recordSeconds = 0;
       let activeBookings = [];
@@ -2517,9 +2684,22 @@
       }
 
       let currentCategoryFilter = 'all';
+      let isDiagnosticActive = false;
 
-      // Position of the rendered exploded-car image, relative to #sequence-container,
-      // used to place the hotspot pins on top of it.
+      // Cachované rozmery a gradienty pre elimináciu layout thrashingu a plynulé scrollovanie
+      let cachedCw = 0;
+      let cachedCh = 0;
+      let cachedDw = 0;
+      let cachedDh = 0;
+      let cachedOffsetX = 0;
+      let cachedOffsetY = 0;
+      let cachedBgGradient = null;
+      let cachedGradLeft = null;
+      let cachedGradRight = null;
+      let cachedGradTop = null;
+      let cachedGradBottom = null;
+
+      // Calculated Image Rect within Canvas
       let currentImageRect = { x: 0, y: 0, width: 0, height: 0 };
 
       // =========================================================
@@ -2635,27 +2815,302 @@
         });
       }
 
-      // Recalculates currentImageRect from the rendered <img>'s actual box, relative
-      // to #sequence-container (the positioned ancestor the hotspot pins are placed in).
-      function updateImageRect() {
-        if (!explodedImg || !sequenceContainer) return;
-        const containerRect = sequenceContainer.getBoundingClientRect();
-        const imgRect = explodedImg.getBoundingClientRect();
-        currentImageRect = {
-          x: imgRect.left - containerRect.left,
-          y: imgRect.top - containerRect.top,
-          width: imgRect.width,
-          height: imgRect.height
-        };
+      function getFrameUrl(index) {
+        const num = String(index + 1).padStart(FRAME_PAD, '0');
+        return `assets/frames/${FRAME_PREFIX}${num}${FRAME_EXT}`;
       }
 
-      function handleDiagramLayoutChange() {
-        updateImageRect();
+      function loadSingleFrame(i) {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.src = getFrameUrl(i);
+
+          img.onload = () => {
+            loadedImagesCount++;
+            images[i] = img;
+            updateProgress();
+
+            if (loadedImagesCount === FRAME_COUNT) {
+              finishPreloading();
+            }
+            resolve(img);
+          };
+
+          img.onerror = () => {
+            loadedImagesCount++;
+            images[i] = images[0] || null;
+            updateProgress();
+            if (loadedImagesCount === FRAME_COUNT) {
+              finishPreloading();
+            }
+            resolve(null);
+          };
+        });
+      }
+
+      async function loadImageBatch(indices, batchSize = 6) {
+        for (let i = 0; i < indices.length; i += batchSize) {
+          const batch = indices.slice(i, i + batchSize);
+          await Promise.all(batch.map(idx => loadSingleFrame(idx)));
+        }
+      }
+
+      function preloadFrames() {
+        // 1. Okamžité načítanie úvodnej snímky (Frame 0) pre okamžité zobrazenie auta bez čakania
+        const firstImg = new Image();
+        firstImg.src = getFrameUrl(0);
+        firstImg.onload = () => {
+          images[0] = firstImg;
+          loadedImagesCount++;
+          if (!isPreloaded) {
+            render();
+          }
+          updateProgress();
+        };
+        firstImg.onerror = () => {
+          loadedImagesCount++;
+          updateProgress();
+        };
+
+        // 2. Asynchrónne dávkované načítanie zvyšných snímok (1 - 239) po max 6 súbežných spojení
+        const remainingIndices = [];
+        for (let i = 1; i < FRAME_COUNT; i++) {
+          remainingIndices.push(i);
+        }
+
+        loadImageBatch(remainingIndices, 6);
+      }
+
+      function updateProgress() {
+        const percent = Math.round((loadedImagesCount / FRAME_COUNT) * 100);
+        progressFill.style.width = `${percent}%`;
+        loadPercent.textContent = `${percent}%`;
+        const dict = TRANSLATIONS[currentLang];
+        loadStatus.textContent = `${dict.loader_cached} ${loadedImagesCount} / ${FRAME_COUNT}`;
+      }
+
+      function finishPreloading() {
+        if (isPreloaded) return;
+        isPreloaded = true;
+
+        setTimeout(() => {
+          preloader.classList.add('loaded');
+          resizeCanvas();
+          render();
+          initScrollTrigger();
+          setLanguage(currentLang);
+          buildTimeSlots();
+        }, 300);
+      }
+
+      skipBtn.addEventListener('click', finishPreloading);
+
+      function resizeCanvas() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const rect = canvas.getBoundingClientRect();
+        
+        cachedCw = rect.width;
+        cachedCh = rect.height;
+
+        canvas.width = cachedCw * dpr;
+        canvas.height = cachedCh * dpr;
+        
+        ctx.scale(dpr, dpr);
+
+        // Prepočítanie rozmerov modelu len pri zmene veľkosti okna (nie pri každom scrolle!)
+        const imgAspect = 16 / 9;
+        const canvasAspect = cachedCw / cachedCh;
+
+        // Mierne priblíženie (scale: 0.83) pre lepšiu viditeľnosť detailov s bezpečným odstupom
+        const scale = cachedCw >= 768 ? 0.83 : 0.92;
+        let drawWidth, drawHeight;
+
+        if (canvasAspect > imgAspect) {
+          drawHeight = cachedCh * scale;
+          drawWidth = drawHeight * imgAspect;
+        } else {
+          drawWidth = cachedCw * scale;
+          drawHeight = drawWidth / imgAspect;
+        }
+
+        cachedDw = Math.round(drawWidth);
+        cachedDh = Math.round(drawHeight);
+        cachedOffsetX = Math.round((cachedCw - drawWidth) / 2);
+        cachedOffsetY = Math.round((cachedCh - drawHeight) / 2 + (cachedCw >= 768 ? 26 : 10));
+
+        currentImageRect = { x: cachedOffsetX, y: cachedOffsetY, width: cachedDw, height: cachedDh };
+
+        // Predpočítaný vertikálny gradient plátna (nulová réžia pri scrollovaní)
+        cachedBgGradient = ctx.createLinearGradient(0, cachedOffsetY, 0, cachedOffsetY + cachedDh);
+        cachedBgGradient.addColorStop(0, '#7c8082');
+        cachedBgGradient.addColorStop(0.2, '#94989a');
+        cachedBgGradient.addColorStop(0.5, '#a3a7a9');
+        cachedBgGradient.addColorStop(0.8, '#c2c6c8');
+        cachedBgGradient.addColorStop(1, '#babec0');
+
+        // Predpripravený offscreen canvas a gradienty na zjemnenie okrajov (feathering)
+        if (!offCanvas) {
+          offCanvas = document.createElement('canvas');
+          offCtx = offCanvas.getContext('2d');
+        }
+        offCanvas.width = cachedDw;
+        offCanvas.height = cachedDh;
+
+        const f = 28;
+        cachedGradLeft = offCtx.createLinearGradient(0, 0, f, 0);
+        cachedGradLeft.addColorStop(0, 'rgba(0,0,0,1)');
+        cachedGradLeft.addColorStop(1, 'rgba(0,0,0,0)');
+
+        cachedGradRight = offCtx.createLinearGradient(cachedDw, 0, cachedDw - f, 0);
+        cachedGradRight.addColorStop(0, 'rgba(0,0,0,1)');
+        cachedGradRight.addColorStop(1, 'rgba(0,0,0,0)');
+
+        cachedGradTop = offCtx.createLinearGradient(0, 0, 0, f);
+        cachedGradTop.addColorStop(0, 'rgba(0,0,0,1)');
+        cachedGradTop.addColorStop(1, 'rgba(0,0,0,0)');
+
+        cachedGradBottom = offCtx.createLinearGradient(0, cachedDh, 0, cachedDh - f);
+        cachedGradBottom.addColorStop(0, 'rgba(0,0,0,1)');
+        cachedGradBottom.addColorStop(1, 'rgba(0,0,0,0)');
+
+        render();
         repositionHotspots();
       }
 
-      window.addEventListener('resize', handleDiagramLayoutChange);
-      window.addEventListener('orientationchange', handleDiagramLayoutChange);
+      function render() {
+        const frameIndex = Math.min(Math.max(Math.round(playhead.frame), 0), FRAME_COUNT - 1);
+        
+        let img = images[frameIndex];
+        if (!img || !img.complete) {
+          for (let offset = 1; offset < FRAME_COUNT; offset++) {
+            if (images[frameIndex - offset] && images[frameIndex - offset].complete) {
+              img = images[frameIndex - offset];
+              break;
+            }
+            if (images[frameIndex + offset] && images[frameIndex + offset].complete) {
+              img = images[frameIndex + offset];
+              break;
+            }
+          }
+        }
+
+        if (!img || !cachedBgGradient) return;
+
+        // 1. Podklad s predpočítaným gradientom (0 ms zdržanie, žiadne layout reflows)
+        ctx.fillStyle = cachedBgGradient;
+        ctx.fillRect(0, 0, cachedCw, cachedCh);
+
+        // 2. Vykreslenie snímky do offscreen canvasu
+        offCtx.clearRect(0, 0, cachedDw, cachedDh);
+        offCtx.drawImage(img, 0, 0, cachedDw, cachedDh);
+
+        // 3. Aplikácia predpočítaných zmäkčovacích prechodov na okraje
+        offCtx.globalCompositeOperation = 'destination-out';
+        offCtx.fillStyle = cachedGradLeft;
+        offCtx.fillRect(0, 0, 28, cachedDh);
+        offCtx.fillStyle = cachedGradRight;
+        offCtx.fillRect(cachedDw - 28, 0, 28, cachedDh);
+        offCtx.fillStyle = cachedGradTop;
+        offCtx.fillRect(0, 0, cachedDw, 28);
+        offCtx.fillStyle = cachedGradBottom;
+        offCtx.fillRect(0, cachedDh - 28, cachedDw, 28);
+        offCtx.globalCompositeOperation = 'source-over';
+
+        // 4. Bleskový prenos do hlavného plátna (hardware GPU blit)
+        ctx.drawImage(offCanvas, cachedOffsetX, cachedOffsetY);
+      }
+
+      function getScrollDistance() {
+        const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const isMobileWidth = window.innerWidth <= 768;
+        return (isTouch || isMobileWidth) ? 7500 : 4600;
+      }
+
+      function initScrollTrigger() {
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (prefersReducedMotion) {
+          // Pre používateľov s požiadavkou na zníženie pohybu nevytvárame pin/scrub scroll-jack
+          playhead.frame = FRAME_COUNT - 1;
+          render();
+          isDiagnosticActive = true;
+          diagnosticLayer.classList.add('active');
+          repositionHotspots();
+
+          function handleReducedMotionResize() {
+            resizeCanvas();
+            render();
+            repositionHotspots();
+          }
+          window.addEventListener('resize', handleReducedMotionResize);
+          window.addEventListener('orientationchange', handleReducedMotionResize);
+          return;
+        }
+
+        const sequenceTimeline = gsap.timeline({
+          scrollTrigger: {
+            id: "sequence-scroll",
+            trigger: "#sequence-container",
+            start: "top top",
+            end: () => "+=" + getScrollDistance(),
+            pin: true,
+            scrub: 0.8,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              updateDiagnosticState(self.progress);
+            }
+          }
+        });
+
+        sequenceTimeline.to(playhead, {
+          frame: FRAME_COUNT - 1,
+          ease: "none",
+          onUpdate: render
+        });
+
+        function handleWindowResize() {
+          resizeCanvas();
+          const trigger = ScrollTrigger.getById('sequence-scroll');
+          if (trigger) {
+            trigger.vars.end = () => "+=" + getScrollDistance();
+          }
+          ScrollTrigger.refresh();
+        }
+
+        window.addEventListener('resize', handleWindowResize);
+        window.addEventListener('orientationchange', handleWindowResize);
+
+        // Listener na zmenu preferencie zníženia pohybu za behu
+        try {
+          const motionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+          motionMediaQuery.addEventListener('change', (e) => {
+            const trigger = ScrollTrigger.getById('sequence-scroll');
+            if (e.matches) {
+              if (trigger) trigger.kill();
+              playhead.frame = FRAME_COUNT - 1;
+              render();
+              isDiagnosticActive = true;
+              diagnosticLayer.classList.add('active');
+              repositionHotspots();
+            } else {
+              initScrollTrigger();
+            }
+          });
+        } catch(e) {}
+      }
+
+      function updateDiagnosticState(progress) {
+        const shouldBeActive = progress >= 0.85;
+        // Odstránenie zbytočného nastavovania štýlov DOM elementov na každom ticku scrollu
+        if (shouldBeActive !== isDiagnosticActive) {
+          isDiagnosticActive = shouldBeActive;
+          diagnosticLayer.classList.toggle('active', isDiagnosticActive);
+          if (isDiagnosticActive) {
+            repositionHotspots();
+          }
+        }
+      }
 
       // =========================================================
       // BUILD & POSITION INTERACTIVE HOTSPOTS (WITH EDGE CLAMPING)
@@ -2790,11 +3245,14 @@
 
       // Jump straight to exploded view from Hero CTA (Smooth 3.2s cinematic glide)
       heroJumpBtn.addEventListener('click', () => {
-        gsap.to(window, {
-          scrollTo: { y: sequenceContainer, offsetY: 0 },
-          duration: 1.1,
-          ease: "power1.inOut"
-        });
+        const trigger = ScrollTrigger.getById('sequence-scroll');
+        if (trigger) {
+          gsap.to(window, {
+            scrollTo: trigger.end - 50,
+            duration: 3.2,
+            ease: "power1.inOut"
+          });
+        }
       });
 
       // =========================================================
@@ -3678,13 +4136,8 @@
         });
       }
 
-      diagnosticLayer.classList.add('active');
-      updateImageRect();
-      setLanguage(currentLang);
-      buildTimeSlots();
-      if (!explodedImg.complete) {
-        explodedImg.addEventListener('load', handleDiagramLayoutChange);
-      }
+      preloadFrames();
+      resizeCanvas();
     })();
   </script>
 </body>

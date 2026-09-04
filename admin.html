@@ -3425,12 +3425,10 @@
             renderTable();
             renderCalendar();
 
-            // Sync with backend — this endpoint is public (also used by the customer
-            // booking form), so it must not be gated on having a session token: if the
-            // token happened to be missing/expired this used to silently skip the sync
-            // entirely, leaving the change saved only in this browser. The next full
-            // reload would then pull the still-old status from the server and it would
-            // look like the change "didn't stick".
+            // Sync with backend — updates on this endpoint require a valid admin session
+            // (creation is what's public, for the customer booking form). If the token is
+            // missing/expired the request fails with 401 and the .catch() below reverts
+            // the optimistic status change in this browser.
             fetch('/api/bookings', {
               method: 'POST',
               headers: getAuthHeaders(),

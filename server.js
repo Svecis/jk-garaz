@@ -760,7 +760,7 @@ const server = http.createServer((req, res) => {
 
   // API ROUTE: Login (password, then TOTP 2FA)
   if (pathname === '/api/auth/login' && req.method === 'POST') {
-    const ip = req.socket.remoteAddress || 'unknown';
+    const ip = getClientIp(req);
     let body = '';
     req.on('data', chunk => { body += chunk; });
     req.on('end', async () => {
@@ -1016,7 +1016,9 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // API ROUTE: Create or upsert a booking (public — used by the customer-facing booking form)
+  // API ROUTE: Create a new booking (public — used by the customer-facing booking form)
+  // or update an existing one (admin only — the customer-facing self-service flow goes
+  // through /api/my-booking/* below, which is gated by manageToken instead).
   if (pathname === '/api/bookings' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => { body += chunk; });
@@ -1028,6 +1030,11 @@ const server = http.createServer((req, res) => {
         const bookings = loadBookings();
         const idx = bookings.findIndex(b => b.id === booking.id);
         const isNew = idx === -1;
+
+        if (!isNew) {
+          const payload = requireAuth(req, res);
+          if (!payload) return;
+        }
 
         if (isNew && isBookingRateLimited(getClientIp(req))) {
           res.writeHead(429, { 'Content-Type': 'application/json' });

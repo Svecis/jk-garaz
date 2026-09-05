@@ -301,16 +301,48 @@ function markResetRequested(ip) {
   resetRequestCooldown.set(ip, Date.now());
 }
 
-function getBearerToken(req) {
-  const header = req.headers['authorization'] || '';
-  const match = header.match(/^Bearer\s+(.+)$/i);
-  return match ? match[1] : null;
+// The admin session token lives in an httpOnly cookie (not sessionStorage/JS-
+// readable storage), so a future XSS bug on admin.html can't just read it off
+// the page and exfiltrate it — the browser holds it, JS never sees the value.
+const SESSION_COOKIE_NAME = 'jk_admin_session';
+
+function parseCookies(req) {
+  const header = req.headers.cookie;
+  const cookies = {};
+  if (!header) return cookies;
+  header.split(';').forEach((pair) => {
+    const idx = pair.indexOf('=');
+    if (idx === -1) return;
+    const key = pair.slice(0, idx).trim();
+    const val = pair.slice(idx + 1).trim();
+    if (key) cookies[key] = decodeURIComponent(val);
+  });
+  return cookies;
+}
+
+// Secure requires HTTPS, which is how the site is actually served (behind
+// Cloudflare) — skipped only for local http://localhost testing, where a real
+// browser would otherwise silently refuse to ever send the cookie back.
+function isLocalHost(host) {
+  return /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host || '');
+}
+
+function buildSessionCookie(token, host) {
+  const parts = [`${SESSION_COOKIE_NAME}=${token}`, 'HttpOnly', 'SameSite=Strict', 'Path=/', `Max-Age=${Math.floor(TOKEN_TTL_MS / 1000)}`];
+  if (!isLocalHost(host)) parts.push('Secure');
+  return parts.join('; ');
+}
+
+function buildClearSessionCookie(host) {
+  const parts = [`${SESSION_COOKIE_NAME}=`, 'HttpOnly', 'SameSite=Strict', 'Path=/', 'Max-Age=0'];
+  if (!isLocalHost(host)) parts.push('Secure');
+  return parts.join('; ');
 }
 
 // Writes a 401 response and returns null if the request isn't authenticated,
 // otherwise returns the decoded token payload.
 function requireAuth(req, res) {
-  const token = getBearerToken(req);
+  const token = parseCookies(req)[SESSION_COOKIE_NAME] || null;
   const payload = token ? verifyToken(token, adminAuth.jwtSecret) : null;
   if (!payload) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
@@ -901,8 +933,9 @@ const server = http.createServer((req, res) => {
 
         clearAttempts(ip);
         const token = signToken({ sub: 'admin', exp: Date.now() + TOKEN_TTL_MS }, adminAuth.jwtSecret);
+        res.setHeader('Set-Cookie', buildSessionCookie(token, req.headers.host));
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true, token, needsRecoverySetup: !adminAuth.recoveryEmail }));
+        res.end(JSON.stringify({ success: true, needsRecoverySetup: !adminAuth.recoveryEmail }));
       } catch (err) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: err.message }));
@@ -915,6 +948,15 @@ const server = http.createServer((req, res) => {
   if (pathname === '/api/auth/verify' && req.method === 'GET') {
     const payload = requireAuth(req, res);
     if (!payload) return;
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true }));
+    return;
+  }
+
+  // API ROUTE: Log out (clears the httpOnly session cookie — the client can't
+  // just delete it itself, so this has to be a real server round-trip)
+  if (pathname === '/api/auth/logout' && req.method === 'POST') {
+    res.setHeader('Set-Cookie', buildClearSessionCookie(req.headers.host));
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ success: true }));
     return;

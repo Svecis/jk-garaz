@@ -779,17 +779,6 @@
       let targetId = urlParams.get('id') || '';
       targetId = targetId.trim().replace(/^#/, '');
 
-      // This page opens in a new tab from admin.html, so it has no sessionStorage of
-      // its own — pick up the admin token handed off via localStorage (shared across
-      // tabs) and consume it immediately so it doesn't linger.
-      try {
-        const handoff = localStorage.getItem('jk_admin_jwt_handoff');
-        if (handoff) {
-          sessionStorage.setItem('jk_admin_jwt', handoff);
-          localStorage.removeItem('jk_admin_jwt_handoff');
-        }
-      } catch (e) {}
-
       let bookings = [];
 
       const MONTH_NAMES_SK = [
@@ -1109,18 +1098,12 @@
             renderPrintSheet(b);
             renderOrderPage(b);
 
-            // Sync to backend
-            const token = sessionStorage.getItem('jk_admin_jwt');
-            if (token) {
-              fetch('/api/bookings', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(b)
-              }).catch(() => {});
-            }
+            // Sync to backend — the admin session cookie is sent automatically
+            fetch('/api/bookings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(b)
+            }).catch(() => {});
           });
         }
 
@@ -1265,15 +1248,11 @@
             window.location.href = 'admin.html';
           };
 
-          const token = sessionStorage.getItem('jk_admin_jwt');
-          if (token) {
-            fetch('/api/bookings/' + encodeURIComponent(b.id), {
-              method: 'DELETE',
-              headers: { 'Authorization': `Bearer ${token}` }
-            }).then(finishDelete).catch(finishDelete);
-          } else {
-            finishDelete();
-          }
+          // The admin session cookie is sent automatically; if it's missing/expired
+          // the server 401s but this still resolves the response, so it falls through
+          // to finishDelete() either way (same as before when there was no local token).
+          fetch('/api/bookings/' + encodeURIComponent(b.id), { method: 'DELETE' })
+            .then(finishDelete).catch(finishDelete);
         });
       }
 

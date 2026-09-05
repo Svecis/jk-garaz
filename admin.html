@@ -2869,25 +2869,18 @@
     (function() {
       const STORAGE_KEY = 'automek_bookings';
 
-      // order.html opens in a new tab (window.open target=_blank), and sessionStorage
-      // is per-tab — hand the admin token to that tab via a short-lived localStorage
-      // key (localStorage IS shared across tabs) so it isn't stuck logged out when it
-      // calls authenticated endpoints (status changes, delete). order.html reads this
-      // key once on load and deletes it immediately.
+      // order.html opens in a new tab (window.open target=_blank). The admin session
+      // lives in an httpOnly cookie now, so it's automatically available there too —
+      // no manual handoff needed, unlike the old sessionStorage-based token.
       function openOrderCard(booking) {
-        const sessionToken = sessionStorage.getItem('jk_admin_jwt');
-        if (sessionToken) {
-          try { localStorage.setItem('jk_admin_jwt_handoff', sessionToken); } catch (e) {}
-        }
         // manageToken lets order.html fetch this booking fresh from the server if this
         // browser/tab has no cached data (e.g. opened from a phone that never loaded admin.html).
         const manageToken = (booking && booking.manageToken) || '';
         window.open('order.html?id=' + encodeURIComponent(booking.id) + '&token=' + encodeURIComponent(manageToken), '_blank');
       }
 
-      function getAuthHeaders() {
-        const token = sessionStorage.getItem('jk_admin_jwt');
-        return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+      function jsonHeaders() {
+        return { 'Content-Type': 'application/json' };
       }
 
       // ==========================================
@@ -2896,10 +2889,9 @@
       async function syncFromBackend() {
         try {
           const res = await fetch('/api/bookings', {
-            headers: getAuthHeaders()
+            headers: jsonHeaders()
           });
           if (res.status === 401) {
-            sessionStorage.removeItem('jk_admin_jwt');
             if (window.checkAdminSession) window.checkAdminSession();
             return;
           }
@@ -3404,13 +3396,6 @@
             }
           });
 
-          tr.querySelectorAll('a[target="_blank"]').forEach(a => {
-            a.addEventListener('click', () => {
-              const token = sessionStorage.getItem('jk_admin_jwt');
-              if (token) { try { localStorage.setItem('jk_admin_jwt_handoff', token); } catch (e) {} }
-            });
-          });
-
           const sel = tr.querySelector('.row-status');
           sel.addEventListener('change', (e) => {
             const previousStatus = b.status;
@@ -3431,7 +3416,7 @@
             // the optimistic status change in this browser.
             fetch('/api/bookings', {
               method: 'POST',
-              headers: getAuthHeaders(),
+              headers: jsonHeaders(),
               body: JSON.stringify(b)
             })
               .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); })
@@ -4398,13 +4383,9 @@
 
           // Try sending Brevo notification if server is active
           try {
-            const notifToken = sessionStorage.getItem('jk_admin_jwt');
             fetch('/api/send-notification', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + (notifToken || '')
-              },
+              headers: jsonHeaders(),
               body: JSON.stringify(newBooking)
             }).catch(() => {});
           } catch (e) {}
@@ -4489,10 +4470,7 @@
       function openBrevoModal() {
         if (settingsDropdownMenu) settingsDropdownMenu.style.display = 'none';
         if (modalStatus) modalStatus.style.display = 'none';
-        const settingsToken = sessionStorage.getItem('jk_admin_jwt');
-        fetch('/api/get-settings', {
-          headers: { 'Authorization': 'Bearer ' + (settingsToken || '') }
-        })
+        fetch('/api/get-settings')
           .then(r => r.json())
           .then(cfg => {
             if (cfg.recipientEmail && cfg.recipientEmail !== 'servis@automek.sk') cfgRecipient.value = cfg.recipientEmail;
@@ -4547,7 +4525,7 @@
 
         fetch('/api/save-settings', {
           method: 'POST',
-          headers: getAuthHeaders(),
+          headers: jsonHeaders(),
           body: JSON.stringify(payload)
         })
         .then(r => r.json())
@@ -4578,7 +4556,7 @@
 
         fetch('/api/test-email', {
           method: 'POST',
-          headers: getAuthHeaders(),
+          headers: jsonHeaders(),
           body: JSON.stringify(payload)
         })
         .then(r => r.json())
@@ -4624,7 +4602,7 @@
         accountNewPass.value = '';
         accountConfirmPass.value = '';
 
-        fetch('/api/auth/account-info', { headers: getAuthHeaders() })
+        fetch('/api/auth/account-info', { headers: jsonHeaders() })
           .then(r => r.json())
           .then(info => {
             account2faStatus.textContent = info.totpEnabled ? '✅ 2FA je aktívne' : '⚠️ 2FA nie je nastavené';
@@ -4657,7 +4635,7 @@
           }
           fetch('/api/auth/set-recovery-email', {
             method: 'POST',
-            headers: getAuthHeaders(),
+            headers: jsonHeaders(),
             body: JSON.stringify({ email })
           })
           .then(r => r.json())
@@ -4690,7 +4668,7 @@
 
           fetch('/api/auth/change-password', {
             method: 'POST',
-            headers: getAuthHeaders(),
+            headers: jsonHeaders(),
             body: JSON.stringify({ currentPassword, newPassword })
           })
           .then(r => r.json())
@@ -4786,21 +4764,15 @@
     const resetConfirmPass = document.getElementById('reset-confirm-pass');
 
     async function checkSession() {
-      const token = sessionStorage.getItem('jk_admin_jwt');
-      if (token) {
-        try {
-          const res = await fetch('/api/auth/verify', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (res.ok) {
-            authOverlay.classList.add('unlocked');
-            if (typeof syncFromBackend === 'function') syncFromBackend();
-            return;
-          }
-        } catch (e) {}
-      }
+      try {
+        const res = await fetch('/api/auth/verify');
+        if (res.ok) {
+          authOverlay.classList.add('unlocked');
+          if (typeof syncFromBackend === 'function') syncFromBackend();
+          return;
+        }
+      } catch (e) {}
 
-      sessionStorage.removeItem('jk_admin_jwt');
       authOverlay.classList.remove('unlocked');
       showStep(1);
     }
@@ -5013,7 +4985,6 @@
 
         if (res.ok && data.success) {
           if (data.token) {
-            sessionStorage.setItem('jk_admin_jwt', data.token);
             passErrorMsg.textContent = '';
             tempEnteredPassword = '';
             currentSetupSecret = '';
@@ -5072,8 +5043,7 @@
         });
         const data = await res.json();
 
-        if (res.ok && data.success && data.token) {
-          sessionStorage.setItem('jk_admin_jwt', data.token);
+        if (res.ok && data.success) {
           twofaErrorMsg.textContent = '';
           tempEnteredPassword = '';
           currentSetupSecret = '';
@@ -5113,10 +5083,7 @@
         try {
           const res = await fetch('/api/auth/set-recovery-email', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + (sessionStorage.getItem('jk_admin_jwt') || '')
-            },
+            headers: jsonHeaders(),
             body: JSON.stringify({ email: recEmail })
           });
           const data = await res.json();
@@ -5216,8 +5183,7 @@
 
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
-        sessionStorage.removeItem('jk_admin_jwt');
-        checkSession();
+        fetch('/api/auth/logout', { method: 'POST' }).finally(checkSession);
       });
     }
 

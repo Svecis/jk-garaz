@@ -42,6 +42,28 @@ function isBookingRateLimited(ip) {
   return false;
 }
 
+// Caps on the plain-text booking fields the public /api/bookings endpoint accepts,
+// so an attacker can't stash oversized or wrong-typed values in stored bookings
+// (which later get rendered in the admin dashboard, order card, and e-mails).
+const BOOKING_STRING_FIELD_LIMITS = {
+  customer: 200, phone: 40, email: 200, plate: 20, partName: 200, partCode: 10,
+  problemDesc: 2000, mechanic: 100, date: 20, time: 20, price: 50, urgency: 30, category: 100
+};
+
+function sanitizeBookingStringFields(booking) {
+  for (const field of Object.keys(BOOKING_STRING_FIELD_LIMITS)) {
+    if (booking[field] !== undefined && booking[field] !== null) {
+      booking[field] = String(booking[field]).slice(0, BOOKING_STRING_FIELD_LIMITS[field]);
+    }
+  }
+  return booking;
+}
+
+// A booking id the client suggests must look like one we'd generate ourselves —
+// anything else (including HTML/script payloads) is replaced with a fresh one,
+// since this value is later rendered into admin.html/order.html and used in URLs.
+const BOOKING_ID_FORMAT = /^JK-\d{6}$/;
+
 // Periodically drop IPs with no requests in the last hour so this Map doesn't grow forever
 setInterval(() => {
   const now = Date.now();
@@ -232,7 +254,8 @@ function saveAdminAuth() {
   fs.writeFileSync(AUTH_FILE, JSON.stringify(adminAuth, null, 2), 'utf8');
 }
 
-// Simple in-memory brute-force guard for the login endpoint
+// Simple in-memory brute-force guard, shared by the login endpoint and the
+// password-reset OTP endpoint (both let someone try to authenticate as admin).
 const loginAttempts = new Map();
 function isLockedOut(ip) {
   const entry = loginAttempts.get(ip);
@@ -249,6 +272,19 @@ function registerFailedAttempt(ip) {
 }
 function clearAttempts(ip) {
   loginAttempts.delete(ip);
+}
+
+// Per-IP cooldown for requesting a new reset OTP, separate from the guess-lockout
+// above — otherwise anyone could keep invalidating a legitimate in-flight code
+// (and re-spamming the recovery inbox) with no limit at all.
+const RESET_REQUEST_COOLDOWN_MS = 60 * 1000;
+const resetRequestCooldown = new Map();
+function isResetRequestOnCooldown(ip) {
+  const last = resetRequestCooldown.get(ip);
+  return !!(last && Date.now() - last < RESET_REQUEST_COOLDOWN_MS);
+}
+function markResetRequested(ip) {
+  resetRequestCooldown.set(ip, Date.now());
 }
 
 function getBearerToken(req) {
@@ -604,11 +640,20 @@ function dispatchCustomerStatusUpdate(booking) {
   return sendEmailGeneric(booking.email, subject, buildCustomerStatusUpdateEmailHtml(booking));
 }
 
+// The app serves its own frontend, so legitimate calls are always same-origin
+// (no CORS headers needed for those). These are only consulted for cross-origin
+// requests — a wildcard '*' here let any third-party site script calls against
+// public endpoints (and read their responses) from a visitor's browser.
+const ALLOWED_ORIGINS = new Set([PUBLIC_BASE_URL, 'http://localhost:' + PORT, 'http://127.0.0.1:' + PORT]);
+
 const server = http.createServer((req, res) => {
   const parsedUrl = new URL(req.url, 'http://localhost:' + PORT);
   const pathname = parsedUrl.pathname;
 
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  if (origin && ALLOWED_ORIGINS.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -920,11 +965,18 @@ const server = http.createServer((req, res) => {
   if (pathname === '/api/auth/request-reset' && req.method === 'POST') {
     (async () => {
       try {
+        const ip = getClientIp(req);
+        if (isResetRequestOnCooldown(ip)) {
+          res.writeHead(429, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Skúste to znova o chvíľu.' }));
+          return;
+        }
         if (!adminAuth.recoveryEmail) {
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ success: false, error: 'Nie je nastavený obnovovací e-mail.' }));
           return;
         }
+        markResetRequested(ip);
         const code = String(Math.floor(100000 + Math.random() * 900000));
         adminAuth.resetCode = code;
         adminAuth.resetCodeExpiry = Date.now() + 10 * 60 * 1000;
@@ -945,10 +997,17 @@ const server = http.createServer((req, res) => {
 
   // API ROUTE: Confirm the OTP and set a new password
   if (pathname === '/api/auth/reset-password' && req.method === 'POST') {
+    const ip = getClientIp(req);
     let body = '';
     req.on('data', chunk => { body += chunk; });
     req.on('end', () => {
       try {
+        if (isLockedOut(ip)) {
+          res.writeHead(429, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Príliš veľa neúspešných pokusov. Skúste to znova o pár minút.' }));
+          return;
+        }
+
         const { resetCode, newPassword } = JSON.parse(body || '{}');
 
         if (!adminAuth.resetCode || !adminAuth.resetCodeExpiry || Date.now() > adminAuth.resetCodeExpiry) {
@@ -956,7 +1015,8 @@ const server = http.createServer((req, res) => {
           res.end(JSON.stringify({ success: false, error: 'Kód expiroval, vyžiadajte si nový.' }));
           return;
         }
-        if (resetCode !== adminAuth.resetCode) {
+        if (!resetCode || resetCode !== adminAuth.resetCode) {
+          registerFailedAttempt(ip);
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ success: false, error: 'Nesprávny kód.' }));
           return;
@@ -977,6 +1037,7 @@ const server = http.createServer((req, res) => {
         adminAuth.totpSecret = null;
         adminAuth.totpEnabled = false;
         saveAdminAuth();
+        clearAttempts(ip);
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true }));
@@ -1024,8 +1085,10 @@ const server = http.createServer((req, res) => {
     req.on('data', chunk => { body += chunk; });
     req.on('end', async () => {
       try {
-        const booking = JSON.parse(body || '{}');
-        if (!booking.id) booking.id = 'JK-' + Math.floor(100000 + Math.random() * 900000);
+        const booking = sanitizeBookingStringFields(JSON.parse(body || '{}'));
+        if (!booking.id || !BOOKING_ID_FORMAT.test(booking.id)) {
+          booking.id = 'JK-' + Math.floor(100000 + Math.random() * 900000);
+        }
 
         const bookings = loadBookings();
         const idx = bookings.findIndex(b => b.id === booking.id);

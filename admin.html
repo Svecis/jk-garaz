@@ -3361,7 +3361,7 @@
 
           tr.innerHTML = `
             <td>
-              <a href="${orderUrl}" target="_blank" class="id-tag" title="Otvoriť zákazku v novej karte" aria-label="Zákazka #${b.id}">#${escapeHtml(b.id)}</a>
+              <a href="${orderUrl}" target="_blank" class="id-tag" title="Otvoriť zákazku v novej karte" aria-label="Zákazka #${escapeHtml(b.id)}">#${escapeHtml(b.id)}</a>
             </td>
             <td>
               <div class="cust-col">
@@ -3377,14 +3377,14 @@
             </td>
             <td>
               <div class="row-right">
-                <select class="status-select row-status" data-id="${b.id}" aria-label="Zmeniť stav zákazky ${b.id}">
+                <select class="status-select row-status" data-id="${escapeHtml(b.id)}" aria-label="Zmeniť stav zákazky ${escapeHtml(b.id)}">
                   <option value="pending" ${b.status === 'pending' ? 'selected' : ''}>Nová (Čaká)</option>
                   <option value="confirmed" ${b.status === 'confirmed' ? 'selected' : ''}>Schválená</option>
                   <option value="in_progress" ${b.status === 'in_progress' ? 'selected' : ''}>V servise</option>
                   <option value="completed" ${b.status === 'completed' ? 'selected' : ''}>Dokončená</option>
                   <option value="cancelled" ${b.status === 'cancelled' ? 'selected' : ''}>Zrušená</option>
                 </select>
-                <a href="${orderUrl}" target="_blank" class="open-card-link" aria-label="Otvoriť kartu zákazky ${b.id}">
+                <a href="${orderUrl}" target="_blank" class="open-card-link" aria-label="Otvoriť kartu zákazky ${escapeHtml(b.id)}">
                   <span>Otvoriť kartu</span>
                 </a>
               </div>
@@ -3520,7 +3520,7 @@
 
           chip.innerHTML = `
             <div class="chip-time-cust">
-              <button type="button" class="chip-time-btn" title="Kliknite pre zmenu času a dátumu" aria-label="Zmeniť čas pre ${b.id}">
+              <button type="button" class="chip-time-btn" title="Kliknite pre zmenu času a dátumu" aria-label="Zmeniť čas pre ${escapeHtml(b.id)}">
                 <span>${escapeHtml(b.time || '10:00')}</span>
                 <span class="chip-time-arrow">&#9662;</span>
               </button>

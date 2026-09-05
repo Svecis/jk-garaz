@@ -646,6 +646,36 @@ function dispatchCustomerStatusUpdate(booking) {
 // public endpoints (and read their responses) from a visitor's browser.
 const ALLOWED_ORIGINS = new Set([PUBLIC_BASE_URL, 'http://localhost:' + PORT, 'http://127.0.0.1:' + PORT]);
 
+// Booking submissions carry up to 4 base64 photos (8MB each) plus a short audio
+// clip, so the cap has to clear that comfortably — this only exists to stop an
+// unbounded body (the previous behavior) from exhausting server memory.
+const MAX_BODY_BYTES = 60 * 1024 * 1024;
+
+// Reads a request body up to maxBytes, writing a 413 and resolving null if the
+// client sends more than that (the caller must check for null and bail).
+function readBody(req, res, maxBytes = MAX_BODY_BYTES) {
+  return new Promise((resolve) => {
+    let body = '';
+    let size = 0;
+    let rejected = false;
+    req.on('data', (chunk) => {
+      if (rejected) return;
+      size += chunk.length;
+      if (size > maxBytes) {
+        rejected = true;
+        res.writeHead(413, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Požiadavka je príliš veľká.' }));
+        req.destroy();
+        resolve(null);
+        return;
+      }
+      body += chunk;
+    });
+    req.on('end', () => { if (!rejected) resolve(body); });
+    req.on('error', () => { if (!rejected) resolve(null); });
+  });
+}
+
 const server = http.createServer((req, res) => {
   const parsedUrl = new URL(req.url, 'http://localhost:' + PORT);
   const pathname = parsedUrl.pathname;
@@ -656,6 +686,9 @@ const server = http.createServer((req, res) => {
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -667,9 +700,8 @@ const server = http.createServer((req, res) => {
   if (pathname === '/api/send-notification' && req.method === 'POST') {
     const payload = requireAuth(req, res);
     if (!payload) return;
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', async () => {
+    readBody(req, res).then(async (body) => {
+      if (body === null) return;
       try {
         const booking = JSON.parse(body || '{}');
         const targetEmail = emailConfig.recipientEmail || 'servis@automek.sk';
@@ -707,9 +739,8 @@ const server = http.createServer((req, res) => {
   if (pathname === '/api/save-settings' && req.method === 'POST') {
     const payload = requireAuth(req, res);
     if (!payload) return;
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
+    readBody(req, res).then((body) => {
+      if (body === null) return;
       try {
         const data = JSON.parse(body || '{}');
         if (data.recipientEmail) emailConfig.recipientEmail = data.recipientEmail.trim();
@@ -742,9 +773,8 @@ const server = http.createServer((req, res) => {
   if (pathname === '/api/test-email' && req.method === 'POST') {
     const payload = requireAuth(req, res);
     if (!payload) return;
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', async () => {
+    readBody(req, res).then(async (body) => {
+      if (body === null) return;
       try {
         let reqData = {};
         try { reqData = JSON.parse(body || '{}'); } catch(e){}
@@ -806,9 +836,8 @@ const server = http.createServer((req, res) => {
   // API ROUTE: Login (password, then TOTP 2FA)
   if (pathname === '/api/auth/login' && req.method === 'POST') {
     const ip = getClientIp(req);
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', async () => {
+    readBody(req, res).then(async (body) => {
+      if (body === null) return;
       try {
         if (isLockedOut(ip)) {
           res.writeHead(429, { 'Content-Type': 'application/json' });
@@ -891,9 +920,8 @@ const server = http.createServer((req, res) => {
   if (pathname === '/api/auth/set-recovery-email' && req.method === 'POST') {
     const payload = requireAuth(req, res);
     if (!payload) return;
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
+    readBody(req, res).then((body) => {
+      if (body === null) return;
       try {
         const data = JSON.parse(body || '{}');
         if (!data.email || !data.email.includes('@')) {
@@ -929,9 +957,8 @@ const server = http.createServer((req, res) => {
   if (pathname === '/api/auth/change-password' && req.method === 'POST') {
     const payload = requireAuth(req, res);
     if (!payload) return;
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
+    readBody(req, res).then((body) => {
+      if (body === null) return;
       try {
         const { currentPassword, newPassword } = JSON.parse(body || '{}');
 
@@ -998,9 +1025,8 @@ const server = http.createServer((req, res) => {
   // API ROUTE: Confirm the OTP and set a new password
   if (pathname === '/api/auth/reset-password' && req.method === 'POST') {
     const ip = getClientIp(req);
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
+    readBody(req, res).then((body) => {
+      if (body === null) return;
       try {
         if (isLockedOut(ip)) {
           res.writeHead(429, { 'Content-Type': 'application/json' });
@@ -1081,9 +1107,8 @@ const server = http.createServer((req, res) => {
   // or update an existing one (admin only — the customer-facing self-service flow goes
   // through /api/my-booking/* below, which is gated by manageToken instead).
   if (pathname === '/api/bookings' && req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', async () => {
+    readBody(req, res).then(async (body) => {
+      if (body === null) return;
       try {
         const booking = sanitizeBookingStringFields(JSON.parse(body || '{}'));
         if (!booking.id || !BOOKING_ID_FORMAT.test(booking.id)) {
@@ -1172,9 +1197,8 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
+    readBody(req, res).then((body) => {
+      if (body === null) return;
       try {
         const updates = JSON.parse(body || '{}');
         bookings[idx] = { ...bookings[idx], ...updates };
@@ -1216,9 +1240,8 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === '/api/my-booking/cancel' && req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
+    readBody(req, res).then((body) => {
+      if (body === null) return;
       try {
         const { id, token } = JSON.parse(body || '{}');
         const bookings = loadBookings();
@@ -1256,9 +1279,8 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === '/api/my-booking/reschedule' && req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
+    readBody(req, res).then((body) => {
+      if (body === null) return;
       try {
         const { id, token, dateIso, date, time } = JSON.parse(body || '{}');
         const bookings = loadBookings();

@@ -59,6 +59,20 @@ function sanitizeBookingStringFields(booking) {
   return booking;
 }
 
+// Once a job is done, the shop has no more use for the customer's uploaded
+// photos/audio — clear them so they don't sit in bookings.json indefinitely.
+// admin.html's status dropdown already mirrors this client-side before saving,
+// but that's just one caller; enforcing it here covers every path that can
+// flip a booking to completed (including PUT /api/bookings/:id).
+function purgeMediaIfNewlyCompleted(booking, previousStatus) {
+  if (booking.status === 'completed' && previousStatus !== 'completed') {
+    booking.photos = [];
+    booking.photosCount = 0;
+    booking.hasAudio = false;
+    booking.audioData = null;
+  }
+}
+
 // A booking id the client suggests must look like one we'd generate ourselves —
 // anything else (including HTML/script payloads) is replaced with a fresh one,
 // since this value is later rendered into admin.html/order.html and used in URLs.
@@ -1140,6 +1154,7 @@ const server = http.createServer((req, res) => {
           bookings.push(booking);
         } else {
           bookings[idx] = { ...bookings[idx], ...booking };
+          purgeMediaIfNewlyCompleted(bookings[idx], previousStatus);
         }
         saveBookings(bookings);
 
@@ -1201,7 +1216,9 @@ const server = http.createServer((req, res) => {
       if (body === null) return;
       try {
         const updates = JSON.parse(body || '{}');
+        const previousStatus = bookings[idx].status;
         bookings[idx] = { ...bookings[idx], ...updates };
+        purgeMediaIfNewlyCompleted(bookings[idx], previousStatus);
         saveBookings(bookings);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(bookings[idx]));
